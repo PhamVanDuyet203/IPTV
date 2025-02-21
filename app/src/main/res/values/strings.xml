@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">IPTV Mine</string>
+    <string name="title_language">Language</string>
+    <string name="title_onboard_1">Stream Your Favorite Shows</string>
+    <string name="content_onboard_1">Enjoy unlimited entertainment with thousands of movies, TV shows, and more.</string>
+
+    <string name="title_onboard_2">Discover Endless Entertainment</string>
+    <string name="content_onboard_2">Watch your favorite shows and movies anytime, anywhere.</string>
+
+    <string name="title_onboard_3">Easy To Use</string>
+    <string name="content_onboard_3">Easy guide-search, secure connecting to channels around the world, Live TV, Smart TV Player</string>
+
+    <string name="title_onboard_4">Discover New Shows</string>
+    <string name="content_onboard_4">Explore a wide variety of content tailored just for you.</string>
 </resources>

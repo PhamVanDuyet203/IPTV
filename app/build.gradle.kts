@@ -77,4 +77,13 @@ dependencies {
 //    implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.7.1" )// For the latest versions with Kotlin extensions
 //    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.1") // For ViewModel
     // Add other dependencies here
+
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
+
+
+    // viewpage2
+    implementation("com.tbuonomo:dotsindicator:5.1.0")
+
+    //
+    implementation("com.google.android.material:material:1.9.0")
 }

@@ -77,7 +77,7 @@ class HomeFragment : Fragment() {
         recyclerView.adapter = adapter
 
         setupObservers()
-//        fetchData()
+        fetchData()
 
         // Set click listener to toggle the search bar visibility
         searchIcon.setOnClickListener {

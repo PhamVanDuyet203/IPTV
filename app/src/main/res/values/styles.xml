@@ -5,4 +5,13 @@
         <item name="colorControlHighlight">@android:color/darker_gray</item>
         <item name="android:background">?selectableItemBackgroundBorderless</item>
     </style>
+    <style name="CustomTabLayout" parent="Widget.MaterialComponents.TabLayout">
+        <item name="tabIndicatorHeight">0dp</item>
+    </style>
+
+    <style name="SearchPageTabItemText">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/inter_regular</item>
+        <item name="textAllCaps">false</item>
+    </style>
 </resources>

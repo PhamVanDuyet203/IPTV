@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:padding="14dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
+        android:background="@color/white">
+
+        <TextView
+            android:id="@+id/language_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/title_language"
+            android:textSize="20sp"
+            android:textColor="#1A1C1B"
+            android:textStyle="bold"/>
+
+        <ImageButton
+            android:id="@+id/check_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginRight="24dp"
+            android:layout_alignParentRight="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_check" />
+    </RelativeLayout>
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/language_list"
+        android:layout_marginLeft="14dp"
+        android:layout_marginRight="14dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>
