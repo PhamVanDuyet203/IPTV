@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="156dp"
+    android:layout_height="235dp"
+    android:orientation="vertical"
+    android:background="@drawable/bg_pop_sort"
+    android:elevation="6dp">
+
+    <TextView
+        android:id="@+id/sort_az"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="A → Z"
+        android:gravity="center_vertical"
+        android:fontFamily="@font/inter_regular"
+        android:textSize="14sp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"/>
+
+    <TextView
+        android:id="@+id/sort_za"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Z → A"
+        android:gravity="center_vertical"
+        android:fontFamily="@font/inter_regular"
+        android:textSize="14sp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"/>
+
+    <TextView
+        android:id="@+id/sort_09"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="0 → 9"
+        android:gravity="center_vertical"
+        android:fontFamily="@font/inter_regular"
+        android:textSize="14sp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"/>
+
+    <TextView
+        android:id="@+id/sort_90"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="9 → 0"
+        android:gravity="center_vertical"
+        android:fontFamily="@font/inter_regular"
+        android:textSize="14sp"
+        android:paddingStart="16dp"/>
+
+<!--        android:background="#D0E4FF"-->
+
+
+</LinearLayout>

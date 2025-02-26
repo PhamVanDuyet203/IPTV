@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    android:padding="14dp"
+    android:background="@drawable/item_channel">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginRight="12dp"
+            android:src="@drawable/link_channel"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/playlistName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Channel playlist name"
+                android:fontFamily="@font/inter_medium"
+                android:textSize="14sp"
+                android:textColor="#171D1E"/>
+
+            <TextView
+                android:id="@+id/channelCount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="1000 channels"
+                android:fontFamily="@font/inter_regular"
+                android:textSize="12sp"
+                android:textColor="#3D4949"/>
+
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/fav_channel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@color/white"
+            android:contentDescription="Options"
+            android:layout_gravity="center_vertical"
+            android:padding="6dp"
+            android:src="@drawable/fav_channel" />
+
+        <ImageButton
+            android:id="@+id/opt_channel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@color/white"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="Options"
+            android:layout_marginStart="8dp"
+            android:padding="10dp"
+            android:src="@drawable/opt_channel" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

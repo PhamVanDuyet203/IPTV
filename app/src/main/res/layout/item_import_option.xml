@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:padding="16dp">
+
+    <!-- Import bằng URL -->
+    <LinearLayout
+        android:id="@+id/upload_url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="start"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_url"
+
+            android:layout_gravity="center_vertical"
+            android:contentDescription="URL Icon"/>
+
+        <Button
+            android:id="@+id/btnImportUrl"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Import playlist URL"
+            android:gravity="start"
+            android:backgroundTint="@color/white"
+            android:textColor="#171D1E"
+            android:fontFamily="@font/inter_regular"
+            android:textSize="16sp"/>
+    </LinearLayout>
+
+    <!-- Import bằng M3U File -->
+    <LinearLayout
+        android:id="@+id/upload_m3u"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="start"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/upload_url">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_m3u_file"
+
+            android:layout_gravity="center_vertical"
+            android:contentDescription="M3U Icon"/>
+
+        <Button
+            android:id="@+id/btnImportM3U"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Upload M3U File"
+            android:gravity="start"
+            android:backgroundTint="@color/white"
+            android:textColor="#171D1E"
+            android:fontFamily="@font/inter_regular"
+            android:textSize="16sp"/>
+    </LinearLayout>
+
+    <!-- Import từ thiết bị -->
+    <LinearLayout
+        android:id="@+id/upload_device"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="start"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/upload_m3u">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_video"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="Device Icon"/>
+
+        <Button
+            android:id="@+id/btnImportDevice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Import from Device"
+            android:gravity="start"
+            android:backgroundTint="@color/white"
+            android:textColor="#171D1E"
+            android:fontFamily="@font/inter_regular"
+            android:textSize="16sp"/>
+    </LinearLayout>
+
+    <!-- Văn bản hướng dẫn -->
+    <TextView
+        android:id="@+id/btn_howtouse"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Don't have an M3U file to stream?"
+        android:textColor="#0095F3"
+        android:fontFamily="@font/inter_italic"
+        android:textSize="14sp"
+        android:gravity="start"
+        app:layout_constraintTop_toBottomOf="@id/upload_device"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

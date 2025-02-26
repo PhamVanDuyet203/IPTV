@@ -11,6 +11,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
         val sharedPreferences = getSharedPreferences("AppSettings", MODE_PRIVATE)
         val selectedLanguage = sharedPreferences.getString("selectedLanguage", null)
 

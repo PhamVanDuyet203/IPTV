@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:id="@+id/txtname"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="start"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/playlist_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="[Playlist name]"
+            android:gravity="start"
+            android:backgroundTint="@color/white"
+            android:textColor="#171D1E"
+            android:fontFamily="@font/inter_bold"
+            android:textSize="20sp"/>
+        <ImageView
+            android:id="@+id/btn_close"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:src="@drawable/remove"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="14dp"
+            android:contentDescription="del Icon"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/rename"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="start"
+        android:orientation="horizontal"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtname">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="M3U Icon"
+            android:src="@drawable/ic_rename" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/white"
+            android:baselineAligned="false"
+            android:fontFamily="@font/inter_regular"
+            android:gravity="start"
+            android:text="Rename"
+            android:textColor="#171D1E"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/del"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="start"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rename">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_del_item"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="Device Icon"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Delete"
+            android:gravity="start"
+            android:layout_marginStart="16dp"
+            android:backgroundTint="@color/white"
+            android:textColor="#171D1E"
+            android:fontFamily="@font/inter_regular"
+            android:textSize="16sp"/>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

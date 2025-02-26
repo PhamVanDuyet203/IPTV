@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -35,6 +36,11 @@
         <activity android:name=".screens.HowToUseActivity" android:exported="true"/>
         <activity android:name=".screens.HomePageActivity" android:exported="true"/>
         <activity android:name=".MainActivity" android:exported="true"/>
+        <activity android:name=".screens.ActivityAddPlaylistFromDevice" android:exported="true"/>
+        <activity android:name=".screens.ActivityImportPlaylistM3U" android:exported="true" />
+        <activity android:name=".screens.ActivityImportPlaylistUrl" android:exported="true"/>
+        <activity android:name=".ChannelListActivity" android:exported="true"/>
+        <activity android:name=".ChannelDetailActivity" android:exported="true"/>
     </application>
 
 </manifest>

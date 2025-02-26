@@ -4,9 +4,11 @@ import android.os.Parcel
 import android.os.Parcelable
 
 data class Channel(
-    val name: String,
+    var name: String,
     val logoUrl: String,
-    val streamUrl: String
+    val streamUrl: String,
+    var isFavorite: Boolean = false,
+    val groupTitle: String? = null // Thêm groupTitle
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString() ?: "",

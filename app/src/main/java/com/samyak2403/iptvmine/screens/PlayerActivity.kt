@@ -15,6 +15,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.PlaybackException
@@ -25,6 +26,7 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.google.android.exoplayer2.util.Util
 import com.samyak2403.iptvmine.R
 import com.samyak2403.iptvmine.model.Channel
+import com.samyak2403.iptvmine.provider.ChannelsProvider
 
 class PlayerActivity : AppCompatActivity() {
 
@@ -37,6 +39,7 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var linearLayoutControlUp: LinearLayout
     private lateinit var linearLayoutControlBottom: LinearLayout
     private lateinit var channel: Channel
+    private lateinit var channelsProvider: ChannelsProvider // Thêm ChannelsProvider
     private var playbackPosition = 0L
     private var isPlayerReady = false
     private var isFullScreen = false
@@ -62,12 +65,22 @@ class PlayerActivity : AppCompatActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         // Retrieve channel from savedInstanceState or intent
-        channel = savedInstanceState?.getParcelable("channel") ?: intent.getParcelableExtra("channel") ?: return
+        channel = savedInstanceState?.getParcelable("channel") ?: intent.getParcelableExtra("channel") ?: run {
+            finish() // Thoát nếu không có channel
+            return
+        }
+
+        // Khởi tạo ChannelsProvider
+        channelsProvider = ViewModelProvider(this).get(ChannelsProvider::class.java)
+        channelsProvider.init(this) // Sửa lỗi: thay initSharedPreferences bằng init
 
         setFindViewById()
         setupPlayer()
         setLockScreen()
         setFullScreen()
+
+        // Thêm channel vào danh sách Recent
+        channelsProvider.addToRecent(channel)
     }
 
     private fun setFindViewById() {

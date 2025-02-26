@@ -1,6 +1,5 @@
 package com.samyak2403.iptvmine.screens
 
-import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -18,17 +17,13 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.samyak2403.iptvmine.R
 import com.samyak2403.iptvmine.adapter.ChannelsAdapter
 import com.samyak2403.iptvmine.model.Channel
 import com.samyak2403.iptvmine.provider.ChannelsProvider
-import java.io.BufferedReader
-import java.io.InputStreamReader
-
 
 class HomeFragment : Fragment() {
 
@@ -38,22 +33,20 @@ class HomeFragment : Fragment() {
     private lateinit var progressBar: ProgressBar
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ChannelsAdapter
-    private lateinit var toolbar_title: TextView
+    private lateinit var toolbarTitle: TextView
 
     private var debounceHandler: Handler? = null
     private var isSearchVisible: Boolean = false
 
     private val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
             val uri: Uri? = result.data?.data
             if (uri != null) {
-                // Đọc nội dung file .m3u từ URI
-                activity?.let { channelsProvider.readM3UFileFromUri(it,uri) }
+                Log.d("HomeFragment", "Selected M3U file URI: $uri")
+                // TODO: Xử lý file M3U từ URI nếu cần, hiện tại fetch từ Room nên bỏ qua
             }
         }
     }
-
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,32 +54,44 @@ class HomeFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
-        channelsProvider = ViewModelProvider(this).get(ChannelsProvider::class.java)
+        channelsProvider = viewModels<ChannelsProvider>().value
         searchEditText = view.findViewById(R.id.searchEditText)
         searchIcon = view.findViewById(R.id.search_icon)
         progressBar = view.findViewById(R.id.progressBar)
         recyclerView = view.findViewById(R.id.recyclerView)
-        toolbar_title = view.findViewById(R.id.toolbar_title)
+        toolbarTitle = view.findViewById(R.id.toolbar_title)
 
-        adapter = ChannelsAdapter(emptyList()) { channel: Channel ->
-            Log.d("==Stream==", "onCreateView: ${channel.streamUrl}")
-            PlayerActivity.start(requireContext(), channel)
-        }
+        adapter = ChannelsAdapter(
+            channels = mutableListOf(), // Sửa từ emptyList() thành mutableListOf()
+            onChannelClicked = { channel ->
+                Log.d("==Stream==", "onCreateView: ${channel.streamUrl}")
+                PlayerActivity.start(requireContext(), channel)
+            },
+            onFavoriteClicked = { channel ->
+                channelsProvider.toggleFavorite(channel)
+            },
+            onRenameChannel = { channel, newName ->
+                channelsProvider.updateChannel(channel.copy(name = newName))
+                // Không cần gọi fetchData() vì ChannelsProvider sẽ cập nhật LiveData
+            },
+            onDeleteChannel = { channel ->
+                channelsProvider.deleteChannel(channel)
+                // Không cần gọi fetchData() vì ChannelsProvider sẽ cập nhật LiveData
+            }
+        )
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
 
+        channelsProvider.init(requireContext())
         setupObservers()
         fetchData()
 
-        // Set click listener to toggle the search bar visibility
-        searchIcon.setOnClickListener {
-            toggleSearchBar()
-        }
+        searchIcon.setOnClickListener { toggleSearchBar() }
 
-        toolbar_title.setOnClickListener {
+        toolbarTitle.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                type = "audio/x-mpegurl" // MIME type cho file .m3u
+                type = "audio/x-mpegurl"
                 addCategory(Intent.CATEGORY_OPENABLE)
             }
             startForResult.launch(intent)
@@ -94,7 +99,6 @@ class HomeFragment : Fragment() {
 
         searchEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 debounceHandler?.removeCallbacksAndMessages(null)
                 debounceHandler = Handler(Looper.getMainLooper())
@@ -102,7 +106,6 @@ class HomeFragment : Fragment() {
                     filterChannels(s.toString())
                 }, 500)
             }
-
             override fun afterTextChanged(s: Editable?) {}
         })
 
@@ -110,19 +113,26 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupObservers() {
-        channelsProvider.channels.observe(viewLifecycleOwner, Observer { data ->
+        channelsProvider.channels.observe(viewLifecycleOwner) { data ->
             adapter.updateChannels(data)
-        })
+            progressBar.visibility = View.GONE
+        }
 
-        channelsProvider.filteredChannels.observe(viewLifecycleOwner, Observer { data ->
+        channelsProvider.filteredChannels.observe(viewLifecycleOwner) { data ->
             adapter.updateChannels(data)
-        })
+        }
+
+        channelsProvider.error.observe(viewLifecycleOwner) { error ->
+            if (error != null) {
+                Log.e("HomeFragment", error)
+                progressBar.visibility = View.GONE
+            }
+        }
     }
 
     private fun fetchData() {
         progressBar.visibility = View.VISIBLE
-        channelsProvider.fetchM3UFile()
-        progressBar.visibility = View.GONE
+        channelsProvider.fetchChannelsFromRoom()
     }
 
     private fun filterChannels(query: String) {
@@ -132,15 +142,9 @@ class HomeFragment : Fragment() {
     private fun toggleSearchBar() {
         if (isSearchVisible) {
             searchEditText.visibility = View.GONE
-            isSearchVisible = false
         } else {
             searchEditText.visibility = View.VISIBLE
-            isSearchVisible = true
         }
+        isSearchVisible = !isSearchVisible
     }
-
 }
-
-
-
-

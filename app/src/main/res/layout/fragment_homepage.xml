@@ -12,15 +12,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
-        app:tabIndicatorColor="@color/white"
-        app:tabIndicatorHeight="3dp"
+        app:tabIndicatorColor="@android:color/transparent"
+        app:tabIndicatorHeight="0dp"
+        app:tabRippleColor="@null"
         app:tabMode="fixed"
         app:tabGravity="fill"
         app:layout_constraintTop_toTopOf="parent"/>
 
     <!-- Danh sách hoặc nội dung của trang Home -->
-    <ListView
-        android:id="@+id/lv_item_home"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvPlaylist"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:visibility="gone"
@@ -28,21 +29,21 @@
         app:layout_constraintBottom_toBottomOf="parent"/>
 
     <LinearLayout
+        android:id="@+id/emptyStateLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:visibility="gone">
 
         <ImageView
-            android:id="@+id/imageView"
             android:layout_width="160dp"
             android:layout_height="110dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_homeimg_vp"/>
 
         <TextView
-            android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Don't have any playlists yet"
@@ -51,7 +52,6 @@
             android:paddingTop="16dp"/>
 
         <TextView
-            android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
@@ -59,5 +59,6 @@
             android:textSize="16sp"
             android:fontFamily="@font/inter_regular"/>
     </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("kotlin-kapt")
 }
 
 android {
@@ -86,4 +87,12 @@ dependencies {
 
     //
     implementation("com.google.android.material:material:1.9.0")
+
+    implementation("androidx.room:room-runtime:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+
+    // Optional - Coroutines support for Room
+    implementation("androidx.room:room-ktx:2.6.1")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
 }
