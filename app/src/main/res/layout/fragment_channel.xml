@@ -60,7 +60,7 @@
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Don't have any channels yet"
+            android:text="@string/don_t_have_any_channels_yet"
             android:textSize="16sp"
             android:fontFamily="@font/inter_regular"
             android:paddingTop="16dp"/>
@@ -70,7 +70,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="Press the Add button to create one"
+            android:text="@string/press_the_add_button_to_create_one_channel"
             android:textSize="16sp"
             android:fontFamily="@font/inter_regular"/>
     </LinearLayout>

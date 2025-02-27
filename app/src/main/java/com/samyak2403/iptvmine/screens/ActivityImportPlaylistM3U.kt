@@ -4,13 +4,16 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import com.samyak2403.iptvmine.ChannelListActivity
 import com.samyak2403.iptvmine.R
 import com.samyak2403.iptvmine.db.AppDatabase
 import com.samyak2403.iptvmine.db.PlaylistEntity
@@ -29,6 +32,7 @@ class ActivityImportPlaylistM3U : AppCompatActivity() {
     private lateinit var tvFileName: TextView
     private lateinit var btnRemoveFile: ImageView
     private lateinit var btnAddPlaylist: TextView
+    private  lateinit var tvTitle: TextView
 
     private var selectedFileUri: Uri? = null
     private val playlistDao by lazy { AppDatabase.getDatabase(this).playlistDao() }
@@ -45,6 +49,9 @@ class ActivityImportPlaylistM3U : AppCompatActivity() {
         btnRemoveFile = findViewById(R.id.btnRemoveFile)
         btnAddPlaylist = findViewById(R.id.btn_add_playlist)
 
+        tvTitle = findViewById(R.id.tvTitle)
+        tvTitle.isSelected = true
+
         btnBack.setOnClickListener { finish() }
         lnUpload.setOnClickListener { openFilePicker() }
         btnRemoveFile.setOnClickListener { removeSelectedFile() }
@@ -54,11 +61,33 @@ class ActivityImportPlaylistM3U : AppCompatActivity() {
     private val filePicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
-                selectedFileUri = uri
-                tvFileName.text = getFileName(uri)
-                lnUpload.visibility = View.GONE
-                fileUploadedLayout.visibility = View.VISIBLE
+                try {
+                    // Yêu cầu quyền truy cập lâu dài
+                    contentResolver.takePersistableUriPermission(
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                    // Kiểm tra xem quyền có được cấp thành công không
+                    val hasPermission = contentResolver.persistedUriPermissions.any {
+                        it.uri == uri && it.isReadPermission
+                    }
+
+                    if (!hasPermission) {
+                        return@let
+                    }
+
+
+                    selectedFileUri = uri
+                    tvFileName.text = getFileName(uri)
+                    lnUpload.visibility = View.GONE
+                    fileUploadedLayout.visibility = View.VISIBLE
+                } catch (e: SecurityException) {
+                    Toast.makeText(this,
+                        getString(R.string.cannot_retain_file_access_permission_please_try_again), Toast.LENGTH_LONG).show()
+                }
             }
+        } else {
+            Log.w("M3UFile", "File selection canceled or failed with result code: ${result.resultCode}")
         }
     }
 
@@ -80,21 +109,31 @@ class ActivityImportPlaylistM3U : AppCompatActivity() {
     private fun savePlaylist() {
         val name = etPlaylistName.text.toString().trim()
         if (name.isEmpty() || selectedFileUri == null) {
-            etPlaylistName.error = "Please enter a name and select a file"
+            etPlaylistName.error = getString(R.string.please_enter_a_name_and_select_a_file)
             return
         }
 
         CoroutineScope(Dispatchers.IO).launch {
-            val channelCount = countChannelsInM3U(selectedFileUri!!)
-            val playlist = PlaylistEntity(
-                name = name,
-                channelCount = channelCount,
-                sourceType = "FILE",
-                sourcePath = selectedFileUri.toString()
-            )
-            playlistDao.insertPlaylist(playlist)
-            setResult(RESULT_OK)
-            finish()
+            try {
+                val channelCount = countChannelsInM3U(selectedFileUri!!)
+                val playlist = PlaylistEntity(
+                    name = name,
+                    channelCount = channelCount,
+                    sourceType = "FILE",
+                    sourcePath = selectedFileUri.toString()
+                )
+                playlistDao.insertPlaylist(playlist)
+
+                withContext(Dispatchers.Main) {
+                    setResult(RESULT_OK)
+                    finish()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@ActivityImportPlaylistM3U,
+                        getString(R.string.error_saving_playlist, e.message), Toast.LENGTH_LONG).show()
+                }
+            }
         }
     }
 
@@ -112,13 +151,13 @@ class ActivityImportPlaylistM3U : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
             }
             count
         }
     }
 
     private fun getFileName(uri: Uri): String {
-        return uri.lastPathSegment ?: "Unknown.m3u"
+        val fileName = uri.lastPathSegment ?: "Unknown.m3u"
+        return fileName
     }
 }

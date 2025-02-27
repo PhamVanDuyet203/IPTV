@@ -22,7 +22,7 @@
                 android:id="@+id/tv_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="IPTV"
+                android:text="@string/iptv"
                 android:fontFamily="@font/inter_bold"
                 android:textSize="20sp"
                 app:layout_constraintStart_toStartOf="parent"
@@ -31,18 +31,20 @@
 
             <ImageView
                 android:id="@+id/vip_status"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="8dp"
                 android:src="@drawable/vip"
                 app:layout_constraintEnd_toStartOf="@+id/language_icon"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_marginEnd="16dp"/>
+                android:layout_marginEnd="2dp"/>
 
             <ImageView
                 android:id="@+id/language_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="8dp"
                 android:src="@drawable/ic_english"
                 android:layout_marginRight="24dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -87,7 +89,7 @@
                 android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Don't have any playlists yet"
+                android:text="@string/don_t_have_any_playlists_yet"
                 android:textSize="16sp"
                 android:fontFamily="@font/inter_regular"
                 android:paddingTop="16dp"/>
@@ -96,7 +98,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="Press the Add button to create one"
+                android:text="@string/press_the_add_button_to_create_one"
 
                 android:textSize="16sp"
                 android:fontFamily="@font/inter_regular" />
@@ -110,7 +112,6 @@
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:background="@color/white"
-        android:elevation="10dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <!-- Home -->
@@ -118,7 +119,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="80dp"
-            android:elevation="10dp"
             android:gravity="center"
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -146,7 +146,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/inter_regular"
-                    android:text="Home"
+                    android:text="@string/home"
                     android:textColor="@color/cool_blue"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -154,9 +154,10 @@
             <!-- Floating Action Button (Nút trung tâm) -->
             <ImageView
                 android:id="@+id/nav_center"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:layout_marginBottom="6dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:elevation="10dp"
                 android:src="@drawable/ic_add" />
 
             <!-- Channel Icon -->
@@ -180,7 +181,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/inter_regular"
-                    android:text="Channel"
+                    android:text="@string/channel"
                     android:textColor="#6F797A"
                     android:textSize="14sp" />
             </LinearLayout>

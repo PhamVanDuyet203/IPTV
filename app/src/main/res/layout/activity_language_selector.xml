@@ -22,16 +22,19 @@
             android:text="@string/title_language"
             android:textSize="20sp"
             android:textColor="#1A1C1B"
+            android:layout_centerVertical="true"
             android:textStyle="bold"/>
 
         <ImageButton
             android:id="@+id/check_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="8dp"
             android:layout_marginTop="4dp"
             android:layout_marginRight="24dp"
             android:layout_alignParentRight="true"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_centerVertical="true"
             android:src="@drawable/ic_check" />
     </RelativeLayout>
 

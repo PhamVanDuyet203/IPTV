@@ -21,17 +21,25 @@
     <!-- Tiêu đề -->
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:singleLine="true"
+        android:scrollHorizontally="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:layout_height="wrap_content"
-        android:text="Playlist name detail"
+        android:text="@string/playlist_name_detail"
         android:textSize="20sp"
         android:fontFamily="@font/inter_bold"
         android:textColor="#1A1C1B"
         android:gravity="center_horizontal"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btnBack"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="14dp"/>
+        android:layout_marginTop="14dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="72dp"/>
 
     <LinearLayout
         android:id="@+id/toolbar"
@@ -55,7 +63,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Search channel..."
+                android:hint="@string/search_channel_detail"
+                android:maxLines="1"
                 android:fontFamily="@font/inter_regular"
                 android:paddingTop="14dp"
                 android:paddingBottom="14dp"

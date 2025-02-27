@@ -21,17 +21,25 @@
     <!-- Tiêu đề -->
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Playlist name"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:singleLine="true"
+        android:scrollHorizontally="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:text="@string/playlist_name"
         android:textSize="20sp"
         android:fontFamily="@font/inter_bold"
         android:textColor="#1A1C1B"
-        android:gravity="center_horizontal"
+        android:gravity="center"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btnBack"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="28dp"/>
+        android:layout_marginTop="28dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="72dp"/>
 
     <LinearLayout
         android:id="@+id/toolbar"
@@ -58,14 +66,16 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Search channel..."
+                android:hint="@string/search_channel"
                 android:fontFamily="@font/inter_regular"
+                android:maxLines="1"
                 android:paddingTop="14dp"
                 android:paddingBottom="14dp"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
                 android:textSize="16sp"
-                android:textColor="#A9ABAC"
+                android:textColorHint="#3D4949"
+                android:textColor="#171D1D"
                 android:background="@drawable/custom_edittext_search_background"
                 />
 
@@ -89,6 +99,15 @@
 
             />
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"

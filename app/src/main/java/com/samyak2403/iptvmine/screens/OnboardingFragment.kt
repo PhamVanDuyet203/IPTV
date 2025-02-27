@@ -56,15 +56,16 @@ class OnboardingFragment : Fragment() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 val lastPage = viewPager.adapter?.itemCount?.minus(1) ?: 0
-                nextButton.text = if (position == lastPage) "START" else "NEXT"
+                nextButton.text = if (position == lastPage) getString(R.string.start) else getString(
+                    R.string.next_onboarding)
             }
         })
 
 
         // Xử lý khi bấm "Next" hoặc "Start"
         nextButton.setOnClickListener {
-            if (nextButton.text == "START") {
-                startActivity(Intent(requireActivity(), HowToUseActivity::class.java))
+            if (nextButton.text == getString(R.string.start)) {
+                startActivity(Intent(requireActivity(), HomePageActivity::class.java))
                 requireActivity().finish() // Đóng màn hình Onboarding
             } else {
                 viewPager.currentItem += 1 // Chuyển sang trang tiếp theo

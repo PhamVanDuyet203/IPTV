@@ -24,18 +24,18 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="How to Add a Playlist"
+            android:text="@string/how_to_add_a_playlist"
             android:textSize="20sp"
+            android:gravity="center"
             android:fontFamily="@font/inter_bold"
             android:layout_centerInParent="true"
             android:layout_centerVertical="true" />
         <ImageButton
             android:id="@+id/close_htu"
-            android:layout_width="14dp"
-            android:layout_height="14dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:padding="8dp"
             android:src="@drawable/remove"
-            android:layout_marginRight="16dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:background="#E9EFF0"/>
@@ -66,7 +66,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="STEP 1"
+                android:text="@string/step_1"
                 android:layout_marginLeft="16dp"
                 android:fontFamily="@font/inter_semibold"
                 android:textSize="12sp"
@@ -78,13 +78,13 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:fontFamily="@font/inter_medium"
-            android:text="Use any search engine to find 'free IPTV playlist public'" />
+            android:text="@string/use_any_search_engine_to_find_free_iptv_playlist_public" />
 
         <TextView
             android:gravity="center"
             android:layout_width="172dp"
             android:layout_height="38dp"
-            android:text="Free IPTV playlist public"
+            android:text="@string/free_iptv_playlist_public"
             android:backgroundTint="@color/cool_blue"
             android:background="@drawable/ic_btn_step_1"
             android:textColor="@color/white"
@@ -118,7 +118,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="STEP 2"
+                android:text="@string/step_2"
                 android:layout_marginLeft="16dp"
                 android:fontFamily="@font/inter_semibold"
                 android:textSize="12sp"
@@ -130,7 +130,7 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:fontFamily="@font/inter_medium"
-            android:text="Copy the M3U playlist or download the file." />
+            android:text="@string/copy_the_m3u_playlist_or_download_the_file" />
 
 
         <ImageView
@@ -168,7 +168,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="STEP 3"
+                android:text="@string/step_3"
                 android:layout_marginLeft="16dp"
                 android:fontFamily="@font/inter_semibold"
                 android:textSize="12sp"
@@ -180,7 +180,7 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:fontFamily="@font/inter_medium"
-            android:text="Return to the app, tap the 'Add Playlist' button, select 'Import Playlist URL' and paste the link." />
+            android:text="@string/return_to_the_app_tap_the_add_playlist_button_select_import_playlist_url_and_paste_the_link" />
 
         <ImageView
             android:layout_width="226dp"
@@ -215,7 +215,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="STEP 4"
+                android:text="@string/step_4"
                 android:layout_marginLeft="16dp"
                 android:fontFamily="@font/inter_semibold"
                 android:textSize="12sp"
@@ -227,7 +227,7 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:fontFamily="@font/inter_medium"
-            android:text="Start streaming and enjoy your IPTV shows." />
+            android:text="@string/start_streaming_and_enjoy_your_iptv_shows" />
 
         <ImageView
             android:layout_width="226dp"

@@ -3,14 +3,15 @@
     android:width="64dp"
     android:height="64dp"
     android:viewportWidth="64"
-    android:viewportHeight="64">
+    android:viewportHeight="64"
+    android:elevation="4dp">
   <group>
     <clip-path
         android:pathData="M32,0L32,0A28,28 0,0 1,60 28L60,28A28,28 0,0 1,32 56L32,56A28,28 0,0 1,4 28L4,28A28,28 0,0 1,32 0z"/>
     <path
         android:pathData="M32,0L32,0A28,28 0,0 1,60 28L60,28A28,28 0,0 1,32 56L32,56A28,28 0,0 1,4 28L4,28A28,28 0,0 1,32 0z">
       <aapt:attr name="android:fillColor">
-        <gradient 
+        <gradient
             android:startX="32"
             android:startY="0"
             android:endX="32"

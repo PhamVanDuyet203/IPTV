@@ -12,12 +12,28 @@ import com.samyak2403.iptvmine.db.AppDatabase
 import com.samyak2403.iptvmine.model.Channel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import okhttp3.Cache
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+
+
+// Data class để lưu thông tin recent channel
+@Serializable
+data class RecentChannel(
+    val streamUrl: String,
+    val timestamp: Long
+)
 
 class ChannelsProvider : ViewModel() {
 
@@ -35,6 +51,10 @@ class ChannelsProvider : ViewModel() {
     private lateinit var playlistDao: com.samyak2403.iptvmine.db.PlaylistDao
     private lateinit var appContext: Context
 
+    private var cachedChannels: List<Channel> = emptyList()
+
+
+
     fun init(context: Context) {
         Log.d("ChannelsProvider", "Initializing ChannelsProvider")
         appContext = context
@@ -42,9 +62,13 @@ class ChannelsProvider : ViewModel() {
         playlistDao = AppDatabase.getDatabase(context).playlistDao()
     }
 
-    fun fetchChannelsFromRoom() {
-        Log.d("ChannelsProvider", "fetchChannelsFromRoom called")
+    fun fetchChannelsFromRoom(forceRefresh: Boolean = false) {
+        Log.d("ChannelsProvider", "fetchChannelsFromRoom called, forceRefresh: $forceRefresh")
         fetchJob?.cancel()
+        if (!forceRefresh && cachedChannels.isNotEmpty()) {
+            _channels.value = cachedChannels
+            return
+        }
         fetchJob = viewModelScope.launch(Dispatchers.IO) {
             loadChannels()
         }
@@ -61,12 +85,10 @@ class ChannelsProvider : ViewModel() {
         Log.d("ChannelsProvider", "Loading channels")
         try {
             val playlists = playlistDao.getAllPlaylists()
-            Log.d("ChannelsProvider", "Fetched playlists: ${playlists.size}")
             if (playlists.isEmpty()) {
                 withContext(Dispatchers.Main) {
-                    _error.value = "No playlists found in database. Please add a playlist."
+                    cachedChannels = emptyList()
                     _channels.value = emptyList()
-                    Log.d("ChannelsProvider", "No playlists, set empty channels")
                 }
                 return
             }
@@ -76,26 +98,22 @@ class ChannelsProvider : ViewModel() {
                 val channels = when (playlist.sourceType) {
                     "URL" -> fetchChannelsFromUrl(playlist.sourcePath)
                     "FILE" -> fetchChannelsFromUri(Uri.parse(playlist.sourcePath))
-                    "DEVICE" -> {
-                        val uriList = playlist.sourcePath.split(";").map { Uri.parse(it) }
-                        uriList.flatMap { fetchChannelsFromUri(it) }
-                    }
+                    "DEVICE" -> playlist.sourcePath.split(";").map { Uri.parse(it) }.flatMap { fetchChannelsFromUri(it) }
                     else -> emptyList()
                 }
-                Log.d("ChannelsProvider", "Channels from ${playlist.sourceType}: ${channels.size}")
                 allChannels.addAll(channels)
             }
 
             val updatedChannels = applyFavoriteStatus(allChannels)
             withContext(Dispatchers.Main) {
+                cachedChannels = updatedChannels // Cập nhật cache
                 _channels.value = updatedChannels
-                Log.d("ChannelsProvider", "Updated channels: ${updatedChannels.size}")
             }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
                 _error.value = "Failed to fetch channels: ${e.message}"
+                cachedChannels = emptyList()
                 _channels.value = emptyList()
-                Log.e("ChannelsProvider", "Error fetching channels: ${e.message}")
             }
         }
     }
@@ -121,14 +139,13 @@ class ChannelsProvider : ViewModel() {
     private suspend fun fetchChannelsFromUrl(url: String): List<Channel> {
         return withContext(Dispatchers.IO) {
             try {
-                val urlConnection = (URL(url).openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 10000
-                    readTimeout = 10000
-                }
-                urlConnection.inputStream.bufferedReader().use { reader ->
-                    val fileText = reader.readText()
-                    parseM3UFile(fileText)
-                }
+                val client = OkHttpClient.Builder()
+                    .cache(Cache(appContext.cacheDir, 10 * 1024 * 1024)) // 10MB cache
+                    .build()
+                val request = Request.Builder().url(url).build()
+                val response = client.newCall(request).execute()
+                val fileText = response.body?.string() ?: return@withContext emptyList()
+                parseM3UFile(fileText)
             } catch (e: Exception) {
                 Log.e("ChannelsProvider", "Error fetching from URL $url: ${e.message}")
                 emptyList()
@@ -205,7 +222,14 @@ class ChannelsProvider : ViewModel() {
         _channels.value?.let { channelList ->
             val filtered = when (type) {
                 "favorite" -> channelList.filter { it.isFavorite }
-                "recent" -> channelList.filter { isRecent(it.streamUrl) }
+                "recent" -> {
+                    // Lấy danh sách recent đã sắp xếp theo thời gian
+                    val recentChannels = getRecentChannels()
+                    // Sắp xếp channelList theo thứ tự trong recentChannels
+                    val sortedRecent = recentChannels
+                        .mapNotNull { recent -> channelList.find { it.streamUrl == recent.streamUrl } }
+                    sortedRecent
+                }
                 else -> channelList
             }
             _filteredChannels.value = filtered
@@ -213,6 +237,18 @@ class ChannelsProvider : ViewModel() {
         } ?: run {
             _filteredChannels.value = emptyList()
             Log.d("ChannelsProvider", "No channels to filter, set empty list")
+        }
+    }
+
+    // Hàm để lấy danh sách recent từ SharedPreferences
+    private fun getRecentChannels(): List<RecentChannel> {
+        val recentJson = sharedPreferences.getString("recent_channels_json", "[]") ?: "[]"
+        return try {
+            Json.decodeFromString<List<RecentChannel>>(recentJson)
+                .sortedByDescending { it.timestamp } // Sắp xếp theo thời gian giảm dần
+        } catch (e: Exception) {
+            Log.e("ChannelsProvider", "Error parsing recent channels: ${e.message}")
+            emptyList()
         }
     }
 
@@ -226,11 +262,14 @@ class ChannelsProvider : ViewModel() {
                     it.copy(isFavorite = newFavoriteStatus)
                 } else it
             }
-            _channels.value = updatedList
+            // Cập nhật danh sách kênh chính
+            _channels.postValue(updatedList)
             Log.d("ChannelsProvider", "Toggled favorite, updated channels: ${updatedList.size}")
+
+            // Nếu đang ở tab "favorite", cập nhật danh sách filteredChannels
             if (tabLayoutSelectedPosition() == 1) {
-                _filteredChannels.value = updatedList.filter { it.isFavorite }
-                Log.d("ChannelsProvider", "Updated filtered channels (favorite): ${_filteredChannels.value?.size}")
+                _filteredChannels.postValue(updatedList.filter { it.isFavorite })
+                Log.d("ChannelsProvider", "Updated filteredChannels for favorite tab: ${_filteredChannels.value?.size}")
             }
         }
     }
@@ -271,6 +310,22 @@ class ChannelsProvider : ViewModel() {
         }
     }
 
+    // refresh data
+
+    private val _shouldRefresh = MutableLiveData<Boolean>()
+    val shouldRefresh: LiveData<Boolean> = _shouldRefresh
+
+    // Đặt lại flag khi cần làm mới
+    fun requestRefresh() {
+        _shouldRefresh.postValue(true)
+        Log.d("ChannelsProvider", "Requested refresh")
+    }
+
+    // Reset flag sau khi đã làm mới
+    fun resetRefresh() {
+        _shouldRefresh.postValue(false)
+    }
+
     private fun applyFavoriteStatus(channels: List<Channel>): List<Channel> {
         return channels.map {
             val isFavorite = sharedPreferences.getBoolean(it.streamUrl, false)
@@ -278,18 +333,34 @@ class ChannelsProvider : ViewModel() {
         }
     }
 
+    // Hàm để thêm kênh vào recent với timestamp
     fun addToRecent(channel: Channel) {
-        val recentSet = sharedPreferences.getStringSet("recent_channels", emptySet())?.toMutableSet() ?: mutableSetOf()
-        recentSet.add(channel.streamUrl)
-        if (recentSet.size > 10) {
-            recentSet.remove(recentSet.first())
+        viewModelScope.launch(Dispatchers.IO) {
+            val recentChannels = getRecentChannels().toMutableList()
+            // Xóa nếu kênh đã tồn tại để cập nhật timestamp mới
+            recentChannels.removeAll { it.streamUrl == channel.streamUrl }
+            // Thêm kênh mới với timestamp hiện tại
+            recentChannels.add(RecentChannel(channel.streamUrl, System.currentTimeMillis()))
+            // Giới hạn 10 kênh
+            if (recentChannels.size > 10) {
+                recentChannels.removeAt(0) // Xóa kênh cũ nhất
+            }
+            // Lưu lại vào SharedPreferences
+            val json = Json.encodeToString(recentChannels)
+            sharedPreferences.edit().putString("recent_channels_json", json).apply()
+            Log.d("ChannelsProvider", "Added to recent: ${channel.name}, total recent: ${recentChannels.size}")
+
+            // Cập nhật filteredChannels nếu đang ở tab "recent"
+            withContext(Dispatchers.Main) {
+                if (tabLayoutSelectedPosition() == 2) {
+                    filterChannels("recent")
+                }
+            }
         }
-        sharedPreferences.edit().putStringSet("recent_channels", recentSet).apply()
     }
 
-    private fun isRecent(streamUrl: String): Boolean {
-        val recentSet = sharedPreferences.getStringSet("recent_channels", emptySet()) ?: emptySet()
-        return recentSet.contains(streamUrl)
+    fun isRecent(streamUrl: String): Boolean {
+        return getRecentChannels().any { it.streamUrl == streamUrl }
     }
 
     fun isFavorite(streamUrl: String): Boolean {

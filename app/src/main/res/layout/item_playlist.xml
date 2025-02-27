@@ -16,6 +16,7 @@
         >
 
         <ImageView
+            android:id="@+id/img_item_playlist"
             android:layout_width="44dp"
             android:layout_height="44dp"
             android:layout_marginRight="12dp"
@@ -35,6 +36,8 @@
                 android:layout_height="wrap_content"
                 android:text="Channel playlist name"
                 android:fontFamily="@font/inter_medium"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:textSize="14sp"
                 android:textColor="#171D1E"/>
 

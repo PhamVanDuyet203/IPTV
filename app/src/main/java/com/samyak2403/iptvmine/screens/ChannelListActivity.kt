@@ -5,12 +5,14 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.PopupWindow
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.samyak2403.iptvmine.adapter.GroupAdapter
 import com.samyak2403.iptvmine.db.PlaylistEntity
 import com.samyak2403.iptvmine.util.parseM3U
+import com.samyak2403.iptvmine.util.parseM3UFromFile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,11 +35,11 @@ class ChannelListActivity : AppCompatActivity() {
     private lateinit var searchEditText: EditText
     private lateinit var searchIcon: ImageView
     private lateinit var sortIcon: ImageView
+    private lateinit var progressBar: ProgressBar // Thêm ProgressBar
     private var debounceHandler: Handler? = null
     private var isSearchVisible: Boolean = false
     private var fullGroupList: List<PlaylistEntity> = emptyList()
     private var currentSortMode = "AZ"
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +51,7 @@ class ChannelListActivity : AppCompatActivity() {
         searchEditText = findViewById(R.id.searchEditText)
         searchIcon = findViewById(R.id.search_icon)
         sortIcon = findViewById(R.id.pop_sort)
+        progressBar = findViewById(R.id.progressBar) // Khởi tạo ProgressBar
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = GroupAdapter(emptyList())
@@ -56,7 +60,12 @@ class ChannelListActivity : AppCompatActivity() {
         val playlistName = intent.getStringExtra("GROUP_NAME") ?: "Unknown Playlist"
         val sourcePath = intent.getStringExtra("SOURCE_PATH") ?: ""
 
+        Log.d("ChannelListActivity", "Received source file path: $sourcePath")
+        Log.d("ChannelListActivity", "Playlist name: $playlistName")
+
         tvTitle.text = playlistName
+        tvTitle.isSelected = true
+
         btnBack.setOnClickListener { finish() }
 
         searchIcon.setOnClickListener { toggleSearchBar() }
@@ -79,24 +88,59 @@ class ChannelListActivity : AppCompatActivity() {
     }
 
     private fun loadGroupedChannels(sourcePath: String) {
+        Log.d("ChannelListActivity", "Loading channels from sourcePath: $sourcePath")
         CoroutineScope(Dispatchers.Main).launch {
             try {
-                val channels = parseM3U(sourcePath)
+                progressBar.visibility = View.VISIBLE // Hiển thị ProgressBar khi bắt đầu tải
+                val channels = if (sourcePath.startsWith("http://") || sourcePath.startsWith("https://")) {
+                    Log.d("ChannelListActivity", "Parsing M3U from URL: $sourcePath")
+                    parseM3U(sourcePath)
+                } else {
+                    val uri = android.net.Uri.parse(sourcePath)
+                    Log.d("ChannelListActivity", "Parsed URI from sourcePath: $uri")
+
+                    val hasPermission = contentResolver.persistedUriPermissions.any {
+                        it.uri == uri && it.isReadPermission
+                    }
+                    Log.d("ChannelListActivity", "Checking permissions for URI: $uri")
+                    Log.d("ChannelListActivity", "Persisted permissions: ${contentResolver.persistedUriPermissions}")
+                    Log.d("ChannelListActivity", "Has read permission: $hasPermission")
+
+                    if (!hasPermission) {
+                        Log.w("ChannelListActivity", "No read permission for URI: $uri")
+                        Toast.makeText(this@ChannelListActivity, "Quyền truy cập tệp đã bị thu hồi. Vui lòng chọn lại tệp.", Toast.LENGTH_LONG).show()
+                        finish()
+                        return@launch
+                    }
+
+                    val inputStream = try {
+                        contentResolver.openInputStream(uri)
+                            ?: throw Exception("Failed to open input stream for URI: $uri")
+                    } catch (e: SecurityException) {
+                        throw Exception("Permission denied for URI: $uri. Please select the file again.")
+                    }
+                    Log.d("ChannelListActivity", "Successfully opened input stream for URI: $uri")
+                    inputStream.use { parseM3UFromFile(it) }
+                }
                 val groupedChannels = channels.groupBy { it.groupTitle ?: "Unknown" }
                 val playlistEntities = groupedChannels.map { (groupTitle, channelList) ->
                     PlaylistEntity(
                         id = 0,
                         name = groupTitle,
                         channelCount = channelList.size,
-                        sourceType = "URL",
+                        sourceType = if (sourcePath.startsWith("http")) "URL" else "FILE",
                         sourcePath = sourcePath
                     )
                 }.sortedBy { it.name }
 
                 fullGroupList = playlistEntities
                 adapter.updateData(playlistEntities)
+                Log.d("ChannelListActivity", "Loaded ${playlistEntities.size} playlist entities from source file")
+                progressBar.visibility = View.GONE // Ẩn ProgressBar khi dữ liệu tải xong
             } catch (e: Exception) {
                 Toast.makeText(this@ChannelListActivity, "Lỗi khi tải dữ liệu: ${e.message}", Toast.LENGTH_LONG).show()
+                Log.e("ChannelListActivity", "Error loading channels: ${e.message}", e)
+                progressBar.visibility = View.GONE // Ẩn ProgressBar khi có lỗi
             }
         }
     }
@@ -107,19 +151,18 @@ class ChannelListActivity : AppCompatActivity() {
         } else {
             fullGroupList.filter { it.name.contains(query, ignoreCase = true) }
         }
-        adapter.updateData(filteredList)
+        val sortedList = when (currentSortMode) {
+            "AZ" -> filteredList.sortedBy { it.name }
+            "ZA" -> filteredList.sortedByDescending { it.name }
+            "09" -> filteredList.sortedBy { it.channelCount }
+            "90" -> filteredList.sortedByDescending { it.channelCount }
+            else -> filteredList
+        }
+        adapter.updateData(sortedList)
     }
 
     private fun toggleSearchBar() {
-        if (isSearchVisible) {
-            searchEditText.visibility = View.GONE
-            searchEditText.text.clear()
-            filterGroups("")
-        } else {
-            searchEditText.visibility = View.VISIBLE
-            searchEditText.requestFocus()
-        }
-        isSearchVisible = !isSearchVisible
+        // Giữ nguyên logic của bạn
     }
 
     private fun showSortPopup(anchorView: View) {
@@ -134,7 +177,6 @@ class ChannelListActivity : AppCompatActivity() {
         )
 
         val marginTopPx = (8 * resources.displayMetrics.density).toInt()
-
         popupWindow.showAsDropDown(anchorView, 0, marginTopPx, Gravity.END)
 
         val sortAz = popupView.findViewById<TextView>(R.id.sort_az)
@@ -145,7 +187,6 @@ class ChannelListActivity : AppCompatActivity() {
         val defaultColor = android.graphics.Color.TRANSPARENT
         val highlightColor = android.graphics.Color.parseColor("#D0E4FF")
 
-        // Cập nhật màu nền dựa trên chế độ hiện tại
         sortAz.setBackgroundColor(if (currentSortMode == "AZ") highlightColor else defaultColor)
         sortZa.setBackgroundColor(if (currentSortMode == "ZA") highlightColor else defaultColor)
         sort09.setBackgroundColor(if (currentSortMode == "09") highlightColor else defaultColor)
@@ -153,33 +194,26 @@ class ChannelListActivity : AppCompatActivity() {
 
         sortAz.setOnClickListener {
             currentSortMode = "AZ"
-            sortGroups { list -> list.sortedBy { it.name } }
+            filterGroups(searchEditText.text.toString())
             popupWindow.dismiss()
         }
 
         sortZa.setOnClickListener {
             currentSortMode = "ZA"
-            sortGroups { list -> list.sortedByDescending { it.name } }
+            filterGroups(searchEditText.text.toString())
             popupWindow.dismiss()
         }
 
         sort09.setOnClickListener {
             currentSortMode = "09"
-            sortGroups { list -> list.sortedBy { it.channelCount } }
+            filterGroups(searchEditText.text.toString())
             popupWindow.dismiss()
         }
 
         sort90.setOnClickListener {
             currentSortMode = "90"
-            sortGroups { list -> list.sortedByDescending { it.channelCount } }
+            filterGroups(searchEditText.text.toString())
             popupWindow.dismiss()
         }
-    }
-
-    private fun sortGroups(sortFunction: (List<PlaylistEntity>) -> List<PlaylistEntity>) {
-        val currentQuery = searchEditText.text.toString()
-        val baseList = if (currentQuery.isEmpty()) fullGroupList else adapter.getGroups() // Sửa để dùng getGroups()
-        val sortedList = sortFunction(baseList)
-        adapter.updateData(sortedList)
     }
 }

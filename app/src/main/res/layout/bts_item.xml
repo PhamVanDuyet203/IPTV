@@ -27,12 +27,16 @@
             android:gravity="start"
             android:backgroundTint="@color/white"
             android:textColor="#171D1E"
+            android:layout_marginEnd="36dp"
+            android:maxLines="3"
+            android:ellipsize="end"
             android:fontFamily="@font/inter_bold"
             android:textSize="20sp"/>
         <ImageView
             android:id="@+id/btn_close"
-            android:layout_width="14dp"
-            android:layout_height="14dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
             android:src="@drawable/remove"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="14dp"
@@ -66,7 +70,7 @@
             android:baselineAligned="false"
             android:fontFamily="@font/inter_regular"
             android:gravity="start"
-            android:text="Rename"
+            android:text="@string/rename"
             android:textColor="#171D1E"
             android:textSize="16sp" />
     </LinearLayout>
@@ -93,7 +97,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Delete"
+            android:text="@string/delete"
             android:gravity="start"
             android:layout_marginStart="16dp"
             android:backgroundTint="@color/white"

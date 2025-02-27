@@ -10,35 +10,45 @@
     <!-- Nút Back -->
     <ImageView
         android:id="@+id/btnBack"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:src="@drawable/ic_back"
         android:contentDescription="Back"
+        android:padding="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="8dp" />
 
     <!-- Tiêu đề -->
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Import playlist URL"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:singleLine="true"
+        android:scrollHorizontally="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:text="@string/import_m3u_file"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="#171D1E"
         android:gravity="center"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btnBack"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="14dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="72dp"/>
+
 
     <!-- Label "Playlist name" -->
     <TextView
         android:id="@+id/tvPlaylistName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Playlist name"
+        android:text="@string/playlist_name_m3u"
         android:textSize="14sp"
         android:textColor="#171D1E"
         android:fontFamily="@font/inter_regular"
@@ -51,17 +61,19 @@
         android:id="@+id/etPlaylistName"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:hint="Enter playlist name"
+        android:hint="@string/enter_playlist_name_m3u"
         android:background="@drawable/bg_edittext"
         android:padding="16dp"
         android:textSize="16sp"
         android:textColorHint="#AFB3B4"
-        android:textColor="#AFB3B4"
+        android:textColor="#171D1E"
         android:backgroundTint="#E9EFF0"
         android:fontFamily="@font/inter_regular"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvPlaylistName"
         app:layout_constraintEnd_toEndOf="parent"
+        android:singleLine="true"
+        android:gravity="center_vertical"
         android:layout_marginTop="8dp"/>
 
     <!-- Label "Playlist URL" -->
@@ -69,7 +81,7 @@
         android:id="@+id/tvPlaylistUrl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Upload M3U file"
+        android:text="@string/upload_m3u_file_m3u"
         android:textSize="14sp"
         android:textColor="#171D1E"
         android:fontFamily="@font/inter_regular"
@@ -102,7 +114,7 @@
             android:id="@+id/tvUploadText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Select file to upload"
+            android:text="@string/select_file_to_upload_m3u"
             android:fontFamily="@font/inter_semibold"
             android:textSize="14sp"
             android:textColor="@color/cool_blue"/>
@@ -180,7 +192,7 @@
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:text="Save"
+        android:text="@string/save_m3u"
         android:textColor="@color/white"
         android:fontFamily="@font/inter_semibold"
         android:textSize="16sp"

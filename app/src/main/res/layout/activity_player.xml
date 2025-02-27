@@ -32,7 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:text="Channel not available now"
+        android:text="@string/channel_not_available_now"
         android:textSize="24sp"
         android:visibility="gone"
         android:textColor="@android:color/black" />

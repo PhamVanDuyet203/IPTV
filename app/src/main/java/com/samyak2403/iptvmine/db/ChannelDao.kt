@@ -5,17 +5,32 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.samyak2403.iptvmine.adapter.ChannelEntity
+import androidx.room.Update
+import androidx.room.Delete
 
 @Dao
 interface ChannelDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChannel(channel: ChannelEntity)
 
-    @Query("SELECT * FROM ChannelEntity WHERE playlistId = :playlistId")
-    fun getChannelsByPlaylist(playlistId: Int): LiveData<List<ChannelEntity>>
+    @Query("SELECT * FROM channels")
+    fun getAllChannels(): LiveData<List<ChannelEntity>>
 
-    @Query("SELECT * FROM ChannelEntity")
-    fun getAllChannels(): LiveData<List<ChannelEntity>> // Trả về LiveData để cập nhật UI
+    @Update
+    suspend fun update(channel: ChannelEntity)
 
+    @Delete
+    suspend fun delete(channel: ChannelEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertChannels(channels: List<ChannelEntity>)
+
+    @Update
+    suspend fun updateChannel(channel: ChannelEntity)
+
+    @Query("DELETE FROM channels WHERE streamUrl = :streamUrl")
+    suspend fun deleteChannel(streamUrl: String)
+
+    @Query("SELECT isFavorite FROM channels WHERE streamUrl = :streamUrl")
+    suspend fun isFavorite(streamUrl: String): Boolean
 }

@@ -54,20 +54,8 @@
         android:background="@color/white"
         android:contentDescription="Options"
         android:layout_gravity="center_vertical"
-        android:padding="6dp"
+        android:padding="8dp"
+        android:layout_marginEnd="14dp"
         android:src="@drawable/fav_channel" />
 
-    <ImageButton
-        android:id="@+id/opt_channel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:background="@color/white"
-        android:layout_gravity="center_vertical"
-        android:contentDescription="Options"
-        android:layout_marginStart="8dp"
-        android:padding="10dp"
-        android:layout_marginEnd="8dp"
-        android:src="@drawable/opt_channel" />
 </LinearLayout>

@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("kotlin-kapt")
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.0"
 }
 
 android {
@@ -95,4 +96,18 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+
+    implementation("androidx.paging:paging-runtime:3.2.1")
+
+    // mirroring
+    implementation("androidx.mediarouter:mediarouter:1.2.0")
+    implementation("com.google.android.gms:play-services-cast:21.0.1")
+    implementation("com.google.android.gms:play-services-cast-framework:21.0.1")
+
+    // okhttp
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation ("com.intuit.sdp:sdp-android:1.1.1")
+
 }

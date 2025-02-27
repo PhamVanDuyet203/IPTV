@@ -1,7 +1,6 @@
 package com.samyak2403.iptvmine.adapter
 
 import android.app.AlertDialog
-import android.app.Dialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +16,7 @@ import com.samyak2403.iptvmine.R
 import com.samyak2403.iptvmine.model.Channel
 
 class ChannelsAdapter(
-     var channels: MutableList<Channel>, // Sử dụng var thay vì val
+    var channels: MutableList<Channel>,
     private val onChannelClicked: (Channel) -> Unit,
     private val onFavoriteClicked: (Channel) -> Unit,
     private val onRenameChannel: (Channel, String) -> Unit,
@@ -38,7 +37,8 @@ class ChannelsAdapter(
 
     fun updateChannels(newChannels: List<Channel>) {
         val diffResult = DiffUtil.calculateDiff(ChannelDiffCallback(channels, newChannels))
-        channels = newChannels.toMutableList() // Gán lại giá trị cho var
+        channels.clear()
+        channels.addAll(newChannels)
         diffResult.dispatchUpdatesTo(this)
     }
 
@@ -46,7 +46,6 @@ class ChannelsAdapter(
         private val logoImageView: ImageView = itemView.findViewById(R.id.logoImageView)
         private val nameTextView: TextView = itemView.findViewById(R.id.nameTextView)
         private val favButton: ImageButton = itemView.findViewById(R.id.fav_channel)
-        private val optButton: ImageButton = itemView.findViewById(R.id.opt_channel)
 
         fun bind(channel: Channel) {
             nameTextView.text = channel.name
@@ -64,9 +63,6 @@ class ChannelsAdapter(
                 notifyItemChanged(adapterPosition)
             }
 
-            optButton.setOnClickListener {
-                showBottomSheet(channel)
-            }
 
             itemView.setOnClickListener {
                 onChannelClicked(channel)
@@ -100,10 +96,8 @@ class ChannelsAdapter(
             }
 
             bottomSheetView.findViewById<View>(R.id.del).setOnClickListener {
-                onDeleteChannel(channel)
-                channels.removeAt(adapterPosition)
-                notifyItemRemoved(adapterPosition)
                 bottomSheetDialog.dismiss()
+                showConfirmDeleteDialog(channel)
             }
 
             bottomSheetDialog.show()
@@ -116,7 +110,6 @@ class ChannelsAdapter(
                 .setView(dialogView)
                 .create()
 
-            // Đặt kích thước cố định
             val width = (290 * context.resources.displayMetrics.density).toInt()
             val height = (215 * context.resources.displayMetrics.density).toInt()
             dialog.window?.setLayout(width, height)
@@ -132,10 +125,36 @@ class ChannelsAdapter(
                 val newName = nameEditText.text.toString().trim()
                 if (newName.isNotEmpty()) {
                     val updatedChannel = channel.copy(name = newName)
-                    channels[adapterPosition] = updatedChannel
-                    onRenameChannel(updatedChannel, newName)
-                    notifyItemChanged(adapterPosition)
+                    onRenameChannel(updatedChannel, newName) // Gọi callback để lưu vào DB
+                    // Không cập nhật channels ở đây vì LiveData sẽ làm việc này
                 }
+                dialog.dismiss()
+            }
+
+            dialog.show()
+        }
+
+        private fun showConfirmDeleteDialog(channel: Channel) {
+            val context = itemView.context
+            val dialogView = LayoutInflater.from(context).inflate(R.layout.confirm_del, null)
+            val dialog = AlertDialog.Builder(context)
+                .setView(dialogView)
+                .create()
+
+            val width = (290 * context.resources.displayMetrics.density).toInt()
+            val height = (215 * context.resources.displayMetrics.density).toInt()
+            dialog.window?.setLayout(width, height)
+
+            val message = dialogView.findViewById<TextView>(R.id.message)
+            message.text = context.getString(R.string.do_you_want_to_delete_channel, channel.name)
+
+            dialogView.findViewById<TextView>(R.id.btn_cancel).setOnClickListener {
+                dialog.dismiss()
+            }
+
+            dialogView.findViewById<TextView>(R.id.btn_delete).setOnClickListener {
+                onDeleteChannel(channel) // Gọi callback để xóa khỏi DB
+                // Không xóa channels ở đây vì LiveData sẽ làm việc này
                 dialog.dismiss()
             }
 

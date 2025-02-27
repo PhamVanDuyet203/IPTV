@@ -5,9 +5,10 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [PlaylistEntity::class], version = 3, exportSchema = true)
+@Database(entities = [PlaylistEntity::class, ChannelEntity::class], version = 5, exportSchema = true)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun playlistDao(): PlaylistDao
+    abstract fun channelDao(): ChannelDao // Thêm ChannelDao
 
     companion object {
         @Volatile

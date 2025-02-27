@@ -46,16 +46,17 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Don't have any playlists yet"
+            android:text="@string/don_t_have_any_playlists_yet_ft_home"
             android:textSize="16sp"
             android:fontFamily="@font/inter_regular"
             android:paddingTop="16dp"/>
 
         <TextView
+            android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="Press the Add button to create one"
+            android:text="@string/press_the_add_button_to_create_one_fr_home"
             android:textSize="16sp"
             android:fontFamily="@font/inter_regular"/>
     </LinearLayout>

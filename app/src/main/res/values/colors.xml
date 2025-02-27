@@ -14,6 +14,7 @@
 
     <!--    custom colors-->
     <color name="cool_blue">#0095F3</color>
+    <color name="add_btn">#5460F9</color>
 
     <color name="cool_green">#64DD17</color>
     <color name="cool_pink">#F50057</color>

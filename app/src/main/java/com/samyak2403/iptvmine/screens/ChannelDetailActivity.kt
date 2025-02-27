@@ -5,12 +5,14 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.PopupWindow
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -22,9 +24,11 @@ import com.samyak2403.iptvmine.model.Channel
 import com.samyak2403.iptvmine.provider.ChannelsProvider
 import com.samyak2403.iptvmine.screens.PlayerActivity
 import com.samyak2403.iptvmine.util.parseM3U
+import com.samyak2403.iptvmine.util.parseM3UFromFile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ChannelDetailActivity : AppCompatActivity() {
 
@@ -35,11 +39,13 @@ class ChannelDetailActivity : AppCompatActivity() {
     private lateinit var searchEditText: EditText
     private lateinit var searchIcon: ImageView
     private lateinit var sortIcon: ImageView
+    private lateinit var progressBar: ProgressBar
     private var debounceHandler: Handler? = null
     private var isSearchVisible: Boolean = false
     private var currentSortMode = "AZ"
     private lateinit var channelsProvider: ChannelsProvider
     private var groupName: String = "Unknown"
+    private var currentQuery: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +57,7 @@ class ChannelDetailActivity : AppCompatActivity() {
         searchEditText = findViewById(R.id.searchEditText)
         searchIcon = findViewById(R.id.search_icon)
         sortIcon = findViewById(R.id.pop_sort)
+        progressBar = findViewById(R.id.progressBar)
 
         channelsProvider = ViewModelProvider(this).get(ChannelsProvider::class.java)
         channelsProvider.init(this)
@@ -75,7 +82,11 @@ class ChannelDetailActivity : AppCompatActivity() {
         groupName = intent.getStringExtra("GROUP_NAME") ?: "Unknown"
         val sourcePath = intent.getStringExtra("SOURCE_PATH") ?: ""
 
+        Log.d("ChannelDetailActivity", "Received groupName: $groupName, sourcePath: $sourcePath")
+
         tvTitle.text = groupName
+        tvTitle.isSelected = true
+
         btnBack.setOnClickListener { finish() }
 
         searchIcon.setOnClickListener { toggleSearchBar() }
@@ -86,7 +97,8 @@ class ChannelDetailActivity : AppCompatActivity() {
                 debounceHandler?.removeCallbacksAndMessages(null)
                 debounceHandler = Handler(Looper.getMainLooper())
                 debounceHandler?.postDelayed({
-                    filterChannels(s.toString())
+                    currentQuery = s.toString()
+                    filterChannels(currentQuery)
                 }, 500)
             }
             override fun afterTextChanged(s: Editable?) {}
@@ -100,21 +112,48 @@ class ChannelDetailActivity : AppCompatActivity() {
 
     private fun loadChannels(sourcePath: String) {
         CoroutineScope(Dispatchers.Main).launch {
+            progressBar.visibility = View.VISIBLE // Hiển thị ProgressBar trên luồng Main
             try {
-                val channels = parseM3U(sourcePath)
+                val channels = withContext(Dispatchers.IO) { // Chuyển tải dữ liệu sang luồng IO
+                    if (sourcePath.startsWith("http://") || sourcePath.startsWith("https://")) {
+                        Log.d("ChannelDetailActivity", "Loading from URL: $sourcePath")
+                        parseM3U(sourcePath)
+                    } else {
+                        Log.d("ChannelDetailActivity", "Loading from file: $sourcePath")
+                        val uri = android.net.Uri.parse(sourcePath)
+                        val hasPermission = contentResolver.persistedUriPermissions.any {
+                            it.uri == uri && it.isReadPermission
+                        }
+                        if (!hasPermission) {
+                            throw Exception("Không có quyền truy cập tệp. Vui lòng chọn lại.")
+                        }
+                        val inputStream = contentResolver.openInputStream(uri)
+                        inputStream?.use { parseM3UFromFile(it) } ?: throw Exception("Không thể mở tệp")
+                    }
+                }
+
                 val filteredChannels = channels.filter { it.groupTitle == groupName }
                     .map { channel ->
                         Channel(
                             name = channel.name,
-                            streamUrl = channel.url,
+                            streamUrl = channel.streamUrl,
                             logoUrl = channel.logoUrl ?: "",
-                            isFavorite = channelsProvider.isFavorite(channel.url),
-                            groupTitle = channel.groupTitle // Lưu groupTitle
+                            isFavorite = channelsProvider.isFavorite(channel.streamUrl),
+                            groupTitle = channel.groupTitle
                         )
                     }
+
+                Log.d("ChannelDetailActivity", "Loaded ${channels.size} channels, filtered to ${filteredChannels.size} for group $groupName")
+
                 channelsProvider.addChannelsFromM3U(filteredChannels)
+                if (filteredChannels.isEmpty()) {
+                    Toast.makeText(this@ChannelDetailActivity, "Không có kênh nào trong nhóm $groupName", Toast.LENGTH_SHORT).show()
+                }
             } catch (e: Exception) {
-                Toast.makeText(this@ChannelDetailActivity, "Lỗi khi tải kênh: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@ChannelDetailActivity, "Lỗi khi tải dữ liệu: ${e.message}", Toast.LENGTH_LONG).show()
+                Log.e("ChannelDetailActivity", "Error loading channels: ${e.message}", e)
+            } finally {
+                progressBar.visibility = View.GONE // Ẩn ProgressBar trong mọi trường hợp (thành công hoặc lỗi)
             }
         }
     }
@@ -130,6 +169,7 @@ class ChannelDetailActivity : AppCompatActivity() {
                 "ZA" -> filteredList.sortedByDescending { it.name }
                 else -> filteredList
             }
+            Log.d("ChannelDetailActivity", "Filtered ${sortedList.size} channels with query: $query")
             adapter.updateChannels(sortedList)
         }
     }
@@ -138,6 +178,7 @@ class ChannelDetailActivity : AppCompatActivity() {
         if (isSearchVisible) {
             searchEditText.visibility = View.GONE
             searchEditText.text.clear()
+            currentQuery = ""
             filterChannels("")
         } else {
             searchEditText.visibility = View.VISIBLE
@@ -183,6 +224,7 @@ class ChannelDetailActivity : AppCompatActivity() {
 
     private fun toggleFavorite(channel: Channel) {
         channelsProvider.toggleFavorite(channel)
+        filterChannels(currentQuery)
     }
 
     private fun observeChannels() {
@@ -193,6 +235,7 @@ class ChannelDetailActivity : AppCompatActivity() {
                 "ZA" -> filteredList.sortedByDescending { it.name }
                 else -> filteredList
             }
+            Log.d("ChannelDetailActivity", "Displaying ${sortedList.size} channels for group $groupName")
             adapter.updateChannels(sortedList)
         }
     }

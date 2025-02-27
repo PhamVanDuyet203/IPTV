@@ -22,6 +22,7 @@ class ActivityImportPlaylistUrl : AppCompatActivity() {
     private lateinit var etPlaylistName: EditText
     private lateinit var etPlaylistUrl: EditText
     private lateinit var btnAddPlaylist: TextView
+    private  lateinit var tvTitle: TextView
 
     private val playlistDao by lazy { AppDatabase.getDatabase(this).playlistDao() }
 
@@ -33,6 +34,9 @@ class ActivityImportPlaylistUrl : AppCompatActivity() {
         etPlaylistName = findViewById(R.id.etPlaylistName)
         etPlaylistUrl = findViewById(R.id.etPlaylistUrl)
         btnAddPlaylist = findViewById(R.id.btn_add_playlist)
+
+        tvTitle = findViewById(R.id.tvTitle)
+        tvTitle.isSelected = true
 
         btnBack.setOnClickListener { finish() }
         btnAddPlaylist.setOnClickListener { savePlaylist() }

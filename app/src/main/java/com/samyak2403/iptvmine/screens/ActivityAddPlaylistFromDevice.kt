@@ -18,6 +18,7 @@ import com.samyak2403.iptvmine.adapter.VideoAdapter
 import com.samyak2403.iptvmine.db.AppDatabase
 import com.samyak2403.iptvmine.db.PlaylistEntity
 import com.samyak2403.iptvmine.model.VideoItem
+import com.samyak2403.iptvmine.provider.ChannelsProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,6 +31,7 @@ class ActivityAddPlaylistFromDevice : AppCompatActivity() {
     private lateinit var btnAddPlaylist: TextView
     private lateinit var videoAdapter: VideoAdapter
     private val videoList = mutableListOf<VideoItem>()
+    private  lateinit var tvTitle: TextView
     private val playlistDao by lazy { AppDatabase.getDatabase(this).playlistDao() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +43,9 @@ class ActivityAddPlaylistFromDevice : AppCompatActivity() {
         lnUpload = findViewById(R.id.ln_upload)
         rvVideo = findViewById(R.id.rvVideo)
         btnAddPlaylist = findViewById(R.id.btn_add_playlist)
+
+        tvTitle = findViewById(R.id.tvTitle)
+        tvTitle.isSelected = true
 
         videoAdapter = VideoAdapter(this, videoList) { videoItem -> removeVideo(videoItem) }
         rvVideo.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
@@ -54,6 +59,10 @@ class ActivityAddPlaylistFromDevice : AppCompatActivity() {
     private val videoPicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
+                contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
                 val fileName = getFileName(uri)
                 if (fileName != null) {
                     videoList.add(VideoItem(uri, fileName))
@@ -79,7 +88,8 @@ class ActivityAddPlaylistFromDevice : AppCompatActivity() {
     private fun savePlaylist() {
         val name = etPlaylistName.text.toString().trim()
         if (name.isEmpty() || videoList.isEmpty()) {
-            etPlaylistName.error = "Please enter a name and select at least one video"
+            etPlaylistName.error =
+                getString(R.string.please_enter_a_name_and_select_at_least_one_video)
             return
         }
 
@@ -91,6 +101,12 @@ class ActivityAddPlaylistFromDevice : AppCompatActivity() {
                 sourcePath = videoList.joinToString(";") { it.uri.toString() }
             )
             playlistDao.insertPlaylist(playlist)
+
+            // Notify ChannelsProvider to refresh channels after adding the playlist
+            val channelsProvider = ChannelsProvider()
+            channelsProvider.init(this@ActivityAddPlaylistFromDevice)
+            channelsProvider.refreshChannels()
+
             setResult(RESULT_OK)
             finish()
         }

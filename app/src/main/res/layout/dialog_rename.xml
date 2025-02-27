@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Rename"
+        android:text="@string/rename_bts"
         android:fontFamily="@font/inter_bold"
         android:textSize="20sp"
         android:textColor="#171D1E"
@@ -28,22 +28,25 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Enter channel name..."
+            android:hint="Enter playlist name..."
             android:fontFamily="@font/inter_regular"
             android:paddingTop="14dp"
             android:paddingBottom="14dp"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:textSize="16sp"
-            android:textColor="#A9ABAC"
+            android:textColor="#171D1E"
+            android:singleLine="true"
             android:background="@drawable/custom_edittext_background"/>
 
         <ImageView
-            android:layout_width="12dp"
-            android:layout_height="12dp"
+            android:id="@+id/btn_del_text"
+            android:padding="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:src="@drawable/remove"
-            android:layout_marginEnd="12dp"
-            android:visibility="gone"/>
+            android:layout_marginLeft="8dp"
+            android:layout_marginEnd="12dp" />
     </LinearLayout>
 
     <!-- Phần nút Cancel và Save -->
@@ -61,7 +64,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/inter_semibold"
-            android:text="Cancel"
+            android:text="@string/cancel_bts"
             android:textColor="#171D1E"
             android:textSize="14sp" />
 
@@ -71,7 +74,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
             android:fontFamily="@font/inter_semibold"
-            android:text="Save"
+            android:text="@string/save_bts"
             android:textColor="@color/cool_blue"
             android:textSize="14sp" />
 

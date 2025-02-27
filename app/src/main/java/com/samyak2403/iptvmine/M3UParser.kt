@@ -1,25 +1,29 @@
 package com.samyak2403.iptvmine.util
 
+import com.samyak2403.iptvmine.model.Channel
 import java.io.BufferedReader
+import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-// Định nghĩa data class cho kênh với thêm logoUrl
-data class Channel(
-    val name: String,
-    val groupTitle: String?,
-    val url: String,
-    val logoUrl: String? = null // Thêm logoUrl, mặc định là null nếu không có
-)
-
-// Hàm phân tích tệp M3U
 suspend fun parseM3U(url: String): List<Channel> = withContext(Dispatchers.IO) {
     val channels = mutableListOf<Channel>()
     val connection = URL(url).openConnection()
     val reader = BufferedReader(InputStreamReader(connection.getInputStream()))
+    parseM3UContent(reader, channels)
+    channels
+}
 
+suspend fun parseM3UFromFile(inputStream: InputStream): List<Channel> = withContext(Dispatchers.IO) {
+    val channels = mutableListOf<Channel>()
+    val reader = BufferedReader(InputStreamReader(inputStream))
+    parseM3UContent(reader, channels)
+    channels
+}
+
+private fun parseM3UContent(reader: BufferedReader, channels: MutableList<Channel>) {
     var currentName = ""
     var currentGroup: String? = null
     var currentUrl = ""
@@ -33,11 +37,19 @@ suspend fun parseM3U(url: String): List<Channel> = withContext(Dispatchers.IO) {
                 val logoMatch = Regex("tvg-logo=\"([^\"]+)\"").find(line)?.groupValues?.get(1)
 
                 currentName = nameMatch ?: line.substringAfter(",").trim()
-                currentGroup = groupMatch ?: "Unknown" // Gán "Unknown" nếu không có group-title
-                currentLogoUrl = logoMatch // Lấy logoUrl, giữ null nếu không có
+                currentGroup = groupMatch ?: "Unknown"
+                currentLogoUrl = logoMatch ?: "assets/images/ic_tv.png"
             } else if (line.isNotBlank() && !line.startsWith("#")) {
                 currentUrl = line.trim()
-                channels.add(Channel(currentName, currentGroup, currentUrl, currentLogoUrl))
+                channels.add(
+                    Channel(
+                        name = currentName,
+                        logoUrl = currentLogoUrl ?: "assets/images/ic_tv.png",
+                        streamUrl = currentUrl,
+                        groupTitle = currentGroup,
+                        isFavorite = false
+                    )
+                )
                 currentName = ""
                 currentGroup = null
                 currentUrl = ""
@@ -45,5 +57,4 @@ suspend fun parseM3U(url: String): List<Channel> = withContext(Dispatchers.IO) {
             }
         }
     }
-    return@withContext channels
 }

@@ -35,6 +35,7 @@
             android:textSize="22sp"
             android:textColor="@android:color/white"
             android:textStyle="bold"
+            android:layout_gravity="center"
             android:text="Stream Your Favorite Shows"
             android:layout_marginBottom="16dp"
             />
@@ -47,6 +48,7 @@
             android:alpha="0.6"
             android:text="Enjoy unlimited entertainment with thousands of movies, TV shows, and more."
             android:textColor="@android:color/white"
+            android:layout_gravity="center"
             android:gravity="center" />
 
 
@@ -76,7 +78,7 @@
                 android:id="@+id/next_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="NEXT"
+                android:text="@string/next"
                 android:textColor="@color/cool_blue"
                 android:fontFamily="@font/inter_regular"
                 android:textSize="18sp"
