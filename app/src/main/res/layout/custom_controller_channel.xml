@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <!-- PlayerView để hiển thị video -->
+    <com.google.android.exoplayer2.ui.PlayerView
+        android:id="@+id/playerView"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+        android:layout_marginTop="120dp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayoutControlUp"
+        android:visibility="visible"
+        android:background="#000000"
+        app:controller_layout_id="@layout/custom_controller"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:use_controller="true"
+        android:clickable="true"
+        app:resize_mode="fit" />
+
+    <!-- View trong suốt để nhận sự kiện chạm -->
+    <View
+        android:id="@+id/touchOverlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="@id/playerView"
+        app:layout_constraintBottom_toBottomOf="@id/playerView"
+        app:layout_constraintStart_toStartOf="@id/playerView"
+        app:layout_constraintEnd_toEndOf="@id/playerView"
+        android:background="@android:color/transparent"
+        android:clickable="true"
+        android:visibility="gone"/>
+
+    <!-- Nút Back -->
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_back"
+        android:contentDescription="Back"
+        android:layout_marginStart="16dp"
+        android:padding="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="16dp" />
+
+    <!-- Tiêu đề -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Channel name"
+        android:textSize="20sp"
+        android:fontFamily="@font/inter_bold"
+        android:textColor="@color/black"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"/>
+
+    <!-- ProgressBar (Loading) ở giữa video -->
+    <ProgressBar
+        android:id="@+id/loadingProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        app:layout_constraintTop_toTopOf="@id/playerView"
+        app:layout_constraintBottom_toBottomOf="@id/playerView"
+        app:layout_constraintStart_toStartOf="@id/playerView"
+        app:layout_constraintEnd_toEndOf="@id/playerView"
+        android:visibility="visible" />
+
+    <!-- Container cho các nút điều khiển phát (play, pause, rewind, forward) -->
+    <LinearLayout
+        android:id="@+id/linearLayoutControlUp"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/playerView"
+        android:layout_marginTop="120dp"
+        app:layout_constraintBottom_toTopOf="@+id/controlButtonsTop"
+        android:gravity="center"
+        android:background="#80000000"
+        android:visibility="gone"> <!-- Ẩn khi loading -->
+
+        <ImageView
+            android:id="@+id/exo_rew"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_replay"
+            android:layout_marginEnd="50dp"
+            android:theme="@style/ClickableView" />
+
+        <ImageView
+            android:id="@+id/exo_play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_play_arrow"
+            android:theme="@style/ClickableView" />
+
+        <ImageView
+            android:id="@+id/exo_pause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_pause"
+            android:theme="@style/ClickableView" />
+
+        <ImageView
+            android:id="@+id/exo_ffwd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_forward"
+            android:layout_marginStart="50dp"
+            android:theme="@style/ClickableView" />
+    </LinearLayout>
+
+
+    <!-- Container cho các nút điều khiển dưới cùng (Mirroring, PiP, Favorite, Lock) -->
+    <LinearLayout
+        android:id="@+id/controlButtonsTop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@+id/playerView"
+        android:gravity="center">
+
+        <!-- Nút Mirroring -->
+        <LinearLayout
+            android:id="@+id/btn_mirroring"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_menu_playcontrol"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/img_mirroring"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_mirroring"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:theme="@style/ClickableView" />
+
+            <TextView
+                android:id="@+id/txt_mirroring"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mirroring"
+                android:textSize="12sp"
+                android:textColor="#3F484A"
+                android:fontFamily="@font/inter_regular"
+                android:paddingTop="4dp"/>
+        </LinearLayout>
+
+        <!-- Nút PiP -->
+        <LinearLayout
+            android:id="@+id/btn_pip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_menu_playcontrol"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/img_pip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_pips"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:theme="@style/ClickableView" />
+
+            <TextView
+                android:id="@+id/txt_pip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PiP"
+                android:textSize="12sp"
+                android:textColor="#3F484A"
+                android:fontFamily="@font/inter_regular"
+                android:paddingTop="4dp"/>
+        </LinearLayout>
+
+        <!-- Nút Favorite -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_menu_playcontrol"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/img_fav"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_fav"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:theme="@style/ClickableView" />
+
+            <TextView
+                android:id="@+id/txt_fav"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Favorite"
+                android:textSize="12sp"
+                android:textColor="#3F484A"
+                android:fontFamily="@font/inter_regular"
+                android:paddingTop="4dp"/>
+        </LinearLayout>
+
+        <!-- Nút Lock -->
+        <LinearLayout
+            android:id="@+id/btn_lock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/bg_menu_playcontrol"
+            android:padding="8dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_lock"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:id="@+id/img_lock"
+
+                android:theme="@style/ClickableView" />
+
+            <TextView
+                android:id="@+id/txt_lock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lock"
+                android:textSize="12sp"
+                android:textColor="#3F484A"
+                android:fontFamily="@font/inter_regular"
+                android:paddingTop="4dp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
