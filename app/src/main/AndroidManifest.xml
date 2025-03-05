@@ -17,17 +17,11 @@
         android:icon="@drawable/ic_tv"
         android:label="@string/app_name"
         android:roundIcon="@drawable/ic_tv"
-<<<<<<< HEAD
         android:supportsRtl="false"
 
         android:supportsPictureInPicture="true"
         android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
 
-=======
-        android:supportsRtl="true"
-        android:supportsPictureInPicture="true"
-        android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
->>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
         android:theme="@style/Theme.IPTV"
         tools:replace="android:supportsRtl"
         tools:targetApi="31">
@@ -35,18 +29,11 @@
         <activity
             android:name=".screens.PlayerActivity"
             android:exported="true"
-<<<<<<< HEAD
             android:resizeableActivity="true"
             android:launchMode="singleTop"
             android:supportsPictureInPicture="true"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|uiMode"
-=======
-            android:supportsPictureInPicture="true"
-            android:resizeableActivity="true"
-            android:launchMode="singleTop"
-            android:configChanges="orientation|screenSize|screenLayout"
->>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
-          />
+            />
         <activity android:name=".screens.LanguageSelectionActivity" android:exported="true"/>
         <activity android:name=".SplashActivity"
             android:exported="true">
@@ -64,16 +51,12 @@
         <activity android:name=".screens.ActivityImportPlaylistUrl" android:exported="true"/>
         <activity android:name=".ChannelListActivity" android:exported="true"/>
         <activity android:name=".ChannelDetailActivity" android:exported="true"/>
-<<<<<<< HEAD
         <activity android:name=".screens.VideoDetailActivity" android:exported="true"/>
 
 
         <meta-data
             android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
             android:value="com.samyak2403.iptvmine.screens.CastOptionsProvider" />
-=======
-
->>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
     </application>
 
 </manifest>

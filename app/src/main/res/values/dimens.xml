@@ -4,8 +4,5 @@
     <dimen name="player_margin_top">120dp</dimen>
     <dimen name="fullscreen_control_margin_bottom">16dp</dimen>
     <dimen name="control_margin_default">24dp</dimen>
-<<<<<<< HEAD
     <dimen name="button_margin">4dp</dimen>
-=======
->>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
 </resources>
