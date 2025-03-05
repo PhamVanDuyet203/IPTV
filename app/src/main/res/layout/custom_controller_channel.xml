@@ -51,6 +51,7 @@
     <!-- Tiêu đề -->
     <TextView
         android:id="@+id/tvTitle"
+<<<<<<< HEAD
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:ellipsize="marquee"
@@ -59,17 +60,27 @@
         android:scrollHorizontally="true"
         android:focusable="true"
         android:focusableInTouchMode="true"
+=======
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
         android:text="Channel name"
         android:textSize="20sp"
         android:fontFamily="@font/inter_bold"
         android:textColor="@color/black"
         android:gravity="center"
         app:layout_constraintTop_toTopOf="parent"
+<<<<<<< HEAD
         app:layout_constraintStart_toEndOf="@id/btnBack"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="72dp"/>
+=======
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"/>
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
 
     <!-- ProgressBar (Loading) ở giữa video -->
     <ProgressBar
@@ -128,6 +139,10 @@
     </LinearLayout>
 
 
+<<<<<<< HEAD
+=======
+    <!-- Container cho các nút điều khiển dưới cùng (Mirroring, PiP, Favorite, Lock) -->
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
     <LinearLayout
         android:id="@+id/controlButtonsTop"
         android:layout_width="match_parent"
@@ -142,8 +157,12 @@
         <!-- Nút Mirroring -->
         <LinearLayout
             android:id="@+id/btn_mirroring"
+<<<<<<< HEAD
             android:layout_weight="1"
             android:layout_width="0dp"
+=======
+            android:layout_width="wrap_content"
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
@@ -165,7 +184,11 @@
                 android:id="@+id/txt_mirroring"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+<<<<<<< HEAD
                 android:text="@string/mirroring_img"
+=======
+                android:text="Mirroring"
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                 android:textSize="12sp"
                 android:textColor="#3F484A"
                 android:fontFamily="@font/inter_regular"
@@ -175,8 +198,12 @@
         <!-- Nút PiP -->
         <LinearLayout
             android:id="@+id/btn_pip"
+<<<<<<< HEAD
             android:layout_weight="1"
             android:layout_width="0dp"
+=======
+            android:layout_width="wrap_content"
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
@@ -198,7 +225,11 @@
                 android:id="@+id/txt_pip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+<<<<<<< HEAD
                 android:text="@string/pip_txt"
+=======
+                android:text="PiP"
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                 android:textSize="12sp"
                 android:textColor="#3F484A"
                 android:fontFamily="@font/inter_regular"
@@ -207,9 +238,13 @@
 
         <!-- Nút Favorite -->
         <LinearLayout
+<<<<<<< HEAD
             android:id="@+id/btn_fav"
             android:layout_weight="1"
             android:layout_width="0dp"
+=======
+            android:layout_width="wrap_content"
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
@@ -231,7 +266,11 @@
                 android:id="@+id/txt_fav"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+<<<<<<< HEAD
                 android:text="@string/favorite_txt"
+=======
+                android:text="Favorite"
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                 android:textSize="12sp"
                 android:textColor="#3F484A"
                 android:fontFamily="@font/inter_regular"
@@ -241,8 +280,12 @@
         <!-- Nút Lock -->
         <LinearLayout
             android:id="@+id/btn_lock"
+<<<<<<< HEAD
             android:layout_weight="1"
             android:layout_width="0dp"
+=======
+            android:layout_width="wrap_content"
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
@@ -258,13 +301,21 @@
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="20dp"
                 android:id="@+id/img_lock"
+<<<<<<< HEAD
+=======
+
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                 android:theme="@style/ClickableView" />
 
             <TextView
                 android:id="@+id/txt_lock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+<<<<<<< HEAD
                 android:text="@string/lock_txt"
+=======
+                android:text="Lock"
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                 android:textSize="12sp"
                 android:textColor="#3F484A"
                 android:fontFamily="@font/inter_regular"
@@ -272,6 +323,7 @@
         </LinearLayout>
     </LinearLayout>
 
+<<<<<<< HEAD
 
     <androidx.mediarouter.app.MediaRouteButton
         android:id="@+id/media_route_button"
@@ -425,4 +477,6 @@
         </LinearLayout>
     </LinearLayout>
 
+=======
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
 </androidx.constraintlayout.widget.ConstraintLayout>

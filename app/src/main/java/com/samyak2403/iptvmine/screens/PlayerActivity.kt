@@ -1,7 +1,10 @@
 package com.samyak2403.iptvmine.screens
 
 import android.annotation.SuppressLint
+<<<<<<< HEAD
 import android.app.AlertDialog
+=======
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
 import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
@@ -60,6 +63,9 @@ import com.google.android.gms.cast.framework.*
 import androidx.mediarouter.app.MediaRouteChooserDialog
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 
+import android.graphics.PorterDuff
+import android.view.ViewGroup
+
 class PlayerActivity : AppCompatActivity() {
 
     private lateinit var player: ExoPlayer
@@ -70,6 +76,10 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var exoPause: ImageView
     private lateinit var exoRew: ImageView
     private lateinit var exoFfwd: ImageView
+<<<<<<< HEAD
+=======
+    private lateinit var imageViewLock: ImageView
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
     private lateinit var linearLayoutControlUp: LinearLayout
     private lateinit var linearLayoutControlBottom: LinearLayout
     private lateinit var controlButtonsTop: LinearLayout
@@ -87,6 +97,7 @@ class PlayerActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private val TAG = "PlayerActivity"
     private lateinit var tvTitle: TextView
+<<<<<<< HEAD
     private val binding by lazy { CustomControllerChannelBinding.inflate(layoutInflater) }
     private var isControlVisible = false
     private val controlHideHandler = Handler(Looper.getMainLooper())
@@ -98,6 +109,18 @@ class PlayerActivity : AppCompatActivity() {
     companion object {
         private const val INCREMENT_MILLIS = 5000L
         private const val MIN_PIP_API = Build.VERSION_CODES.O
+=======
+
+    private var isControlVisible = false
+    private val controlHideHandler = Handler(Looper.getMainLooper())
+    private val hideControlRunnable = Runnable { hideControlsInFullscreen() }
+    private val CONTROL_HIDE_DELAY = 3000L // Ẩn sau 3 giây
+    private lateinit var touchOverlay: View
+
+    companion object {
+        private const val INCREMENT_MILLIS = 5000L
+        private const val MIN_PIP_API = Build.VERSION_CODES.O // API 26
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
 
         fun start(context: Context, channel: Channel) {
             val intent = Intent(context, PlayerActivity::class.java).apply {
@@ -112,7 +135,11 @@ class PlayerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate: Starting PlayerActivity for channel: ${intent.getParcelableExtra<Channel>("channel")?.name}")
+<<<<<<< HEAD
         setContentView(binding.root)
+=======
+        setContentView(R.layout.custom_controller_channel)
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
 
         channel = savedInstanceState?.getParcelable("channel") ?: intent.getParcelableExtra("channel") ?: run {
             Log.e(TAG, "onCreate: Channel not found in Intent, finishing activity")
@@ -123,6 +150,7 @@ class PlayerActivity : AppCompatActivity() {
         channelsProvider = ViewModelProvider(this).get(ChannelsProvider::class.java)
         Log.d(TAG, "onCreate: Initializing ChannelsProvider")
         channelsProvider.init(this)
+<<<<<<< HEAD
 
         // Khởi tạo CastContext
         try {
@@ -131,6 +159,8 @@ class PlayerActivity : AppCompatActivity() {
             Log.e(TAG, "onCreate: Failed to initialize CastContext - ${e.message}")
             Toast.makeText(this, "Casting not available", Toast.LENGTH_SHORT).show()
         }
+=======
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
 
         setFindViewById()
         setupPlayer()
@@ -138,8 +168,11 @@ class PlayerActivity : AppCompatActivity() {
         setFullScreen()
         setupFavorite()
 
+<<<<<<< HEAD
         setupMirroring()
 
+=======
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
         if (Build.VERSION.SDK_INT >= MIN_PIP_API) {
             setupPip()
         }
@@ -163,6 +196,8 @@ class PlayerActivity : AppCompatActivity() {
         channelsProvider.fetchChannelsFromRoom()
     }
 
+
+
     private fun setFindViewById() {
         Log.d(TAG, "setFindViewById: Initializing UI components")
         playerView = findViewById(R.id.playerView)
@@ -181,6 +216,7 @@ class PlayerActivity : AppCompatActivity() {
         imageViewFullScreen = findViewById(R.id.imageViewFullScreen)
         tvTitle = findViewById(R.id.tvTitle)
         btnPip = findViewById(R.id.btn_pip)
+<<<<<<< HEAD
         tvTitle.text = channel.name
         tvTitle.isSelected = true
         Log.d(TAG, "setFindViewById: Set tvTitle to ${channel.name}")
@@ -355,8 +391,9 @@ class PlayerActivity : AppCompatActivity() {
             dialog.dismiss()
             finish()
         } ?: Log.e(TAG, "showErrorDialog: btn_ok not found in dialog_unavailable.xml")
+=======
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
     }
-
     private fun setupPlayer() {
         Log.d(TAG, "setupPlayer: Setting up ExoPlayer for stream URL: ${channel.streamUrl}")
         player = ExoPlayer.Builder(this)
@@ -395,6 +432,10 @@ class PlayerActivity : AppCompatActivity() {
                 exoPlayer.playWhenReady = true
                 exoPlayer.prepare()
 
+<<<<<<< HEAD
+=======
+                // Đặt loading ban đầu là visible
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                 loadingProgress.visibility = View.VISIBLE
                 if (!isFullScreen) {
                     linearLayoutControlUp.visibility = View.GONE
@@ -411,7 +452,12 @@ class PlayerActivity : AppCompatActivity() {
                     override fun onPlayerError(error: PlaybackException) {
                         Log.e(TAG, "onPlayerError: Error playing video - ${error.errorCodeName}, ${error.message}")
                         loadingProgress.visibility = View.GONE
+<<<<<<< HEAD
                         showErrorDialog()
+=======
+                        Toast.makeText(this@PlayerActivity, "Error playing video: ${error.message}", Toast.LENGTH_LONG).show()
+                        playerView.visibility = View.GONE
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                     }
 
                     override fun onPlaybackStateChanged(playbackState: Int) {
@@ -454,6 +500,16 @@ class PlayerActivity : AppCompatActivity() {
         Log.d(TAG, "updatePlayPauseIcons: Updating play/pause icons, isPlaying = $isPlaying")
         exoPlay.visibility = if (isPlaying) View.GONE else View.VISIBLE
         exoPause.visibility = if (isPlaying) View.VISIBLE else View.GONE
+<<<<<<< HEAD
+=======
+    }
+
+    private fun lockScreen(lock: Boolean) {
+        Log.d(TAG, "lockScreen: Setting lock state to $lock")
+        linearLayoutControlUp.visibility = if (lock) View.INVISIBLE else View.VISIBLE
+        linearLayoutControlBottom.visibility = if (lock) View.INVISIBLE else View.VISIBLE
+        controlButtonsTop.visibility = if (lock) View.INVISIBLE else View.VISIBLE
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
     }
 
     private val originalLayoutParams = mutableMapOf<View, LinearLayout.LayoutParams>()
@@ -530,6 +586,7 @@ class PlayerActivity : AppCompatActivity() {
         Log.d(TAG, "setLockScreen: Setting up lock button listener")
         val lockButton = findViewById<LinearLayout>(R.id.btn_lock)
         val lockIcon = findViewById<ImageView>(R.id.img_lock)
+<<<<<<< HEAD
 
         lockButton.setOnClickListener {
             if (!isLock) {
@@ -550,6 +607,18 @@ class PlayerActivity : AppCompatActivity() {
             } else {
                 false
             }
+=======
+        lockButton.setOnClickListener {
+            isLock = !isLock
+            Log.d(TAG, "setLockScreen: Lock toggled to $isLock")
+            lockIcon.setImageDrawable(
+                ContextCompat.getDrawable(
+                    applicationContext,
+                    if (isLock) R.drawable.ic_baseline_lock else R.drawable.ic_baseline_lock_open
+                )
+            )
+            lockScreen(isLock)
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
         }
     }
 
@@ -573,31 +642,54 @@ class PlayerActivity : AppCompatActivity() {
             }
 
             if (isFullScreen) {
+<<<<<<< HEAD
                 binding.controlButtonsTop1.visibility = View.VISIBLE
                 binding.root.setBackgroundColor(getColor(R.color.black))
+=======
+                // Ẩn tất cả, chỉ giữ PlayerView
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                 btnBack.visibility = View.GONE
                 tvTitle.visibility = View.GONE
                 controlButtonsTop.visibility = View.GONE
                 loadingProgress.visibility = View.GONE
+<<<<<<< HEAD
                 playerView.useController = true
                 playerView.hideController()
 
+=======
+                playerView.useController = true // Giữ controller bật nhưng ẩn ban đầu
+                playerView.hideController() // Ẩn controller ban đầu để chỉ hiển thị video
+
+                // Điều chỉnh PlayerView chiếm toàn màn hình
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                 val params = playerView.layoutParams as ConstraintLayout.LayoutParams
                 params.height = ConstraintLayout.LayoutParams.MATCH_PARENT
                 params.topToBottom = ConstraintLayout.LayoutParams.UNSET
                 params.bottomToTop = ConstraintLayout.LayoutParams.UNSET
                 params.topMargin = 0
+<<<<<<< HEAD
                 params.bottomMargin = 100
                 playerView.layoutParams = params
 
+=======
+                playerView.layoutParams = params
+
+                // Kích hoạt touchOverlay trong fullscreen
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                 touchOverlay.visibility = View.VISIBLE
                 val overlayParams = touchOverlay.layoutParams as ConstraintLayout.LayoutParams
                 overlayParams.height = ConstraintLayout.LayoutParams.MATCH_PARENT
                 overlayParams.topToBottom = ConstraintLayout.LayoutParams.UNSET
                 overlayParams.bottomToTop = ConstraintLayout.LayoutParams.UNSET
+<<<<<<< HEAD
                 overlayParams.bottomMargin = 100
                 touchOverlay.layoutParams = overlayParams
 
+=======
+                touchOverlay.layoutParams = overlayParams
+
+                // Thêm listener chạm vào touchOverlay
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                 touchOverlay.setOnClickListener {
                     Log.d(TAG, "Touch overlay clicked in fullscreen")
                     if (isFullScreen) {
@@ -605,14 +697,19 @@ class PlayerActivity : AppCompatActivity() {
                     }
                 }
             } else {
+<<<<<<< HEAD
                 loadingProgress.visibility = View.GONE
                 binding.controlButtonsTop1.visibility = View.GONE
                 binding.root.setBackgroundColor(getColor(R.color.white))
+=======
+                // Khôi phục giao diện ban đầu hoàn toàn
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                 btnBack.visibility = View.VISIBLE
                 tvTitle.visibility = View.VISIBLE
                 linearLayoutControlUp.visibility = View.VISIBLE
                 linearLayoutControlBottom.visibility = View.VISIBLE
                 controlButtonsTop.visibility = View.VISIBLE
+<<<<<<< HEAD
                 loadingProgress.visibility = if (player.isLoading && !player.isPlaying) View.VISIBLE else View.GONE
                 imageViewFullScreen.visibility = View.VISIBLE
                 playerView.useController = true
@@ -628,26 +725,61 @@ class PlayerActivity : AppCompatActivity() {
 
                 val overlayParams = touchOverlay.layoutParams as ConstraintLayout.LayoutParams
                 overlayParams.height = resources.getDimensionPixelSize(R.dimen.player_height)
+=======
+                loadingProgress.visibility = if (player.isLoading) View.VISIBLE else View.GONE
+                imageViewFullScreen.visibility = View.VISIBLE
+                playerView.useController = true // Đảm bảo controller mặc định bật
+                playerView.showController() // Hiển thị controller khi thoát fullscreen
+
+                // Khôi phục kích thước và vị trí PlayerView
+                val params = playerView.layoutParams as ConstraintLayout.LayoutParams
+                params.height = resources.getDimensionPixelSize(R.dimen.player_height) // 200dp
+                params.topToBottom = R.id.tvTitle
+                params.bottomToTop = R.id.linearLayoutControlUp
+                params.topMargin = resources.getDimensionPixelSize(R.dimen.player_margin_top) // 120dp
+                playerView.layoutParams = params
+
+                // Khôi phục touchOverlay về trạng thái ban đầu
+                val overlayParams = touchOverlay.layoutParams as ConstraintLayout.LayoutParams
+                overlayParams.height = resources.getDimensionPixelSize(R.dimen.player_height) // 200dp
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                 overlayParams.topToBottom = R.id.tvTitle
                 overlayParams.bottomToTop = R.id.linearLayoutControlUp
                 touchOverlay.layoutParams = overlayParams
                 touchOverlay.visibility = View.GONE
                 touchOverlay.setOnClickListener(null)
 
+<<<<<<< HEAD
                 tvTitle.setTextColor(Color.parseColor("#000000"))
                 btnBack.clearColorFilter()
 
+=======
+                // Khôi phục trạng thái ban đầu cho custom_controller_channel.xml
+                tvTitle.setTextColor(Color.parseColor("#000000")) // Màu gốc của tvTitle
+                btnBack.clearColorFilter() // Khôi phục màu gốc btnBack
+
+                // Khôi phục trạng thái ban đầu cho controlButtonsTop
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                 val controlButtonsParams = controlButtonsTop.layoutParams as ConstraintLayout.LayoutParams
                 controlButtonsParams.topToBottom = R.id.playerView
                 controlButtonsParams.bottomToBottom = ConstraintLayout.LayoutParams.UNSET
                 controlButtonsParams.bottomMargin = 0
+<<<<<<< HEAD
                 controlButtonsParams.topMargin = resources.getDimensionPixelSize(R.dimen.control_margin_default)
+=======
+                controlButtonsParams.topMargin = resources.getDimensionPixelSize(R.dimen.control_margin_default) // 24dp
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                 controlButtonsTop.layoutParams = controlButtonsParams
 
                 findViewById<LinearLayout>(R.id.btn_mirroring)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
                 findViewById<LinearLayout>(R.id.btn_pip)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
+<<<<<<< HEAD
                 controlButtonsTop.getChildAt(2)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
                 controlButtonsTop.getChildAt(3)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
+=======
+                controlButtonsTop.getChildAt(2)?.setBackgroundResource(R.drawable.bg_menu_playcontrol) // Favorite
+                controlButtonsTop.getChildAt(3)?.setBackgroundResource(R.drawable.bg_menu_playcontrol) // Lock
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                 findViewById<TextView>(R.id.txt_mirroring)?.setTextColor(Color.parseColor("#3F484A"))
                 findViewById<TextView>(R.id.txt_pip)?.setTextColor(Color.parseColor("#3F484A"))
                 findViewById<TextView>(R.id.txt_fav)?.setTextColor(Color.parseColor("#3F484A"))
@@ -657,6 +789,10 @@ class PlayerActivity : AppCompatActivity() {
                 findViewById<ImageView>(R.id.img_fav)?.clearColorFilter()
                 findViewById<ImageView>(R.id.img_lock)?.clearColorFilter()
 
+<<<<<<< HEAD
+=======
+                // Reset isControlVisible và hủy lệnh ẩn
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                 isControlVisible = false
                 controlHideHandler.removeCallbacks(hideControlRunnable)
             }
@@ -665,9 +801,15 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun toggleControlsInFullscreen() {
         if (isControlVisible) {
+<<<<<<< HEAD
             hideControlsInFullscreen()
         } else {
             showControlsInFullscreen()
+=======
+            hideControlsInFullscreen() // Ẩn cả hai giao diện khi nhấn lần thứ hai
+        } else {
+            showControlsInFullscreen() // Hiển thị cả hai giao diện khi nhấn lần đầu
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
         }
     }
 
@@ -675,6 +817,7 @@ class PlayerActivity : AppCompatActivity() {
         Log.d(TAG, "showControlsInFullscreen: Showing controls")
         isControlVisible = true
 
+<<<<<<< HEAD
         btnBack.visibility = if (isLock) View.GONE else View.VISIBLE
         tvTitle.visibility = if (isLock) View.GONE else View.VISIBLE
         controlButtonsTop.visibility = View.GONE
@@ -682,27 +825,52 @@ class PlayerActivity : AppCompatActivity() {
         playerView.useController = true
         playerView.showController()
 
+=======
+        // Hiển thị các thành phần từ custom_controller_channel.xml
+        btnBack.visibility = if (isLock) View.GONE else View.VISIBLE // Ẩn btnBack khi khóa
+        tvTitle.visibility = if (isLock) View.GONE else View.VISIBLE // Ẩn tvTitle khi khóa
+        controlButtonsTop.visibility = View.VISIBLE
+
+        // Hiển thị controller từ custom_controller.xml
+        playerView.useController = true
+        playerView.showController() // Buộc hiển thị controller ngay lập tức
+
+        // Đổi màu text sang #FFFFFF cho custom_controller_channel.xml
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
         tvTitle.setTextColor(Color.parseColor("#FFFFFF"))
         findViewById<TextView>(R.id.txt_mirroring)?.setTextColor(Color.parseColor("#FFFFFF"))
         findViewById<TextView>(R.id.txt_pip)?.setTextColor(Color.parseColor("#FFFFFF"))
         findViewById<TextView>(R.id.txt_fav)?.setTextColor(Color.parseColor("#FFFFFF"))
         findViewById<TextView>(R.id.txt_lock)?.setTextColor(Color.parseColor("#FFFFFF"))
 
+<<<<<<< HEAD
         exoPosition.setTextColor(Color.parseColor("#FFFFFF"))
         exoDuration.setTextColor(Color.parseColor("#FFFFFF"))
 
+=======
+        // Đổi màu text trong custom_controller.xml
+        exoPosition.setTextColor(Color.parseColor("#FFFFFF"))
+        exoDuration.setTextColor(Color.parseColor("#FFFFFF"))
+
+        // Đổi màu icon sang #FFFFFF cho custom_controller_channel.xml
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
         findViewById<ImageView>(R.id.img_mirroring)?.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
         findViewById<ImageView>(R.id.img_pip)?.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
         findViewById<ImageView>(R.id.img_fav)?.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
         findViewById<ImageView>(R.id.img_lock)?.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
         btnBack.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
 
+<<<<<<< HEAD
+=======
+        // Đổi màu icon trong custom_controller.xml
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
         exoPlay.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
         exoPause.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
         exoRew.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
         exoFfwd.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
         imageViewFullScreen.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
 
+<<<<<<< HEAD
         findViewById<LinearLayout>(R.id.btn_mirroring)?.setBackgroundColor(Color.parseColor("#111111"))
         findViewById<LinearLayout>(R.id.btn_pip)?.setBackgroundColor(Color.parseColor("#111111"))
         controlButtonsTop.getChildAt(2)?.setBackgroundColor(Color.parseColor("#111111"))
@@ -719,6 +887,29 @@ class PlayerActivity : AppCompatActivity() {
 
         touchOverlay.isClickable = false
 
+=======
+        // Đổi màu nền của các LinearLayout con trong controlButtonsTop thành #111111
+        findViewById<LinearLayout>(R.id.btn_mirroring)?.setBackgroundColor(Color.parseColor("#111111"))
+        findViewById<LinearLayout>(R.id.btn_pip)?.setBackgroundColor(Color.parseColor("#111111"))
+        controlButtonsTop.getChildAt(2)?.setBackgroundColor(Color.parseColor("#111111")) // Favorite
+        controlButtonsTop.getChildAt(3)?.setBackgroundColor(Color.parseColor("#111111")) // Lock
+
+        // Điều chỉnh constraint của controlButtonsTop để neo vào đáy màn hình
+        val controlButtonsParams = controlButtonsTop.layoutParams as ConstraintLayout.LayoutParams
+        controlButtonsParams.topToBottom = ConstraintLayout.LayoutParams.UNSET // Bỏ ràng buộc top cũ
+        controlButtonsParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID // Neo vào đáy parent
+        controlButtonsParams.bottomMargin = resources.getDimensionPixelSize(R.dimen.fullscreen_control_margin_bottom) * 2 // 32dp
+        controlButtonsTop.layoutParams = controlButtonsParams
+
+        // Hiển thị DefaultTimeBar từ linearLayoutControlBottom
+        val timeBar = linearLayoutControlBottom.findViewById<com.google.android.exoplayer2.ui.DefaultTimeBar>(R.id.exo_progress)
+        timeBar?.visibility = View.VISIBLE
+
+        // Đảm bảo touchOverlay không chặn sự kiện
+        touchOverlay.isClickable = false // Tạm thời vô hiệu hóa để không chặn controller
+
+        // Ẩn controls sau 3 giây nếu không thao tác
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
         controlHideHandler.removeCallbacks(hideControlRunnable)
         controlHideHandler.postDelayed(hideControlRunnable, CONTROL_HIDE_DELAY)
     }
@@ -727,35 +918,61 @@ class PlayerActivity : AppCompatActivity() {
         Log.d(TAG, "hideControlsInFullscreen: Hiding controls")
         isControlVisible = false
 
+<<<<<<< HEAD
+=======
+        // Ẩn tất cả các thành phần từ custom_controller_channel.xml
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
         btnBack.visibility = View.GONE
         tvTitle.visibility = View.GONE
         controlButtonsTop.visibility = View.GONE
         loadingProgress.visibility = View.GONE
 
+<<<<<<< HEAD
         playerView.useController = false
         playerView.hideController()
 
         tvTitle.setTextColor(Color.parseColor("#000000"))
+=======
+        // Ẩn controller từ custom_controller.xml
+        playerView.useController = false // Tắt controller hoàn toàn
+        playerView.hideController() // Đảm bảo controller ẩn
+
+        // Khôi phục màu gốc cho custom_controller_channel.xml
+        tvTitle.setTextColor(Color.parseColor("#000000")) // Màu gốc của tvTitle
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
         findViewById<TextView>(R.id.txt_mirroring)?.setTextColor(Color.parseColor("#3F484A"))
         findViewById<TextView>(R.id.txt_pip)?.setTextColor(Color.parseColor("#3F484A"))
         findViewById<TextView>(R.id.txt_fav)?.setTextColor(Color.parseColor("#3F484A"))
         findViewById<TextView>(R.id.txt_lock)?.setTextColor(Color.parseColor("#3F484A"))
 
+<<<<<<< HEAD
         exoPosition.setTextColor(Color.parseColor("#FFFFFF"))
         exoDuration.setTextColor(Color.parseColor("#CBCDC8"))
 
+=======
+        // Khôi phục màu gốc cho custom_controller.xml
+        exoPosition.setTextColor(Color.parseColor("#FFFFFF")) // Màu gốc trong custom_controller.xml
+        exoDuration.setTextColor(Color.parseColor("#CBCDC8")) // Màu gốc trong custom_controller.xml
+
+        // Xóa màu tint của icon từ custom_controller_channel.xml
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
         findViewById<ImageView>(R.id.img_mirroring)?.clearColorFilter()
         findViewById<ImageView>(R.id.img_pip)?.clearColorFilter()
         findViewById<ImageView>(R.id.img_fav)?.clearColorFilter()
         findViewById<ImageView>(R.id.img_lock)?.clearColorFilter()
         btnBack.clearColorFilter()
 
+<<<<<<< HEAD
+=======
+        // Xóa màu tint của icon từ custom_controller.xml
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
         exoPlay.clearColorFilter()
         exoPause.clearColorFilter()
         exoRew.clearColorFilter()
         exoFfwd.clearColorFilter()
         imageViewFullScreen.clearColorFilter()
 
+<<<<<<< HEAD
         findViewById<LinearLayout>(R.id.btn_mirroring)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
         findViewById<LinearLayout>(R.id.btn_pip)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
         controlButtonsTop.getChildAt(2)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
@@ -768,11 +985,44 @@ class PlayerActivity : AppCompatActivity() {
         controlButtonsParams.topMargin = resources.getDimensionPixelSize(R.dimen.control_margin_default)
         controlButtonsTop.layoutParams = controlButtonsParams
 
+=======
+        // Khôi phục màu nền gốc của các LinearLayout con trong controlButtonsTop
+        findViewById<LinearLayout>(R.id.btn_mirroring)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
+        findViewById<LinearLayout>(R.id.btn_pip)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
+        controlButtonsTop.getChildAt(2)?.setBackgroundResource(R.drawable.bg_menu_playcontrol) // Favorite
+        controlButtonsTop.getChildAt(3)?.setBackgroundResource(R.drawable.bg_menu_playcontrol) // Lock
+
+        // Khôi phục constraint gốc của controlButtonsTop
+        val controlButtonsParams = controlButtonsTop.layoutParams as ConstraintLayout.LayoutParams
+        controlButtonsParams.topToBottom = R.id.playerView // Ràng buộc lại với PlayerView
+        controlButtonsParams.bottomToBottom = ConstraintLayout.LayoutParams.UNSET // Bỏ neo đáy
+        controlButtonsParams.bottomMargin = 0
+        controlButtonsParams.topMargin = resources.getDimensionPixelSize(R.dimen.control_margin_default) // 24dp
+        controlButtonsTop.layoutParams = controlButtonsParams
+
+        // Bật lại touchOverlay để người dùng có thể chạm lần nữa
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
         touchOverlay.isClickable = true
 
         controlHideHandler.removeCallbacks(hideControlRunnable)
     }
 
+<<<<<<< HEAD
+=======
+    private fun setupFavorite() {
+        Log.d(TAG, "setupFavorite: Setting up favorite button listener for channel: ${channel.name}")
+        val favoriteLayout = controlButtonsTop.getChildAt(2) as? LinearLayout
+        val favoriteIcon = favoriteLayout?.findViewById<ImageView>(0)
+        favoriteIcon?.setOnClickListener {
+            Log.d(TAG, "setupFavorite: Toggling favorite for channel: ${channel.name}")
+            channelsProvider.toggleFavorite(channel)
+            favoriteIcon.setImageResource(if (channel.isFavorite) R.drawable.fav_on_channel else R.drawable.ic_fav)
+            channel = channel.copy(isFavorite = !channel.isFavorite)
+            Log.d(TAG, "setupFavorite: Updated favorite status to ${channel.isFavorite}")
+        }
+    }
+
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
     private fun setupPip() {
         Log.d(TAG, "setupPip: Setting up PiP button listener")
         if (Build.VERSION.SDK_INT >= MIN_PIP_API) {
@@ -780,10 +1030,13 @@ class PlayerActivity : AppCompatActivity() {
                 Log.d(TAG, "setupPip: Attempting to enter Picture-in-Picture mode")
                 enterPictureInPictureModeIfAvailable()
             }
+<<<<<<< HEAD
             binding.btnPip1.setOnClickListener {
                 Log.d(TAG, "setupPip: Attempting to enter Picture-in-Picture mode")
                 enterPictureInPictureModeIfAvailable()
             }
+=======
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
         } else {
             btnPip.visibility = View.GONE
             Log.w(TAG, "setupPip: PiP not supported on this device (API < 26)")
@@ -814,7 +1067,11 @@ class PlayerActivity : AppCompatActivity() {
                         return@post
                     }
 
+<<<<<<< HEAD
                     val aspectRatio = Rational(width, height)
+=======
+                    val aspectRatio = Rational(width, height) // Giữ tỉ lệ của PlayerView hiện tại
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
                     val params = PictureInPictureParams.Builder()
                         .setAspectRatio(aspectRatio)
                         .build()
@@ -834,6 +1091,7 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
+<<<<<<< HEAD
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean,
@@ -845,6 +1103,13 @@ class PlayerActivity : AppCompatActivity() {
 
         if (isInPictureInPictureMode) {
 
+=======
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        Log.d(TAG, "onPictureInPictureModeChanged: PiP mode changed to $isInPictureInPictureMode")
+        this.isInPictureInPictureMode = isInPictureInPictureMode
+        if (isInPictureInPictureMode) {
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
             // Ẩn tất cả các thành phần trừ PlayerView
             btnBack.visibility = View.GONE
             tvTitle.visibility = View.GONE
@@ -853,6 +1118,7 @@ class PlayerActivity : AppCompatActivity() {
             loadingProgress.visibility = View.GONE
             playerView.useController = false // Ẩn controller mặc định
             playerView.visibility = View.VISIBLE
+<<<<<<< HEAD
             // Tạm thời điều chỉnh PlayerView để chiếm toàn bộ không gian trong PiP
             val params = playerView.layoutParams as ConstraintLayout.LayoutParams
             params.height = ConstraintLayout.LayoutParams.MATCH_PARENT
@@ -864,6 +1130,16 @@ class PlayerActivity : AppCompatActivity() {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
 
+=======
+
+            // Tạm thời điều chỉnh PlayerView để chiếm toàn bộ không gian trong PiP
+            val params = playerView.layoutParams as ConstraintLayout.LayoutParams
+            params.height = ConstraintLayout.LayoutParams.MATCH_PARENT
+            params.topToBottom = ConstraintLayout.LayoutParams.UNSET // Bỏ constraint top
+            params.bottomToTop = ConstraintLayout.LayoutParams.UNSET // Bỏ constraint bottom
+            params.topMargin = 0
+            playerView.layoutParams = params
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
         } else {
             // Khôi phục giao diện ban đầu
             btnBack.visibility = View.VISIBLE
@@ -871,12 +1147,16 @@ class PlayerActivity : AppCompatActivity() {
             linearLayoutControlUp.visibility = View.VISIBLE
             controlButtonsTop.visibility = View.VISIBLE
             loadingProgress.visibility = if (player.isLoading) View.VISIBLE else View.GONE
+<<<<<<< HEAD
 
+=======
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
             playerView.useController = true
             playerView.visibility = View.VISIBLE
 
             // Khôi phục constraint ban đầu của PlayerView
             val params = playerView.layoutParams as ConstraintLayout.LayoutParams
+<<<<<<< HEAD
             params.width = ConstraintLayout.LayoutParams.MATCH_PARENT
             params.height = resources.getDimensionPixelSize(R.dimen.player_height)
             params.topToBottom = R.id.tvTitle
@@ -901,6 +1181,16 @@ class PlayerActivity : AppCompatActivity() {
     }
 
 
+=======
+            params.height = resources.getDimensionPixelSize(R.dimen.player_height) // 200dp
+            params.topToBottom = R.id.tvTitle
+            params.bottomToTop = R.id.linearLayoutControlUp
+            params.topMargin = resources.getDimensionPixelSize(R.dimen.player_margin_top) // 120dp
+            playerView.layoutParams = params
+        }
+    }
+
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
     private fun updateTime() {
         Log.d(TAG, "updateTime: Updating position and duration")
         player?.let {
@@ -918,13 +1208,20 @@ class PlayerActivity : AppCompatActivity() {
         return String.format("%02d:%02d", minutes, remainingSeconds)
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         Log.d(TAG, "onConfigurationChanged: Orientation changed to ${newConfig.orientation}")
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE && isFullScreen) {
+<<<<<<< HEAD
             window.decorView.systemUiVisibility =
                 (View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+=======
+            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
             supportActionBar?.hide()
             Log.d(TAG, "onConfigurationChanged: Entered full screen mode")
             if (!isControlVisible) {
@@ -961,7 +1258,17 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+<<<<<<< HEAD
         channelsProvider.fetchChannelsFromRoom() // Tải lại danh sách kênh để đảm bảo đồng bộ
+=======
+        Log.d(TAG, "onResume: Resuming player")
+        if (!::player.isInitialized) {
+            setupPlayer()
+        }
+        if (Util.SDK_INT <= 23 || !isPlayerReady) {
+            player.playWhenReady = true
+        }
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
     }
 
     override fun onPause() {
@@ -993,11 +1300,15 @@ class PlayerActivity : AppCompatActivity() {
         if (::player.isInitialized && !isInPictureInPictureMode) {
             player.release()
         }
+<<<<<<< HEAD
         controlHideHandler.removeCallbacks(hideControlRunnable)
 
         // Yêu cầu làm mới dữ liệu khi thoát
         channelsProvider.requestRefresh()
         Log.d(TAG, "onDestroy: Requested ChannelsProvider to refresh")
+=======
+        controlHideHandler.removeCallbacks(hideControlRunnable) // Xóa handler khi activity hủy
+>>>>>>> 82d691e07b8fb1fa2fdc73ac8c70f5ba36b11848
     }
 
     @Deprecated("Deprecated in Java")
