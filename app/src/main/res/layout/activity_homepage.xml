@@ -110,7 +110,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottom_nav_container"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="wrap_content"
         android:background="@color/white"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -120,8 +120,8 @@
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:gravity="center"
+            app:layout_constraintBottom_toTopOf="@+id/fr_home"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
@@ -186,6 +186,21 @@
                     android:textSize="14sp" />
             </LinearLayout>
         </LinearLayout>
+
+        <View
+            android:id="@+id/line"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/black"
+            app:layout_constraintBottom_toTopOf="@+id/fr_home"
+            />
+        <FrameLayout
+            android:id="@+id/fr_home"
+            android:minHeight="50dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

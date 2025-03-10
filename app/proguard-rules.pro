@@ -44,29 +44,29 @@
 # -renamesourcefileattribute SourceFile
 
 # Preserve the Channel class and its fields and methods
--keep class com.samyak2403.iptvmine.model.Channel {
+-keep class com.iptv.smart.player.player.streamtv.live.watch.model.Channel {
     <fields>;
     <methods>;
 }
 
 # Keep the CREATOR field necessary for Parcelable implementation
--keepclassmembers class com.samyak2403.iptvmine.model.Channel {
+-keepclassmembers class com.iptv.smart.player.player.streamtv.live.watch.model.Channel {
     public static final android.os.Parcelable$Creator *;
 }
 
 # Preserve the Parcel constructor
--keepclassmembers class com.samyak2403.iptvmine.model.Channel {
+-keepclassmembers class com.iptv.smart.player.player.streamtv.live.watch.model.Channel {
     public Channel(android.os.Parcel);
 }
 
 # Preserve the HomeFragment class and its fields and methods
--keep class com.samyak2403.iptvmine.screens.HomeFragment {
+-keep class com.iptv.smart.player.player.streamtv.live.watch.screens.HomeFragment {
     <fields>;
     <methods>;
 }
 
 # Preserve the ChannelsProvider class and its fields and methods
--keep class com.samyak2403.iptvmine.provider.ChannelsProvider {
+-keep class com.iptv.smart.player.player.streamtv.live.watch.provider.ChannelsProvider {
     <fields>;
     <methods>;
 }
@@ -75,7 +75,7 @@
 -keep class androidx.lifecycle.** { *; }
 
 # Keep the ChannelsAdapter class and its fields and methods (for RecyclerView)
--keep class com.samyak2403.iptvmine.adapter.ChannelsAdapter {
+-keep class com.iptv.smart.player.player.streamtv.live.watch.adapter.ChannelsAdapter {
     <fields>;
     <methods>;
 }
@@ -136,7 +136,7 @@
 }
 
 # Preserve methods used for extracting data from M3U files
--keepclassmembers class com.samyak2403.iptvmine.provider.ChannelsProvider {
+-keepclassmembers class com.iptv.smart.player.player.streamtv.live.watch.provider.ChannelsProvider {
     private String extractChannelName(...);
     private String extractLogoUrl(...);
     private boolean isValidUrl(...);

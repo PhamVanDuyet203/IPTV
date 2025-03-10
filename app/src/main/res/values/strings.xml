@@ -1,20 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">IPTV Mine</string>
+    <string name="app_name">IPTV Smart Player: Stream TV</string>
     <string name="title_language">Language</string>
     <string name="title_onboard_1">Stream Your Favorite Shows</string>
     <string name="content_onboard_1">Enjoy unlimited entertainment with thousands of movies, TV shows, and more.</string>
-
     <string name="title_onboard_2">Discover Endless Entertainment</string>
     <string name="content_onboard_2">Watch your favorite shows and movies anytime, anywhere.</string>
-
     <string name="title_onboard_3">Easy To Use</string>
     <string name="content_onboard_3">Easy guide-search, secure connecting to channels around the world, Live TV, Smart TV Player</string>
-
     <string name="title_onboard_4">Discover New Shows</string>
     <string name="content_onboard_4">Explore a wide variety of content tailored just for you.</string>
     <string name="iptv">IPTV</string>
     <string name="don_t_have_any_playlists_yet">Don\'t have any playlists yet</string>
-    <string name="press_the_add_button_to_create_one">Press the Add button to create one</string>
+
     <string name="home">Home</string>
     <string name="channel">Channel</string>
     <string name="how_to_add_a_playlist">How to Add a Playlist</string>
@@ -66,7 +64,7 @@
     <string name="don_t_have_an_m3u_file_to_stream">Don\'t have an M3U file to stream?</string>
     <string name="next">NEXT</string>
     <string name="don_t_have_any_channels_yet">Don\'t have any channels yet</string>
-    <string name="press_the_add_button_to_create_one_channel">Press the Add button to create one</string>
+
     <string name="all">All</string>
     <string name="url">URL</string>
     <string name="file">File</string>
@@ -93,7 +91,7 @@
     <string name="italian">Italian</string>
     <string name="german">German</string>
     <string name="don_t_have_any_playlists_yet_ft_home">Don\'t have any playlists yet</string>
-    <string name="press_the_add_button_to_create_one_fr_home">Press the Add button to create one</string>
+
     <string name="channel_unavailable">Channel Unavailable</string>
     <string name="ok">OK</string>
     <string name="this_channel_is_currently_unavailable_please_try_again_later">This channel is currently unavailable. Please try again later.</string>
@@ -106,4 +104,11 @@
     <string name="cannot_retain_file_access_permission_please_try_again">Cannot retain file access permission. Please try again.</string>
     <string name="please_enter_a_name_and_select_a_file">Please enter a name and select a file</string>
     <string name="error_saving_playlist">Error saving playlist: %1$s</string>
+    <string name="add_button">Add button</string>
+    <string name="press_the_add_button_to_create_one_fr_home">Press the Add button to create one</string>
+    <string name="press_the_add_button_to_create_one_channel">Press the Add button to create one</string>
+    <string name="press_the_add_button_to_create_one">Press the Add button to create one</string>
+    <string name="screen_lock_long_press_to_unlock">Screen lock. Long press to unlock</string>
+    <string name="facebook_id">" "</string>
 </resources>
+

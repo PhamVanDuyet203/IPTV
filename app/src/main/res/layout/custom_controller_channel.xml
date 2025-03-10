@@ -169,7 +169,13 @@
                 android:textSize="12sp"
                 android:textColor="#3F484A"
                 android:fontFamily="@font/inter_regular"
-                android:paddingTop="4dp"/>
+                android:paddingTop="4dp"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:singleLine="true"
+                android:scrollHorizontally="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"/>
         </LinearLayout>
 
         <!-- Nút PiP -->
@@ -202,7 +208,13 @@
                 android:textSize="12sp"
                 android:textColor="#3F484A"
                 android:fontFamily="@font/inter_regular"
-                android:paddingTop="4dp"/>
+                android:paddingTop="4dp"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:singleLine="true"
+                android:scrollHorizontally="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"/>
         </LinearLayout>
 
         <!-- Nút Favorite -->
@@ -235,7 +247,13 @@
                 android:textSize="12sp"
                 android:textColor="#3F484A"
                 android:fontFamily="@font/inter_regular"
-                android:paddingTop="4dp"/>
+                android:paddingTop="4dp"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:singleLine="true"
+                android:scrollHorizontally="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"/>
         </LinearLayout>
 
         <!-- Nút Lock -->
@@ -268,23 +286,20 @@
                 android:textSize="12sp"
                 android:textColor="#3F484A"
                 android:fontFamily="@font/inter_regular"
-                android:paddingTop="4dp"/>
+                android:paddingTop="4dp"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:singleLine="true"
+                android:scrollHorizontally="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"/>
         </LinearLayout>
     </LinearLayout>
-
-
-    <androidx.mediarouter.app.MediaRouteButton
-        android:id="@+id/media_route_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:visibility="gone"
         android:weightSum="4"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/line"
         android:id="@+id/controlButtonsTop1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -424,5 +439,20 @@
                 android:paddingTop="4dp"/>
         </LinearLayout>
     </LinearLayout>
+
+    <View
+        android:id="@+id/line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/fr_home"
+        />
+    <FrameLayout
+        android:id="@+id/fr_home"
+        android:minHeight="50dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

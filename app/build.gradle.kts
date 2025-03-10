@@ -3,14 +3,16 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     id("kotlin-kapt")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.0"
+    alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.google.firebase.crashlytics)
 }
 
 android {
-    namespace = "com.samyak2403.iptvmine"
+    namespace = "com.iptv.smart.player.player.streamtv.live.watch"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.samyak2403.iptvmine"
+        applicationId = "com.iptv.smart.player.player.streamtv.live.watch"
         minSdk = 21
         targetSdk = 34
         versionCode = 5
@@ -38,6 +40,7 @@ android {
     }
     buildFeatures{
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -57,6 +60,10 @@ dependencies {
     implementation(libs.exoplayerDash)
     implementation(libs.androidx.fragment)
     implementation(libs.cronet.embedded)
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.config)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -99,15 +106,36 @@ dependencies {
 
     implementation("androidx.paging:paging-runtime:3.2.1")
 
-    // mirroring
-    implementation("androidx.mediarouter:mediarouter:1.2.0")
-    implementation("com.google.android.gms:play-services-cast:21.0.1")
-    implementation("com.google.android.gms:play-services-cast-framework:21.0.1")
 
     // okhttp
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation ("com.intuit.sdp:sdp-android:1.1.1")
+
+    // AdMob Mediation
+    implementation("com.google.ads.mediation:pangle:6.5.0.4.0")
+    implementation("com.google.ads.mediation:applovin:13.1.0.0")
+    implementation("com.google.ads.mediation:facebook:6.18.0.0")
+    implementation("com.google.ads.mediation:vungle:7.4.3.0")
+    implementation("com.google.ads.mediation:mintegral:16.8.61.0")
+
+    implementation("com.github.thienlp201097:DktechLib:1.4.1")
+
+//Adjust
+    implementation ("com.adjust.sdk:adjust-android:5.0.0")
+    implementation ("com.android.installreferrer:installreferrer:2.2")
+    implementation ("com.google.android.gms:play-services-ads-identifier:18.1.0")
+    implementation ("com.adjust.sdk:adjust-android-webbridge:5.0.0")
+    //CMP
+    implementation ("com.google.android.ump:user-messaging-platform:3.0.0")
+
+    implementation ("com.github.thienlp201097:smart-app-rate:1.0.5")
+
+    implementation ("com.facebook.android:facebook-android-sdk:[8,9)")
+    implementation ("com.google.android.gms:play-services-ads:23.0.0")
+    // fire base
+    implementation ("com.google.firebase:firebase-bom:33.1.0")
+    implementation ("com.airbnb.android:lottie:6.4.0")
 
 }

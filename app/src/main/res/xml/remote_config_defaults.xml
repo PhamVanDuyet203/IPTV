@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+    <entry>
+        <key>ADS_SPLASH_050325</key>
+        <value>1</value>
+    </entry>
+    <entry>
+        <key>BANNER_SPLASH_050325</key>
+        <value>0</value>
+    </entry>
+    <entry>
+        <key>NATIVE_LANGUAGE_050325</key>
+        <value>1</value>
+    </entry>
+    <entry>
+        <key>INTER_LANGUAGE_050325</key>
+        <value>0</value>
+    </entry>
+    <entry>
+        <key>NATIVE_INTRO_050325</key>
+        <value>0</value>
+    </entry>
+
+    <entry>
+        <key>NATIVE_FULL_SCREEN_INTRO_050325</key>
+        <value>0</value>
+    </entry>
+    <entry>
+        <key>ADS_HOME_050325</key>
+        <value>1</value>
+    </entry>
+    <entry>
+        <key>INTER_ADD_050325</key>
+        <value>0</value>
+    </entry>
+    <entry>
+    <key>NATIVE_ADD_050325</key>
+    <value>0</value>
+</entry>
+    <entry>
+    <key>INTER_SAVE_ADD_050325</key>
+    <value>1</value>
+    </entry>
+    <entry>
+        <key>INTER_ITEMS_PLAYLIST_050325</key>
+        <value>0</value>
+    </entry>
+    <entry>
+        <key>INTER_SELECT_CATEG_OR_CHANNEL_050325</key>
+        <value>0</value>
+    </entry>
+    <entry>
+        <key>NATIVE_PLAYLIST_CHANNEL_050325</key>
+        <value>0</value>
+    </entry>
+    <entry>
+        <key>BANNER_DETAIL_PLAYLIST_CHANNEL_050325</key>
+        <value>0</value>
+    </entry>
+    <entry>
+        <key>INTER_BACK_PLAY_TO_LIST_050325</key>
+        <value>0</value>
+    </entry>
+    <entry>
+        <key>ADS_PLAY_CONTROL_050325</key>
+        <value>1</value>
+    </entry>
+    <entry>
+        <key>ONRESUME_050325</key>
+        <value>0</value>
+    </entry>
+
+</defaultsMap>

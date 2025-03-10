@@ -1,49 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:orientation="vertical"
-    android:background="@color/white">
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginBottom="10dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/frNative"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:layout_marginBottom="14dp"
+            android:background="@color/white">
+
+            <ImageView
+                android:visibility="gone"
+                android:padding="10dp"
+                android:layout_centerVertical="true"
+                android:id="@+id/ic_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_back" />
+
+            <TextView
+                android:layout_marginStart="10dp"
+                android:layout_toEndOf="@+id/ic_back"
+                android:id="@+id/language_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="@string/title_language"
+                android:textColor="#1A1C1B"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/check_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="20dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:src="@drawable/ic_check" />
+        </RelativeLayout>
 
 
-    <RelativeLayout
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/language_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/frNative"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
-        android:padding="14dp"
-        android:layout_marginTop="2dp"
-        android:layout_marginBottom="2dp"
-        android:background="@color/white">
-
-        <TextView
-            android:id="@+id/language_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/title_language"
-            android:textSize="20sp"
-            android:textColor="#1A1C1B"
-            android:layout_centerVertical="true"
-            android:textStyle="bold"/>
-
-        <ImageButton
-            android:id="@+id/check_icon"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:padding="8dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginRight="24dp"
-            android:layout_alignParentRight="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_check" />
-    </RelativeLayout>
-
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/language_list"
-        android:layout_marginLeft="14dp"
-        android:layout_marginRight="14dp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-</LinearLayout>
+        app:layout_constraintBottom_toBottomOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

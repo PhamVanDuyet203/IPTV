@@ -7,7 +7,6 @@
     android:background="@color/white"
     android:padding="16dp">
 
-    <!-- Import bằng URL -->
     <LinearLayout
         android:id="@+id/upload_url"
         android:layout_width="match_parent"
@@ -38,7 +37,6 @@
             android:textSize="16sp"/>
     </LinearLayout>
 
-    <!-- Import bằng M3U File -->
     <LinearLayout
         android:id="@+id/upload_m3u"
         android:layout_width="match_parent"
@@ -69,7 +67,6 @@
             android:textSize="16sp"/>
     </LinearLayout>
 
-    <!-- Import từ thiết bị -->
     <LinearLayout
         android:id="@+id/upload_device"
         android:layout_width="match_parent"
@@ -99,7 +96,6 @@
             android:textSize="16sp"/>
     </LinearLayout>
 
-    <!-- Văn bản hướng dẫn -->
     <TextView
         android:id="@+id/btn_howtouse"
         android:layout_width="match_parent"
@@ -112,5 +108,20 @@
         app:layout_constraintTop_toBottomOf="@id/upload_device"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="16dp"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:singleLine="true"
+        android:scrollHorizontally="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"/>
+
+    <FrameLayout
+        android:id="@+id/frInterFull"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
