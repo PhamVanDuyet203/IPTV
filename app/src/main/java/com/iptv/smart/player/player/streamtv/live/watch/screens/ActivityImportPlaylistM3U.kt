@@ -13,6 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
 import com.iptv.smart.player.player.streamtv.live.watch.ChannelListActivity
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
@@ -40,7 +41,7 @@ class ActivityImportPlaylistM3U : BaseActivity() {
     private lateinit var tvFileName: TextView
     private lateinit var btnRemoveFile: ImageView
     private lateinit var btnAddPlaylist: TextView
-    private  lateinit var tvTitle: TextView
+    private lateinit var tvTitle: TextView
 
     private var selectedFileUri: Uri? = null
     private val playlistDao by lazy { AppDatabase.getDatabase(this).playlistDao() }
@@ -67,49 +68,61 @@ class ActivityImportPlaylistM3U : BaseActivity() {
         btnRemoveFile.setOnClickListener { removeSelectedFile() }
         btnAddPlaylist.setOnClickListener { savePlaylist() }
 
+        binding.etPlaylistName.addTextChangedListener() {
+            binding.errorTextName.visibility = View.GONE
+        }
+
         showNativeAd()
     }
+
+
 
     private fun showNativeAd() {
         if (RemoteConfig.NATIVE_ADD_050325 == "1") {
             AdsManager.loadAndShowAdsNative(this, binding.frNative, AdsManager.NATIVE_ADD)
-        }
-        else binding.frNative.gone()
+        } else binding.frNative.gone()
     }
 
 
-    private val filePicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            result.data?.data?.let { uri ->
-                try {
-                    // Yêu cầu quyền truy cập lâu dài
-                    contentResolver.takePersistableUriPermission(
-                        uri,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    )
-                    // Kiểm tra xem quyền có được cấp thành công không
-                    val hasPermission = contentResolver.persistedUriPermissions.any {
-                        it.uri == uri && it.isReadPermission
+    private val filePicker =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.data?.let { uri ->
+                    try {
+                        contentResolver.takePersistableUriPermission(
+                            uri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        )
+                        val hasPermission = contentResolver.persistedUriPermissions.any {
+                            it.uri == uri && it.isReadPermission
+                        }
+
+                        if (!hasPermission) {
+                            return@let
+                        }
+
+
+                        selectedFileUri = uri
+                        tvFileName.text = getFileName(uri)
+                        lnUpload.visibility = View.GONE
+                        fileUploadedLayout.visibility = View.VISIBLE
+                        binding.errorTextFile.visibility = View.GONE
+                    } catch (e: SecurityException) {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.cannot_retain_file_access_permission_please_try_again),
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
-
-                    if (!hasPermission) {
-                        return@let
-                    }
-
-
-                    selectedFileUri = uri
-                    tvFileName.text = getFileName(uri)
-                    lnUpload.visibility = View.GONE
-                    fileUploadedLayout.visibility = View.VISIBLE
-                } catch (e: SecurityException) {
-                    Toast.makeText(this,
-                        getString(R.string.cannot_retain_file_access_permission_please_try_again), Toast.LENGTH_LONG).show()
                 }
+            } else {
+                Log.w(
+                    "M3UFile",
+                    "File selection canceled or failed with result code: ${result.resultCode}"
+                )
             }
-        } else {
-            Log.w("M3UFile", "File selection canceled or failed with result code: ${result.resultCode}")
         }
-    }
+
 
     private fun openFilePicker() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -126,35 +139,58 @@ class ActivityImportPlaylistM3U : BaseActivity() {
         fileUploadedLayout.visibility = View.GONE
     }
 
+    private var isSaving = false
+    private var lastSaveTime = 0L
+    private val debounceDuration = 2000L
+
     private fun savePlaylist() {
         val name = etPlaylistName.text.toString().trim()
-        if (name.isEmpty() || selectedFileUri == null) {
-            etPlaylistName.error = getString(R.string.please_enter_a_name_and_select_a_file)
+        if (name.isEmpty()) {
+            binding.errorTextName.visibility = View.VISIBLE
             return
-        }
-
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val channelCount = countChannelsInM3U(selectedFileUri!!)
-                val playlist = PlaylistEntity(
-                    name = name,
-                    channelCount = channelCount,
-                    sourceType = "FILE",
-                    sourcePath = selectedFileUri.toString()
-                )
-                playlistDao.insertPlaylist(playlist)
-
-                withContext(Dispatchers.Main) {
-
-                    startAds()
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@ActivityImportPlaylistM3U,
-                        getString(R.string.error_saving_playlist, e.message), Toast.LENGTH_LONG).show()
+        } else if (selectedFileUri == null) {
+            binding.errorTextFile.visibility = View.VISIBLE
+            return
+        } else {
+            val currentTime = System.currentTimeMillis()
+            if (isSaving || currentTime - lastSaveTime < debounceDuration) return
+            isSaving = true
+            lastSaveTime = currentTime
+            binding.btnAddPlaylist.isEnabled = false
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val existingPlaylist = playlistDao.getPlaylistByName(name)
+                    if (existingPlaylist != null) {
+                        withContext(Dispatchers.Main) {
+                            etPlaylistName.error = "Playlist name already exists"
+                            binding.btnAddPlaylist.isEnabled = true
+                            isSaving = false
+                        }
+                        return@launch
+                    }
+                    val channelCount = countChannelsInM3U(selectedFileUri!!)
+                    val playlist = PlaylistEntity(
+                        name = name,
+                        channelCount = channelCount,
+                        sourceType = "FILE",
+                        sourcePath = selectedFileUri.toString()
+                    )
+                    playlistDao.insertPlaylist(playlist)
+                    withContext(Dispatchers.Main) {
+                        startAds()
+                        setResult(RESULT_OK)
+                    }
+                } finally {
+                    isSaving = false
+                    withContext(Dispatchers.Main) {
+                        binding.btnAddPlaylist.isEnabled = true
+                    }
                 }
             }
+
         }
+
+
     }
 
     private fun startAds() {
@@ -163,6 +199,7 @@ class ActivityImportPlaylistM3U : BaseActivity() {
                 setResult(RESULT_OK)
                 finish()
             }
+
             else -> {
                 Common.countInterAdd++
                 if (Common.countInterAdd % RemoteConfig.INTER_SAVE_ADD_050325.toInt() == 0) {
@@ -198,7 +235,26 @@ class ActivityImportPlaylistM3U : BaseActivity() {
     }
 
     private fun getFileName(uri: Uri): String {
-        val fileName = uri.lastPathSegment ?: "Unknown.m3u"
+        var fileName = "Unknown.m3u"
+
+        try {
+            contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val nameIndex =
+                        cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                    if (nameIndex != -1) {
+                        fileName = cursor.getString(nameIndex)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("M3UFile", "Error retrieving file name: ${e.message}")
+        }
+
+        if (!fileName.contains(".")) {
+            fileName += ".m3u"
+        }
+
         return fileName
     }
 }

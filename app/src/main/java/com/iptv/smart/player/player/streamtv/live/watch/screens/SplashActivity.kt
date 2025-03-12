@@ -5,14 +5,17 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.widget.ImageView
 import androidx.core.os.postDelayed
 import com.admob.max.dktlibrary.AOAManager
 import com.admob.max.dktlibrary.AdmobUtils
 import com.admob.max.dktlibrary.AppOpenManager
 import com.admob.max.dktlibrary.cmp.GoogleMobileAdsConsentManager
+import com.bumptech.glide.Glide
 import com.google.android.gms.ads.AdValue
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
+import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.visible
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.ActivitySplashBinding
@@ -28,7 +31,12 @@ class SplashActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        val loaderGif = findViewById<ImageView>(R.id.loader_gif)
 
+        Glide.with(this)
+            .asGif()
+            .load(R.drawable.loader)
+            .into(loaderGif)
 
         if (AdmobUtils.isNetworkConnected(this)) {
             getKeyRemoteConfig()
@@ -67,21 +75,21 @@ class SplashActivity : BaseActivity() {
                 RemoteConfig.NATIVE_FULL_SCREEN_INTRO_050325 =
                     RemoteConfig.getValueAbTest("NATIVE_FULL_SCREEN_INTRO_050325")
                 RemoteConfig.ADS_HOME_050325 = RemoteConfig.getValueAbTest("ADS_HOME_050325")
-              //  RemoteConfig.INTER_ADD_050325 = RemoteConfig.getValueAbTest("INTER_ADD_050325")
-//                RemoteConfig.NATIVE_ADD_050325 = RemoteConfig.getValueAbTest("NATIVE_ADD_050325")
+               RemoteConfig.INTER_ADD_050325 = RemoteConfig.getValueAbTest("INTER_ADD_050325")
+               RemoteConfig.NATIVE_ADD_050325 = RemoteConfig.getValueAbTest("NATIVE_ADD_050325")
                 RemoteConfig.INTER_SAVE_ADD_050325 =
                     RemoteConfig.getValueAbTest("INTER_SAVE_ADD_050325")
-              //  RemoteConfig.INTER_ITEMS_PLAYLIST_050325 =
+               RemoteConfig.INTER_ITEMS_PLAYLIST_050325 =
                     RemoteConfig.getValueAbTest("INTER_ITEMS_PLAYLIST_050325")
-              //  RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325 =
+              RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325 =
                     RemoteConfig.getValueAbTest("INTER_SELECT_CATEG_OR_CHANNEL_050325")
                 RemoteConfig.NATIVE_PLAYLIST_CHANNEL_050325 =
                     RemoteConfig.getValueAbTest("NATIVE_PLAYLIST_CHANNEL_050325")
-           //     RemoteConfig.BANNER_DETAIL_PLAYLIST_CHANNEL_050325 =
+               RemoteConfig.BANNER_DETAIL_PLAYLIST_CHANNEL_050325 =
                     RemoteConfig.getValueAbTest("BANNER_DETAIL_PLAYLIST_CHANNEL_050325")
-              //  RemoteConfig.INTER_BACK_PLAY_TO_LIST_050325 =
+                RemoteConfig.INTER_BACK_PLAY_TO_LIST_050325 =
                     RemoteConfig.getValueAbTest("INTER_BACK_PLAY_TO_LIST_050325")
-             //   RemoteConfig.ADS_PLAY_CONTROL_050325 =
+               RemoteConfig.ADS_PLAY_CONTROL_050325 =
                     RemoteConfig.getValueAbTest("ADS_PLAY_CONTROL_050325")
                 RemoteConfig.ONRESUME_050325 = RemoteConfig.getValueAbTest("ONRESUME_050325")
                 setupCMP()
@@ -121,6 +129,8 @@ class SplashActivity : BaseActivity() {
         if (RemoteConfig.BANNER_SPLASH_050325 == "1") {
             binding.frBanner.visible()
             binding.view.visible()
+            binding.loaderGif.gone()
+            binding.textView.gone()
             AdsManager.showAdsBannerSplash(this,
                 AdsManager.BANNER_SPLASH,
                 binding.frBanner,
@@ -139,6 +149,9 @@ class SplashActivity : BaseActivity() {
         AdsManager.loadAdsNative(this, AdsManager.NATIVE_INTRO)
         AdsManager.loadAdsNative(this, AdsManager.NATIVE_LANGUAGE)
         AdsManager.loadAdsNative(this, AdsManager.NATIVE_LANGUAGE_ID2)
+
+        binding.loaderGif.visible()
+        binding.textView.visible()
     }
 
 

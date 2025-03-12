@@ -42,11 +42,13 @@ import android.graphics.PorterDuff
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.FrameLayout
 import androidx.annotation.NonNull
 import androidx.annotation.RequiresApi
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
+import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.INTER_BACK_PLAY_TO_LIST
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.INTER_SAVE_ADD
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
@@ -66,6 +68,9 @@ class PlayerActivity : BaseActivity() {
     private lateinit var exoPause: ImageView
     private lateinit var exoRew: ImageView
     private lateinit var exoFfwd: ImageView
+
+    private lateinit var frNative: FrameLayout
+    private lateinit var vLine: View
 
     private lateinit var txtMirroring: TextView
     private lateinit var txtPip: TextView
@@ -178,14 +183,14 @@ class PlayerActivity : BaseActivity() {
     }
 
     private fun startAds() {
-        when (RemoteConfig.INTER_SAVE_ADD_050325) {
+        when (RemoteConfig.INTER_BACK_PLAY_TO_LIST_050325) {
             "0" -> {
                 finish()
             }
             else -> {
-                Common.countInterAdd++
-                if (Common.countInterAdd % RemoteConfig.INTER_SAVE_ADD_050325.toInt() == 0) {
-                    AdsManager.loadAndShowInter(this, INTER_SAVE_ADD) {
+                Common.countInterBackPLay++
+                if (Common.countInterBackPLay % RemoteConfig.INTER_BACK_PLAY_TO_LIST_050325.toInt() == 0) {
+                    AdsManager.loadAndShowInter(this, INTER_BACK_PLAY_TO_LIST) {
                         finish()
                     }
                 } else {
@@ -216,6 +221,9 @@ class PlayerActivity : BaseActivity() {
         tvTitle.text = channel.name
         tvTitle.isSelected = true
 
+        frNative = findViewById(R.id.fr_home)
+        vLine = findViewById(R.id.line)
+
         txtMirroring = findViewById(R.id.txt_mirroring)
         txtPip = findViewById(R.id.txt_pip)
         txtFav = findViewById(R.id.txt_fav)
@@ -240,7 +248,6 @@ class PlayerActivity : BaseActivity() {
         btnBack.setOnClickListener {
             Log.d(TAG, "btnBack clicked")
             if (isLock) {
-                Log.d(TAG, "btnBack: Activity locked, ignoring back press")
                 return@setOnClickListener
             }
             if (isFullScreen && resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -249,6 +256,7 @@ class PlayerActivity : BaseActivity() {
             } else if (Build.VERSION.SDK_INT >= MIN_PIP_API && isInPictureInPictureMode) {
                 Log.d(TAG, "btnBack: In PiP mode, moving to background")
                 moveTaskToBack(true)
+
             } else {
                 startAds()
             }
@@ -888,6 +896,8 @@ class PlayerActivity : BaseActivity() {
             linearLayoutControlUp.visibility = View.GONE
             controlButtonsTop.visibility = View.GONE
             loadingProgress.visibility = View.GONE
+            vLine.visibility = View.GONE
+            frNative.visibility = View.GONE
             playerView.useController = false // Ẩn controller mặc định
             playerView.visibility = View.VISIBLE
             // Tạm thời điều chỉnh PlayerView để chiếm toàn bộ không gian trong PiP
@@ -907,6 +917,9 @@ class PlayerActivity : BaseActivity() {
             tvTitle.visibility = View.VISIBLE
             linearLayoutControlUp.visibility = View.VISIBLE
             controlButtonsTop.visibility = View.VISIBLE
+
+            vLine.visibility = View.VISIBLE
+            frNative.visibility = View.VISIBLE
             loadingProgress.visibility = if (player.isLoading) View.VISIBLE else View.GONE
 
             playerView.useController = true

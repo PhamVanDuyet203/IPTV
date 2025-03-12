@@ -4,6 +4,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/white"
     android:layout_height="match_parent">
+
+
+
+    <ImageView
+        android:id="@+id/loader_gif"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@id/text_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+   <TextView
+       android:id="@+id/text_view"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:text="@string/this_action_can_contain_ads"
+       android:fontFamily="@font/inter_regular"
+       android:textSize="14sp"
+       android:gravity="center"
+       app:layout_constraintBottom_toBottomOf="parent"
+       android:layout_marginBottom="79dp"/>
+
+
+
     <View
         android:id="@+id/view"
         app:layout_constraintBottom_toTopOf="@+id/fr_banner"

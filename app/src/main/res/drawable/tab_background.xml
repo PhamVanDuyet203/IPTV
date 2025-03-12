@@ -2,9 +2,9 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
 
-    <corners android:radius="16dp"/> <!-- Bo góc -->
+    <corners android:radius="999dp"/>
 
     <solid android:color="#F5FAFB"/>
     <stroke
-        android:color="#F5FAFB"/> <!-- Viền -->
+        android:color="#F5FAFB"/>
 </shape>

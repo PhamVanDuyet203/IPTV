@@ -55,6 +55,10 @@ class ChannelListActivity : BaseActivity() {
     private var fullGroupList: List<PlaylistEntity> = emptyList()
     private var currentSortMode = "AZ"
 
+    private lateinit var imgNotFound: ImageView
+    private lateinit var txtNotFound: TextView
+
+
     private lateinit var binding: ActivityPlaylistDetailBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,9 +76,17 @@ class ChannelListActivity : BaseActivity() {
         frNative = findViewById(R.id.fr_home)
         vLine = findViewById(R.id.line)
 
+        imgNotFound = findViewById(R.id.imgNotFound)
+        txtNotFound = findViewById(R.id.txtNotFound)
+        imgNotFound.visibility = View.GONE
+        txtNotFound.visibility = View.GONE
+        recyclerView.visibility = View.VISIBLE
+
+
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = GroupAdapter(emptyList())
         recyclerView.adapter = adapter
+
 
         if (RemoteConfig.BANNER_DETAIL_PLAYLIST_CHANNEL_050325 == "1") {
             AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_DETAIL_PLAYLIST_CHANNEL, frNative , vLine)
@@ -189,6 +201,18 @@ class ChannelListActivity : BaseActivity() {
             else -> filteredList
         }
         adapter.updateData(sortedList)
+
+
+        if (sortedList.isEmpty()) {
+            imgNotFound.visibility = View.VISIBLE
+            txtNotFound.visibility = View.VISIBLE
+            recyclerView.visibility = View.GONE
+            txtNotFound.text = getString(R.string.not_found, query)
+        } else {
+            imgNotFound.visibility = View.GONE
+            txtNotFound.visibility = View.GONE
+            recyclerView.visibility = View.VISIBLE
+        }
     }
 
     private fun toggleSearchBar() {
@@ -204,8 +228,8 @@ class ChannelListActivity : BaseActivity() {
 
             }
             else -> {
-                Common.countInterAdd++
-                if (Common.countInterAdd % RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325.toInt() == 0) {
+                Common.countInterSelect++
+                if (Common.countInterSelect % RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325.toInt() == 0) {
                     AdsManager.loadAndShowInter(this, INTER_SELECT_CATEG_OR_CHANNEL) {
 
                     }

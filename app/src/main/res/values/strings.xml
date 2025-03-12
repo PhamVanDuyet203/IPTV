@@ -42,7 +42,7 @@
     <string name="save_bts">Save</string>
     <string name="import_from_device">Import from device</string>
     <string name="playlist_name_add">Playlist name</string>
-    <string name="upload_m3u_file">Upload M3U file</string>
+    <string name="upload_m3u_file">Upload Video</string>
     <string name="select_videos_to_upload">Select videos to upload</string>
     <string name="save">Save</string>
     <string name="enter_playlist_name">Enter playlist name</string>
@@ -100,9 +100,11 @@
     <string name="favorite_txt">Favorite</string>
     <string name="lock_txt">Lock</string>
     <string name="all_tab">all</string>
-    <string name="please_enter_a_name_and_select_at_least_one_video">Please enter a name and select at least one video</string>
+    <string name="please_select_at_least_one_video">Please select at least one video</string>
     <string name="cannot_retain_file_access_permission_please_try_again">Cannot retain file access permission. Please try again.</string>
-    <string name="please_enter_a_name_and_select_a_file">Please enter a name and select a file</string>
+    <string name="please_enter_a_name">Please enter a name</string>
+    <string name="please_select_a_file">Please select a file</string>
+
     <string name="error_saving_playlist">Error saving playlist: %1$s</string>
     <string name="add_button">Add button</string>
     <string name="press_the_add_button_to_create_one_fr_home">Press the Add button to create one</string>
@@ -110,5 +112,7 @@
     <string name="press_the_add_button_to_create_one">Press the Add button to create one</string>
     <string name="screen_lock_long_press_to_unlock">Screen lock. Long press to unlock</string>
     <string name="facebook_id">" "</string>
+    <string name="this_action_can_contain_ads">This action can contain ads...</string>
+    <string name="not_found">Not result for %1$s</string>
 </resources>
 

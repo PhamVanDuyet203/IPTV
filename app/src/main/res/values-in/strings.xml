@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">IPTV Smart Player: Stream TV</string>
-    <string name="title_language">Bahasa</string>
+    <string name="title_language">Language</string>
     <string name="title_onboard_1">Streaming Acara Favorit Anda</string>
     <string name="content_onboard_1">Nikmati hiburan tanpa batas dengan ribuan film, acara TV, dan banyak lagi.</string>
     <string name="title_onboard_2">Temukan Hiburan Tanpa Akhir</string>
@@ -77,21 +77,21 @@
     <string name="favorite_channel">Favorit</string>
     <string name="recent_channel">Terkini</string>
     <string name="do_you_want_to_delete_channel">Apakah Anda ingin menghapus saluran %1$s?</string>
-    <string name="do_you_want_to_delete_playlist">Apakah Anda ingin menghapus </string>
+    <string name="do_you_want_to_delete_playlist">Apakah Anda ingin menghapus %s</string>
     <string name="search_channel">Cari saluran...</string>
     <string name="search_channel_detail">Cari saluran...</string>
-    <string name="english">Bahasa inggris</string>
-    <string name="korean">Korea</string>
-    <string name="spanish">Spanyol</string>
-    <string name="french">Perancis</string>
-    <string name="arabic">Arab</string>
-    <string name="bengali">Benggala</string>
-    <string name="russian">Rusia</string>
-    <string name="portuguese">Portugis</string>
+    <string name="english">English</string>
+    <string name="korean">Korean</string>
+    <string name="spanish">Spanish</string>
+    <string name="french">French</string>
+    <string name="arabic">Arabic</string>
+    <string name="bengali">Bengali</string>
+    <string name="russian">Russian</string>
+    <string name="portuguese">Portuguese</string>
     <string name="indonesia">Indonesia</string>
     <string name="hindi">Hindi</string>
-    <string name="italian">Italia</string>
-    <string name="german">Jerman</string>
+    <string name="italian">Italian</string>
+    <string name="german">German</string>
     <string name="don_t_have_any_playlists_yet_ft_home">Belum punya playlist apa pun</string>
     <string name="press_the_add_button_to_create_one_fr_home">Tekan tombol Tambah untuk membuatnya</string>
     <string name="channel_unavailable">Saluran Tidak Tersedia</string>

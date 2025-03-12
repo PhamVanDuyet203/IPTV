@@ -1,5 +1,6 @@
 package com.iptv.smart.player.player.streamtv.live.watch
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -59,7 +60,8 @@ class ChannelDetailActivity : BaseActivity() {
     private lateinit var channelsProvider: ChannelsProvider
     private var groupName: String = "Unknown"
     private var currentQuery: String = ""
-
+    private lateinit var imgNotFound: ImageView
+    private lateinit var txtNotFound: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,6 +78,11 @@ class ChannelDetailActivity : BaseActivity() {
         frNative = findViewById(R.id.fr_home)
         vLine = findViewById(R.id.line)
 
+        imgNotFound = findViewById(R.id.imgNotFound)
+        txtNotFound = findViewById(R.id.txtNotFound)
+        imgNotFound.visibility = View.GONE
+        txtNotFound.visibility = View.GONE
+        recyclerView.visibility = View.VISIBLE
 
         channelsProvider = ViewModelProvider(this).get(ChannelsProvider::class.java)
         channelsProvider.init(this)
@@ -147,8 +154,8 @@ class ChannelDetailActivity : BaseActivity() {
                 nextActivity(channel)
             }
             else -> {
-                Common.countInterAdd++
-                if (Common.countInterAdd % RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325.toInt() == 0) {
+                Common.countInterSelect++
+                if (Common.countInterSelect % RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325.toInt() == 0) {
                     AdsManager.loadAndShowInter(this, INTER_SELECT_CATEG_OR_CHANNEL) {
                         nextActivity(channel)
                     }
@@ -210,32 +217,38 @@ class ChannelDetailActivity : BaseActivity() {
 
 
     private fun filterChannels(query: String) {
-        channelsProvider.channels.value?.let { allChannels ->
-            val filteredList = allChannels.filter { it.groupTitle == groupName }
-                .let { list ->
-                    if (query.isEmpty()) list else list.filter { it.name.contains(query, ignoreCase = true) }
-                }
-            val sortedList = when (currentSortMode) {
-                "AZ" -> filteredList.sortedBy { it.name }
-                "ZA" -> filteredList.sortedByDescending { it.name }
-                else -> filteredList
+        val allChannels = channelsProvider.channels.value ?: emptyList()
+        val filteredList = allChannels.filter { it.groupTitle == groupName }
+            .let { list ->
+                if (query.isEmpty()) list
+                else list.filter { it.name.contains(query, ignoreCase = true) }
             }
-            Log.d("ChannelDetailActivity", "Filtered ${sortedList.size} channels with query: $query")
-            adapter.updateChannels(sortedList)
+
+        val sortedList = when (currentSortMode) {
+            "AZ" -> filteredList.sortedBy { it.name }
+            "ZA" -> filteredList.sortedByDescending { it.name }
+            else -> filteredList
+        }
+
+        Log.d("ChannelDetailActivity", "Filtered ${sortedList.size} channels with query: $query")
+
+        adapter.updateChannels(sortedList)
+
+        if (sortedList.isEmpty()) {
+            imgNotFound.visibility = View.VISIBLE
+            txtNotFound.visibility = View.VISIBLE
+            recyclerView.visibility = View.GONE
+            txtNotFound.text = getString(R.string.not_found, query)
+        } else {
+            imgNotFound.visibility = View.GONE
+            txtNotFound.visibility = View.GONE
+            recyclerView.visibility = View.VISIBLE
         }
     }
 
+
     private fun toggleSearchBar() {
-        if (isSearchVisible) {
-            searchEditText.visibility = View.GONE
-            searchEditText.text.clear()
-            currentQuery = ""
-            filterChannels("")
-        } else {
-            searchEditText.visibility = View.VISIBLE
-            searchEditText.requestFocus()
-        }
-        isSearchVisible = !isSearchVisible
+
     }
 
     private fun showSortPopup(anchorView: View) {
@@ -273,9 +286,10 @@ class ChannelDetailActivity : BaseActivity() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun toggleFavorite(channel: Channel) {
         channelsProvider.toggleFavorite(channel)
-        filterChannels(currentQuery)
+        adapter.notifyDataSetChanged()
     }
 
     private fun observeChannels() {
@@ -288,6 +302,16 @@ class ChannelDetailActivity : BaseActivity() {
             }
             Log.d("ChannelDetailActivity", "Displaying ${sortedList.size} channels for group $groupName")
             adapter.updateChannels(sortedList)
+
+            if (sortedList.isEmpty()) {
+                imgNotFound.visibility = View.VISIBLE
+                txtNotFound.visibility = View.VISIBLE
+                recyclerView.visibility = View.GONE
+            } else {
+                imgNotFound.visibility = View.GONE
+                txtNotFound.visibility = View.GONE
+                recyclerView.visibility = View.VISIBLE
+            }
         }
     }
 }

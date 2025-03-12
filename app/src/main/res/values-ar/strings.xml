@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">IPTV Smart Player: Stream TV</string>
-    <string name="title_language">لغة</string>
+    <string name="title_language">Language</string>
     <string name="title_onboard_1">دفق برامجك المفضلة</string>
     <string name="content_onboard_1">استمتع بترفيه غير محدود مع آلاف الأفلام والبرامج التلفزيونية والمزيد.</string>
     <string name="title_onboard_2">اكتشف الترفيه اللامتناهي</string>
@@ -73,21 +73,21 @@
     <string name="favorite_channel">مفضل</string>
     <string name="recent_channel">مؤخرًا</string>
     <string name="do_you_want_to_delete_channel">هل تريد حذف قناة %1$s؟</string>
-    <string name="do_you_want_to_delete_playlist">هل تريد حذف </string>
+    <string name="do_you_want_to_delete_playlist">هل تريد حذف %s</string>
     <string name="search_channel">قناة البحث...</string>
     <string name="search_channel_detail">قناة البحث...</string>
-    <string name="english">إنجليزي</string>
-    <string name="korean">كوري</string>
-    <string name="spanish">الأسبانية</string>
-    <string name="french">فرنسي</string>
-    <string name="arabic">عربي</string>
-    <string name="bengali">البنغالية</string>
-    <string name="russian">الروسية</string>
-    <string name="portuguese">البرتغالية</string>
-    <string name="indonesia">أندونيسيا</string>
-    <string name="hindi">الهندية</string>
-    <string name="italian">ايطالي</string>
-    <string name="german">الألمانية</string>
+    <string name="english">English</string>
+    <string name="korean">Korean</string>
+    <string name="spanish">Spanish</string>
+    <string name="french">French</string>
+    <string name="arabic">Arabic</string>
+    <string name="bengali">Bengali</string>
+    <string name="russian">Russian</string>
+    <string name="portuguese">Portuguese</string>
+    <string name="indonesia">Indonesia</string>
+    <string name="hindi">Hindi</string>
+    <string name="italian">Italian</string>
+    <string name="german">German</string>
     <string name="don_t_have_any_playlists_yet_ft_home">ليس لديك أية قوائم تشغيل حتى الآن</string>
     <string name="channel_unavailable">القناة غير متاحة</string>
     <string name="ok">نعم</string>

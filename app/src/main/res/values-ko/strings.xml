@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">IPTV Smart Player: Stream TV</string>
-    <string name="title_language">언어</string>
+    <string name="title_language">Language</string>
+
     <string name="title_onboard_1">좋아하는 프로그램을 스트리밍하세요</string>
     <string name="content_onboard_1">수천 편의 영화, TV 프로그램 등을 통해 무제한 엔터테인먼트를 즐겨보세요.</string>
     <string name="title_onboard_2">끝없는 엔터테인먼트를 만나보세요</string>
@@ -77,21 +78,21 @@
     <string name="favorite_channel">가장 좋아하는</string>
     <string name="recent_channel">최근의</string>
     <string name="do_you_want_to_delete_channel">%1$s 채널을 삭제하시겠습니까?</string>
-    <string name="do_you_want_to_delete_playlist">삭제하시겠습니까? </string>
+    <string name="do_you_want_to_delete_playlist">삭제하시겠습니까? %s</string>
     <string name="search_channel">채널 검색...</string>
     <string name="search_channel_detail">채널 검색...</string>
-    <string name="english">영어</string>
-    <string name="korean">한국인</string>
-    <string name="spanish">스페인 사람</string>
-    <string name="french">프랑스 국민</string>
-    <string name="arabic">아라비아 말</string>
-    <string name="bengali">벵골 사람</string>
-    <string name="russian">러시아인</string>
-    <string name="portuguese">포르투갈 인</string>
-    <string name="indonesia">인도네시아 공화국</string>
-    <string name="hindi">힌디 어</string>
-    <string name="italian">이탈리아 사람</string>
-    <string name="german">독일 사람</string>
+    <string name="english">English</string>
+    <string name="korean">Korean</string>
+    <string name="spanish">Spanish</string>
+    <string name="french">French</string>
+    <string name="arabic">Arabic</string>
+    <string name="bengali">Bengali</string>
+    <string name="russian">Russian</string>
+    <string name="portuguese">Portuguese</string>
+    <string name="indonesia">Indonesia</string>
+    <string name="hindi">Hindi</string>
+    <string name="italian">Italian</string>
+    <string name="german">German</string>
     <string name="don_t_have_any_playlists_yet_ft_home">아직 재생목록이 없습니다.</string>
     <string name="press_the_add_button_to_create_one_fr_home">추가 버튼을 눌러 하나를 생성하세요</string>
     <string name="channel_unavailable">채널을 사용할 수 없음</string>

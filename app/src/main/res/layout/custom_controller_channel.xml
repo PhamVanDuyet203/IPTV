@@ -69,7 +69,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="72dp"/>
+        android:layout_marginEnd="54dp"/>
 
     <!-- ProgressBar (Loading) ở giữa video -->
     <ProgressBar
@@ -157,8 +157,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_mirroring"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
                 android:theme="@style/ClickableView" />
 
             <TextView
@@ -196,8 +194,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_pips"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
                 android:theme="@style/ClickableView" />
 
             <TextView
@@ -235,8 +231,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_fav"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
                 android:theme="@style/ClickableView" />
 
             <TextView
@@ -273,8 +267,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_lock"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
                 android:id="@+id/img_lock"
                 android:theme="@style/ClickableView" />
 
@@ -449,7 +441,6 @@
         />
     <FrameLayout
         android:id="@+id/fr_home"
-        android:minHeight="50dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"

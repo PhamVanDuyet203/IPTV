@@ -6,12 +6,12 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.INTER_SAVE_ADD
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
-import com.iptv.smart.player.player.streamtv.live.watch.databinding.ImportPlaylistDeviceBinding
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.ImportPlaylistUrlBinding
 import com.iptv.smart.player.player.streamtv.live.watch.db.AppDatabase
 import com.iptv.smart.player.player.streamtv.live.watch.db.PlaylistEntity
@@ -30,11 +30,10 @@ class ActivityImportPlaylistUrl : BaseActivity() {
     private lateinit var etPlaylistName: EditText
     private lateinit var etPlaylistUrl: EditText
     private lateinit var btnAddPlaylist: TextView
-    private  lateinit var tvTitle: TextView
+    private lateinit var tvTitle: TextView
 
     private val playlistDao by lazy { AppDatabase.getDatabase(this).playlistDao() }
     private val binding by lazy { ImportPlaylistUrlBinding.inflate(layoutInflater) }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,45 +50,92 @@ class ActivityImportPlaylistUrl : BaseActivity() {
         btnBack.setOnClickListener { finish() }
         btnAddPlaylist.setOnClickListener { savePlaylist() }
 
+        binding.etPlaylistName.addTextChangedListener() {
+            binding.errorTextName.visibility = View.GONE
+        }
+        binding.etPlaylistUrl.addTextChangedListener() {
+            binding.errorTextURL.visibility = View.GONE
+        }
+
         showNativeAd()
     }
 
     private fun showNativeAd() {
         if (RemoteConfig.NATIVE_ADD_050325 == "1") {
             AdsManager.loadAndShowAdsNative(this, binding.frNative, AdsManager.NATIVE_ADD)
+        } else {
+            binding.frNative.gone()
         }
-        else binding.frNative.gone()
     }
 
+    private var isSaving = false
+    private var lastSaveTime = 0L
+    private val debounceDuration = 2000L
 
     private fun savePlaylist() {
         val name = etPlaylistName.text.toString().trim()
         val url = etPlaylistUrl.text.toString().trim()
 
-        if (name.isEmpty() || url.isEmpty()) {
-            etPlaylistUrl.error = "Please enter a valid URL"
+        if (url.isEmpty() && name.isEmpty() ) {
+            binding.errorTextName.visibility = View.VISIBLE
+            binding.errorTextURL.visibility = View.VISIBLE
+            return
+        }else if (url.isEmpty()){
+            binding.errorTextURL.visibility = View.VISIBLE
             return
         }
+        else if (name.isEmpty()){
+            binding.errorTextName.visibility = View.VISIBLE
+            return
+        }
+        else {
+            val currentTime = System.currentTimeMillis()
+            if (isSaving || currentTime - lastSaveTime < debounceDuration) return
 
-        CoroutineScope(Dispatchers.IO).launch {
-            val channelCount = countChannelsFromUrl(url)
-            if (channelCount == 0) {
-                withContext(Dispatchers.Main) {
-                    etPlaylistUrl.error = "Invalid URL or no channels found"
+            isSaving = true
+            lastSaveTime = currentTime
+            binding.btnAddPlaylist.isEnabled = false
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val existingPlaylist = playlistDao.getPlaylistByName(name)
+                    if (existingPlaylist != null) {
+                        withContext(Dispatchers.Main) {
+                            etPlaylistName.error = "Playlist name already exists"
+                            binding.btnAddPlaylist.isEnabled = true
+                            isSaving = false
+                        }
+                        return@launch
+                    }
+                    val channelCount = fetchAndCountChannelsFromUrl(url)
+                    if (channelCount == 0) {
+                        withContext(Dispatchers.Main) {
+                            etPlaylistUrl.error = "Invalid URL or no channels found"
+                        }
+                        return@launch
+                    }
+
+                    val playlist = PlaylistEntity(
+                        name = name,
+                        channelCount = channelCount,
+                        sourceType = "URL",
+                        sourcePath = url
+                    )
+                    playlistDao.insertPlaylist(playlist)
+
+                    withContext(Dispatchers.Main) {
+                        startAds()
+                        setResult(RESULT_OK)
+                    }
+                } finally {
+                    isSaving = false
+                    withContext(Dispatchers.Main) {
+                        binding.btnAddPlaylist.isEnabled = true
+                    }
                 }
-                return@launch
-            }
-            val playlist = PlaylistEntity(
-                name = name,
-                channelCount = channelCount,
-                sourceType = "URL",
-                sourcePath = url
-            )
-            playlistDao.insertPlaylist(playlist)
-            withContext(Dispatchers.Main) {
-                startAds()
             }
         }
+
+
     }
 
     private fun startAds() {
@@ -110,30 +156,44 @@ class ActivityImportPlaylistUrl : BaseActivity() {
         }
     }
 
-
-
-    private suspend fun countChannelsFromUrl(urlString: String): Int {
+    private suspend fun fetchAndCountChannelsFromUrl(urlString: String): Int {
         return withContext(Dispatchers.IO) {
-            var count = 0
+            var channelCount = 0
             try {
-                val url = URL(urlString)
-                val connection = url.openConnection() as HttpURLConnection
-                connection.connectTimeout = 10000
-                connection.readTimeout = 10000
+                val connection = URL(urlString).openConnection() as HttpURLConnection
+                connection.connectTimeout = 20000
+                connection.readTimeout = 20000
                 connection.requestMethod = "GET"
 
-                connection.inputStream.bufferedReader().use { reader ->
-                    reader.forEachLine { line ->
-                        if (!line.startsWith("#") && line.isNotBlank()) {
-                            count++
+                val fileText = connection.inputStream.bufferedReader().use { it.readText() }
+                connection.disconnect()
+
+                // Sử dụng logic parse từ ChannelsProvider
+                val lines = fileText.split("\n")
+                var name: String? = null
+                var streamUrl: String? = null
+
+                for (line in lines) {
+                    when {
+                        line.startsWith("#EXTINF:") -> {
+                            name = extractChannelName(line)
+                        }
+                        line.isNotEmpty() && !line.startsWith("#") -> {
+                            streamUrl = line
+                            if (!name.isNullOrEmpty() && streamUrl != null) {
+                                channelCount++
+                            }
+                            name = null
+                            streamUrl = null
                         }
                     }
                 }
-                connection.disconnect()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            count
+            channelCount
         }
     }
+
+    private fun extractChannelName(line: String): String? = line.split(",").lastOrNull()?.trim()
 }

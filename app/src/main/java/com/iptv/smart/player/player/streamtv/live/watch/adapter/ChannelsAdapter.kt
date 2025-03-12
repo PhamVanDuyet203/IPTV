@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
+import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
 
 class ChannelsAdapter(
     var channels: MutableList<Channel>,
@@ -22,6 +23,9 @@ class ChannelsAdapter(
     private val onRenameChannel: (Channel, String) -> Unit,
     private val onDeleteChannel: (Channel) -> Unit
 ) : RecyclerView.Adapter<ChannelsAdapter.ChannelViewHolder>() {
+
+
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChannelViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -125,8 +129,7 @@ class ChannelsAdapter(
                 val newName = nameEditText.text.toString().trim()
                 if (newName.isNotEmpty()) {
                     val updatedChannel = channel.copy(name = newName)
-                    onRenameChannel(updatedChannel, newName) // Gọi callback để lưu vào DB
-                    // Không cập nhật channels ở đây vì LiveData sẽ làm việc này
+                    onRenameChannel(updatedChannel, newName)
                 }
                 dialog.dismiss()
             }
@@ -153,8 +156,7 @@ class ChannelsAdapter(
             }
 
             dialogView.findViewById<TextView>(R.id.btn_delete).setOnClickListener {
-                onDeleteChannel(channel) // Gọi callback để xóa khỏi DB
-                // Không xóa channels ở đây vì LiveData sẽ làm việc này
+                onDeleteChannel(channel)
                 dialog.dismiss()
             }
 

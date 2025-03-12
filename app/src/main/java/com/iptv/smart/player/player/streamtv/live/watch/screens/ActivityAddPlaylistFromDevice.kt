@@ -5,12 +5,15 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.iptv.smart.player.player.streamtv.live.watch.R
@@ -31,6 +34,7 @@ import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ActivityAddPlaylistFromDevice : BaseActivity() {
     private lateinit var btnBack: ImageView
@@ -66,7 +70,10 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
         lnUpload.setOnClickListener { openFilePicker() }
         btnAddPlaylist.setOnClickListener {
             savePlaylist()
-            startAds()
+        }
+
+        binding.etPlaylistName.addTextChangedListener() {
+            binding.errorTextName.visibility = View.GONE
         }
 
         showNativeAd()
@@ -88,6 +95,7 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
                         uri,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION
                     )
+                    binding.errorTextFile.visibility = View.GONE
                     val fileName = getFileName(uri)
                     if (fileName != null) {
                         videoList.add(VideoItem(uri, fileName))
@@ -110,31 +118,63 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
         videoAdapter.notifyDataSetChanged()
     }
 
+
+    private var isSaving = false
+    private var lastSaveTime = 0L
+    private val debounceDuration = 2000L
+
     private fun savePlaylist() {
-        val name = etPlaylistName.text.toString().trim()
-        if (name.isEmpty() || videoList.isEmpty()) {
-            etPlaylistName.error =
-                getString(R.string.please_enter_a_name_and_select_at_least_one_video)
+        val name = binding.etPlaylistName.text.toString().trim()
+        if (name.isEmpty()) {
+            binding.errorTextName.visibility = View.VISIBLE
             return
+        } else if (videoList.isEmpty()) {
+            binding.errorTextFile.visibility = View.VISIBLE
+            return
+        } else {
+            val currentTime = System.currentTimeMillis()
+            if (isSaving || currentTime - lastSaveTime < debounceDuration) return
+
+            isSaving = true
+            lastSaveTime = currentTime
+            binding.btnAddPlaylist.isEnabled = false
+
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val existingPlaylist = playlistDao.getPlaylistByName(name)
+                    if (existingPlaylist != null) {
+                        withContext(Dispatchers.Main) {
+                            etPlaylistName.error = "Playlist name already exists"
+                            binding.btnAddPlaylist.isEnabled = true
+                            isSaving = false
+                        }
+                        return@launch
+                    }
+                    val playlist = PlaylistEntity(
+                        name = name,
+                        channelCount = videoList.size,
+                        sourceType = "DEVICE",
+                        sourcePath = videoList.joinToString(";") { it.uri.toString() }
+                    )
+                    playlistDao.insertPlaylist(playlist)
+
+                    withContext(Dispatchers.Main) {
+                        startAds()
+                        setResult(RESULT_OK)
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("SavePlaylist", "Error saving playlist: ${e.message}")
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@ActivityAddPlaylistFromDevice, "Error saving playlist", Toast.LENGTH_SHORT).show()
+                    }
+                } finally {
+                    isSaving = false
+                    withContext(Dispatchers.Main) {
+                        binding.btnAddPlaylist.isEnabled = true
+                    }
+                }
+            }
         }
-
-        CoroutineScope(Dispatchers.IO).launch {
-            val playlist = PlaylistEntity(
-                name = name,
-                channelCount = videoList.size,
-                sourceType = "DEVICE",
-                sourcePath = videoList.joinToString(";") { it.uri.toString() }
-            )
-            playlistDao.insertPlaylist(playlist)
-
-            val channelsProvider = ChannelsProvider()
-            channelsProvider.init(this@ActivityAddPlaylistFromDevice)
-            channelsProvider.refreshChannels()
-            setResult(RESULT_OK)
-
-        }
-
-
     }
 
     private fun startAds() {

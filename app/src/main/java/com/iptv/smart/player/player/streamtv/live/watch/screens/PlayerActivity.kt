@@ -2,6 +2,7 @@ package com.iptv.smart.player.player.streamtv.live.watch.screens
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.app.AppOpsManager
 import android.app.PictureInPictureParams
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -23,6 +24,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -39,23 +41,22 @@ import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
 import com.iptv.smart.player.player.streamtv.live.watch.provider.ChannelsProvider
 import android.graphics.PorterDuff
+import android.provider.Settings
 import android.view.LayoutInflater
-import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.FrameLayout
 import androidx.annotation.NonNull
 import androidx.annotation.RequiresApi
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.INTER_BACK_PLAY_TO_LIST
-import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.INTER_SAVE_ADD
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
+import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.visible
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
-
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.CustomControllerChannelBinding
 import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
 import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
-
 
 class PlayerActivity : BaseActivity() {
 
@@ -67,12 +68,10 @@ class PlayerActivity : BaseActivity() {
     private lateinit var exoPause: ImageView
     private lateinit var exoRew: ImageView
     private lateinit var exoFfwd: ImageView
-
     private lateinit var txtMirroring: TextView
     private lateinit var txtPip: TextView
     private lateinit var txtFav: TextView
     private lateinit var txtLock: TextView
-
     private lateinit var linearLayoutControlUp: LinearLayout
     private lateinit var linearLayoutControlBottom: LinearLayout
     private lateinit var controlButtonsTop: LinearLayout
@@ -97,6 +96,10 @@ class PlayerActivity : BaseActivity() {
     private val hideControlRunnable = Runnable { hideControlsInFullscreen() }
     private val CONTROL_HIDE_DELAY = 3000L
     private lateinit var touchOverlay: View
+    private lateinit var frHome: FrameLayout
+    private lateinit var vLine: View
+
+    private var wasPlayingBeforePause = false
 
     companion object {
         private const val INCREMENT_MILLIS = 5000L
@@ -132,8 +135,6 @@ class PlayerActivity : BaseActivity() {
         Log.d(TAG, "onCreate: Initializing ChannelsProvider")
         channelsProvider.init(this)
 
-
-
         setFindViewById()
         setupPlayer()
         setLockScreen()
@@ -144,14 +145,14 @@ class PlayerActivity : BaseActivity() {
             setupPip()
         }
 
+        binding.btnMirroring1.gone()
+        binding.btnPip1.gone()
 
         if (RemoteConfig.ADS_PLAY_CONTROL_050325 == "1") {
             AdsManager.showAdsBanner(this, AdsManager.BANNER_PLAY_CONTROL, binding.frHome, binding.line)
-        }
-        else if (RemoteConfig.ADS_PLAY_CONTROL_050325 == "2") {
-            AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_COLLAP_PLAY_CONTROL, binding.frHome,binding.line)
-        }
-        else {
+        } else if (RemoteConfig.ADS_PLAY_CONTROL_050325 == "2") {
+            AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_COLLAP_PLAY_CONTROL, binding.frHome, binding.line)
+        } else {
             binding.frHome.gone()
             binding.line.gone()
         }
@@ -160,7 +161,6 @@ class PlayerActivity : BaseActivity() {
         channelsProvider.addToRecent(channel)
         controlButtonsTop.visibility = View.VISIBLE
 
-        /* Quan sát thay đổi từ ChannelsProvider để đồng bộ favorite và tên */
         channelsProvider.channels.observe(this) { channels ->
             channels.find { it.streamUrl == channel.streamUrl }?.let { updatedChannel ->
                 channel = updatedChannel
@@ -174,7 +174,6 @@ class PlayerActivity : BaseActivity() {
             }
         }
 
-        // Tải dữ liệu ban đầu từ Room
         channelsProvider.fetchChannelsFromRoom()
     }
 
@@ -184,8 +183,8 @@ class PlayerActivity : BaseActivity() {
                 finish()
             }
             else -> {
-                Common.countInterAdd++
-                if (Common.countInterAdd % RemoteConfig.INTER_BACK_PLAY_TO_LIST_050325.toInt() == 0) {
+                Common.countInterBackPLay++
+                if (Common.countInterBackPLay % RemoteConfig.INTER_BACK_PLAY_TO_LIST_050325.toInt() == 0) {
                     AdsManager.loadAndShowInter(this, INTER_BACK_PLAY_TO_LIST) {
                         finish()
                     }
@@ -227,14 +226,15 @@ class PlayerActivity : BaseActivity() {
         txtLock.isSelected = true
 
         btnMirroring = findViewById(R.id.btn_mirroring)
+        frHome = findViewById(R.id.fr_home)
+        vLine = findViewById(R.id.line)
         Log.d(TAG, "setFindViewById: Set tvTitle to ${channel.name}")
 
-        btnMirroring.setOnClickListener{
+        btnMirroring.setOnClickListener {
             wifiDisplay()
         }
 
-        // fullscreen click
-        binding.btnMirroring1.setOnClickListener{
+        binding.btnMirroring1.setOnClickListener {
             wifiDisplay()
         }
 
@@ -249,7 +249,6 @@ class PlayerActivity : BaseActivity() {
             } else if (Build.VERSION.SDK_INT >= MIN_PIP_API && isInPictureInPictureMode) {
                 Log.d(TAG, "btnBack: In PiP mode, moving to background")
                 moveTaskToBack(true)
-
             } else {
                 startAds()
             }
@@ -257,6 +256,10 @@ class PlayerActivity : BaseActivity() {
     }
 
     fun wifiDisplay() {
+        if (::player.isInitialized) {
+            wasPlayingBeforePause = player.isPlaying
+            player.playWhenReady = false
+        }
         try {
             val intent = Intent("android.settings.WIFI_DISPLAY_SETTINGS")
             startActivityForResult(intent, 169)
@@ -266,12 +269,9 @@ class PlayerActivity : BaseActivity() {
                 startActivity(packageManager.getLaunchIntentForPackage("com.samsung.wfd.LAUNCH_WFD_PICKER_DLG"))
             } catch (e2: Exception) {
                 try {
-                    startActivityForResult(
-                        Intent("android.settings.CAST_SETTINGS"), 169
-                    )
+                    startActivityForResult(Intent("android.settings.CAST_SETTINGS"), 169)
                 } catch (e3: Exception) {
-                    Toast.makeText(applicationContext, "Device not supported", Toast.LENGTH_LONG)
-                        .show()
+                    Toast.makeText(applicationContext, "Device not supported", Toast.LENGTH_LONG).show()
                 }
             }
         } catch (ex: Exception) {
@@ -279,8 +279,15 @@ class PlayerActivity : BaseActivity() {
         }
     }
 
-
-
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 169) {
+            Log.d(TAG, "onActivityResult: Returned from Wi-Fi Display settings")
+            if (::player.isInitialized && wasPlayingBeforePause) {
+                player.playWhenReady = true
+            }
+        }
+    }
 
     private fun setupFavorite() {
         Log.d(
@@ -289,13 +296,11 @@ class PlayerActivity : BaseActivity() {
         val favoriteLayout = controlButtonsTop.getChildAt(2) as? LinearLayout
         val favoriteIcon = favoriteLayout?.findViewById<ImageView>(R.id.img_fav)
         val favoriteBtn = favoriteLayout?.findViewById<LinearLayout>(R.id.btn_fav)
-        // Hiển thị trạng thái ban đầu
         updateFavoriteIcon(favoriteIcon)
 
         favoriteBtn?.setOnClickListener {
             Log.d(TAG, "setupFavorite: Toggling favorite for channel: ${channel.name}")
-            channelsProvider.toggleFavorite(channel) // Gọi toggleFavorite từ ChannelsProvider
-            // Cập nhật ngay lập tức UI trong PlayerActivity sau khi toggle
+            channelsProvider.toggleFavorite(channel)
             updateFavoriteIcon(favoriteIcon)
         }
     }
@@ -305,7 +310,7 @@ class PlayerActivity : BaseActivity() {
     ) {
         val updatedChannel =
             channelsProvider.channels.value?.find { it.streamUrl == channel.streamUrl }
-        channel = updatedChannel ?: channel // Cập nhật channel trong PlayerActivity
+        channel = updatedChannel ?: channel
         favoriteIcon?.setImageResource(
             if (channel.isFavorite) R.drawable.fav_on_channel else R.drawable.ic_fav
         )
@@ -458,7 +463,6 @@ class PlayerActivity : BaseActivity() {
         val lockText = findViewById<TextView>(R.id.txt_lock)
 
         if (lock) {
-            // Khi khóa màn hình
             linearLayoutControlUp.visibility = View.INVISIBLE
             linearLayoutControlBottom.visibility = View.INVISIBLE
             controlButtonsTop.visibility = View.VISIBLE
@@ -466,7 +470,6 @@ class PlayerActivity : BaseActivity() {
             for (i in 0 until controlButtonsTop.childCount) {
                 val child = controlButtonsTop.getChildAt(i)
                 if (child != lockLayout) {
-                    // Lưu lại layoutParams ban đầu trước khi ẩn
                     originalLayoutParams[child] = child.layoutParams as LinearLayout.LayoutParams
                     child.visibility = View.GONE
                 }
@@ -481,7 +484,6 @@ class PlayerActivity : BaseActivity() {
             lockLayout.setBackgroundColor(Color.WHITE)
             lockText.setTextColor(Color.parseColor("#000000"))
         } else {
-            // Khi thoát khóa
             linearLayoutControlUp.visibility = if (isFullScreen) View.GONE else View.VISIBLE
             linearLayoutControlBottom.visibility = if (isFullScreen) View.GONE else View.VISIBLE
             controlButtonsTop.visibility = View.VISIBLE
@@ -492,11 +494,9 @@ class PlayerActivity : BaseActivity() {
                 val child = controlButtonsTop.getChildAt(i)
                 child.visibility = View.VISIBLE
 
-                // Khôi phục layoutParams gốc nếu có
                 originalLayoutParams[child]?.let {
                     child.layoutParams = it
                 } ?: run {
-                    // Nếu không có layoutParams gốc, thiết lập margin mặc định
                     val params = child.layoutParams as LinearLayout.LayoutParams
                     params.setMargins(margin4dp, params.topMargin, margin4dp, params.bottomMargin)
                     child.layoutParams = params
@@ -512,10 +512,8 @@ class PlayerActivity : BaseActivity() {
             lockLayout.setBackgroundResource(R.drawable.bg_menu_playcontrol)
             lockText.setTextColor(Color.parseColor("#3F484A"))
 
-            // Yêu cầu bố trí lại để áp dụng layout mới
             controlButtonsTop.requestLayout()
 
-            // Nếu đang ở chế độ toàn màn hình, kiểm tra và điều chỉnh UI
             if (isFullScreen && !isControlVisible) {
                 hideControlsInFullscreen()
             }
@@ -526,7 +524,6 @@ class PlayerActivity : BaseActivity() {
             "lockScreen: UI state - controlButtonsTop childCount=${controlButtonsTop.childCount}"
         )
     }
-
 
     private fun setLockScreen() {
         Log.d(TAG, "setLockScreen: Setting up lock button listener")
@@ -584,6 +581,8 @@ class PlayerActivity : BaseActivity() {
 
             if (isFullScreen) {
                 binding.controlButtonsTop1.visibility = View.VISIBLE
+                binding.btnMirroring1.visible()
+                binding.btnPip1.visible()
                 binding.root.setBackgroundColor(getColor(R.color.black))
                 btnBack.visibility = View.GONE
                 tvTitle.visibility = View.GONE
@@ -597,7 +596,7 @@ class PlayerActivity : BaseActivity() {
                 params.topToBottom = ConstraintLayout.LayoutParams.UNSET
                 params.bottomToTop = ConstraintLayout.LayoutParams.UNSET
                 params.topMargin = 0
-                params.bottomMargin = 100
+                params.bottomMargin = 280
                 playerView.layoutParams = params
 
                 touchOverlay.visibility = View.VISIBLE
@@ -802,73 +801,101 @@ class PlayerActivity : BaseActivity() {
     }
 
     private fun setupPip() {
-        Log.d(TAG, "setupPip: Setting up PiP button listener")
         if (Build.VERSION.SDK_INT >= MIN_PIP_API) {
             btnPip.setOnClickListener {
-                Log.d(TAG, "setupPip: Attempting to enter Picture-in-Picture mode")
                 enterPictureInPictureModeIfAvailable()
             }
             binding.btnPip1.setOnClickListener {
-                Log.d(TAG, "setupPip: Attempting to enter Picture-in-Picture mode")
                 enterPictureInPictureModeIfAvailable()
             }
-
         } else {
             btnPip.visibility = View.GONE
             Log.w(TAG, "setupPip: PiP not supported on this device (API < 26)")
         }
     }
 
+    private fun isPipPermissionGranted(): Boolean {
+        val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val mode = appOps.checkOpNoThrow(
+                AppOpsManager.OPSTR_PICTURE_IN_PICTURE,
+                android.os.Process.myUid(),
+                packageName
+            )
+            mode == AppOpsManager.MODE_ALLOWED
+        } else {
+            true
+        }
+    }
+
+    private val pipPermissionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (isPipPermissionGranted()) {
+            if (::player.isInitialized && wasPlayingBeforePause) {
+                player.playWhenReady = true
+            }
+            enterPictureInPictureModeIfAvailable()
+        } else {
+            Toast.makeText(this, "PiP permission denied", Toast.LENGTH_SHORT).show()
+            if (::player.isInitialized && wasPlayingBeforePause) {
+                player.playWhenReady = true
+            }
+        }
+    }
+
+    private fun requestPipPermission() {
+        if (::player.isInitialized) {
+            wasPlayingBeforePause = player.isPlaying
+            player.playWhenReady = false
+        }
+        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.fromParts("package", packageName, null)
+            }
+        } else {
+            Intent(Settings.ACTION_APPLICATION_SETTINGS)
+        }
+        pipPermissionLauncher.launch(intent)
+        val message = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            "Go to 'Picture-in-Picture' and enable it for this app"
+        } else {
+            "PiP settings not applicable on this device"
+        }
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
+
     private fun enterPictureInPictureModeIfAvailable() {
-        if (Build.VERSION.SDK_INT >= MIN_PIP_API) {
-            if (!packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
-                Log.w(TAG, "enterPictureInPictureModeIfAvailable: PiP not supported on this device")
-                Toast.makeText(
-                    this, "Picture-in-Picture mode not supported on this device", Toast.LENGTH_SHORT
-                ).show()
-                return
+        if (Build.VERSION.SDK_INT < MIN_PIP_API) return
+
+        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
+            Toast.makeText(this, "PiP not supported on this device", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (isInPictureInPictureMode) return
+
+        if (!isPipPermissionGranted()) {
+            requestPipPermission()
+            return
+        }
+
+        playerView.post {
+            val width = playerView.measuredWidth
+            val height = playerView.measuredHeight
+            if (width <= 0 || height <= 0) {
+                Toast.makeText(this, "Player not ready for PiP", Toast.LENGTH_SHORT).show()
+                return@post
             }
 
-            if (isInPictureInPictureMode) {
-                Log.d(TAG, "enterPictureInPictureModeIfAvailable: Already in PiP mode")
-                return
-            }
-
-            try {
-                playerView.post {
-                    val width = playerView.measuredWidth
-                    val height = playerView.measuredHeight
-
-                    if (width <= 0 || height <= 0) {
-                        Log.e(
-                            TAG,
-                            "enterPictureInPictureModeIfAvailable: Invalid playerView dimensions ($width x $height)"
-                        )
-                        Toast.makeText(
-                            this, "Cannot enter PiP mode: Player not ready", Toast.LENGTH_SHORT
-                        ).show()
-                        return@post
-                    }
-
-                    val aspectRatio = Rational(width, height)
-                    val params =
-                        PictureInPictureParams.Builder().setAspectRatio(aspectRatio).build()
-
-                    if (enterPictureInPictureMode(params)) {
-                        isInPictureInPictureMode = true
-                        Log.d(
-                            TAG,
-                            "enterPictureInPictureModeIfAvailable: Entered PiP mode successfully"
-                        )
-                    } else {
-                        Log.e(TAG, "enterPictureInPictureModeIfAvailable: Failed to enter PiP mode")
-                        Toast.makeText(this, "Failed to enter PiP mode", Toast.LENGTH_SHORT).show()
-                    }
+            val aspectRatio = Rational(16, 9)
+            val params = PictureInPictureParams.Builder().setAspectRatio(aspectRatio).build()
+            if (enterPictureInPictureMode(params)) {
+                isInPictureInPictureMode = true
+                Log.d(TAG, "Entered PiP mode successfully")
+                if (::player.isInitialized && wasPlayingBeforePause) {
+                    player.playWhenReady = true
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "enterPictureInPictureModeIfAvailable: Error - ${e.message}")
-                Toast.makeText(this, "Error entering PiP mode: ${e.message}", Toast.LENGTH_SHORT)
-                    .show()
+            } else {
+                Toast.makeText(this, "Failed to enter PiP mode", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -882,28 +909,25 @@ class PlayerActivity : BaseActivity() {
         this.isInPictureInPictureMode = isInPictureInPictureMode
 
         if (isInPictureInPictureMode) {
-
-            // Ẩn tất cả các thành phần trừ PlayerView
             btnBack.visibility = View.GONE
             tvTitle.visibility = View.GONE
             linearLayoutControlUp.visibility = View.GONE
             controlButtonsTop.visibility = View.GONE
             loadingProgress.visibility = View.GONE
-            playerView.useController = false // Ẩn controller mặc định
+            playerView.useController = false
             playerView.visibility = View.VISIBLE
-            // Tạm thời điều chỉnh PlayerView để chiếm toàn bộ không gian trong PiP
+            binding.frHome.visibility = View.GONE
+            binding.line.visibility = View.GONE
+
             val params = playerView.layoutParams as ConstraintLayout.LayoutParams
             params.height = ConstraintLayout.LayoutParams.MATCH_PARENT
             params.topToBottom = ConstraintLayout.LayoutParams.UNSET
-            params.bottomToTop = ConstraintLayout.LayoutParams.UNSET // Bỏ constraint bottom
+            params.bottomToTop = ConstraintLayout.LayoutParams.UNSET
             params.topMargin = 0
             params.bottomMargin = 0
             playerView.layoutParams = params
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-
-
         } else {
-            // Khôi phục giao diện ban đầu
             btnBack.visibility = View.VISIBLE
             tvTitle.visibility = View.VISIBLE
             linearLayoutControlUp.visibility = View.VISIBLE
@@ -913,7 +937,9 @@ class PlayerActivity : BaseActivity() {
             playerView.useController = true
             playerView.visibility = View.VISIBLE
 
-            // Khôi phục constraint ban đầu của PlayerView
+            binding.frHome.visibility = View.VISIBLE
+            binding.line.visibility = View.VISIBLE
+
             val params = playerView.layoutParams as ConstraintLayout.LayoutParams
             params.width = ConstraintLayout.LayoutParams.MATCH_PARENT
             params.height = resources.getDimensionPixelSize(R.dimen.player_height)
@@ -934,9 +960,12 @@ class PlayerActivity : BaseActivity() {
                 )
             )
             isFullScreen = false
+
+            if (::player.isInitialized && wasPlayingBeforePause) {
+                player.playWhenReady = true
+            }
         }
     }
-
 
     private fun updateTime() {
         Log.d(TAG, "updateTime: Updating position and duration")
@@ -955,7 +984,6 @@ class PlayerActivity : BaseActivity() {
         return String.format("%02d:%02d", minutes, remainingSeconds)
     }
 
-
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         Log.d(TAG, "onConfigurationChanged: Orientation changed to ${newConfig.orientation}")
@@ -965,15 +993,15 @@ class PlayerActivity : BaseActivity() {
             supportActionBar?.hide()
             Log.d(TAG, "onConfigurationChanged: Entered full screen mode")
             if (!isControlVisible) {
-                hideControlsInFullscreen() // Đảm bảo ẩn điều khiển khi vào fullscreen
-                touchOverlay.visibility = View.VISIBLE // Đảm bảo touchOverlay hiển thị
+                hideControlsInFullscreen()
+                touchOverlay.visibility = View.VISIBLE
             }
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
             supportActionBar?.show()
             Log.d(TAG, "onConfigurationChanged: Returned to portrait mode")
-            isControlVisible = false // Reset trạng thái khi thoát fullscreen
-            touchOverlay.visibility = View.GONE // Ẩn touchOverlay khi thoát fullscreen
+            isControlVisible = false
+            touchOverlay.visibility = View.GONE
         }
     }
 
@@ -987,9 +1015,10 @@ class PlayerActivity : BaseActivity() {
 
     override fun onStart() {
         super.onStart()
-        Log.d(TAG, "onStart: Initializing/resuming player")
         if (!::player.isInitialized) {
             setupPlayer()
+        } else if (wasPlayingBeforePause && !isInPictureInPictureMode) {
+            player.playWhenReady = true
         }
         if (Util.SDK_INT > 23) {
             player.playWhenReady = true
@@ -998,15 +1027,22 @@ class PlayerActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        channelsProvider.fetchChannelsFromRoom() // Tải lại danh sách kênh để đảm bảo đồng bộ
+        channelsProvider.fetchChannelsFromRoom()
+        if (!::player.isInitialized) {
+            setupPlayer()
+        } else if (wasPlayingBeforePause && !isInPictureInPictureMode) {
+            player.playWhenReady = true
+        }
     }
 
     override fun onPause() {
         super.onPause()
-        Log.d(TAG, "onPause: Pausing player if necessary")
-        if (Util.SDK_INT <= 23 && ::player.isInitialized) {
-            player.playWhenReady = false
-            playbackPosition = player.currentPosition
+        if (::player.isInitialized) {
+            wasPlayingBeforePause = player.isPlaying
+            if (Util.SDK_INT <= 23 || !isInPictureInPictureMode) {
+                player.playWhenReady = false
+                playbackPosition = player.currentPosition
+            }
         }
     }
 
@@ -1014,7 +1050,8 @@ class PlayerActivity : BaseActivity() {
         super.onStop()
         Log.d(TAG, "onStop: Handling player stop")
         if (::player.isInitialized) {
-            if (Util.SDK_INT > 23) {
+            wasPlayingBeforePause = player.isPlaying
+            if (Util.SDK_INT > 23 && !isInPictureInPictureMode) {
                 player.playWhenReady = false
                 playbackPosition = player.currentPosition
             }
@@ -1032,7 +1069,6 @@ class PlayerActivity : BaseActivity() {
         }
         controlHideHandler.removeCallbacks(hideControlRunnable)
 
-        // Yêu cầu làm mới dữ liệu khi thoát
         channelsProvider.requestRefresh()
         Log.d(TAG, "onDestroy: Requested ChannelsProvider to refresh")
     }

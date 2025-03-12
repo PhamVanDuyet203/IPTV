@@ -30,6 +30,7 @@ class IntroFragment : Fragment() {
         showNativeIntro(0)
         binding.textTitle.text = getString(R.string.title_onboard_1)
         binding.lnIntro.setBackgroundResource(R.drawable.onboard_img_1)
+        binding.dot.setImageResource(R.drawable.dot1)
         binding.textContent.text = getString(R.string.content_onboard_1)
     }
 
@@ -38,6 +39,7 @@ class IntroFragment : Fragment() {
         showNativeIntro(1)
         binding.textTitle.text = getString(R.string.title_onboard_2)
         binding.lnIntro.setBackgroundResource(R.drawable.onboard_img_2)
+        binding.dot.setImageResource(R.drawable.dot2)
         binding.textContent.text = getString(R.string.content_onboard_2)
     }
 
@@ -46,6 +48,7 @@ class IntroFragment : Fragment() {
         showNativeIntro(2)
         binding.textTitle.text = getString(R.string.title_onboard_3)
         binding.lnIntro.setBackgroundResource(R.drawable.onboard_img_3)
+        binding.dot.setImageResource(R.drawable.dot3)
         binding.textContent.text = getString(R.string.content_onboard_3)
     }
 
@@ -54,6 +57,7 @@ class IntroFragment : Fragment() {
         showNativeIntro(3)
         binding.textTitle.text = getString(R.string.title_onboard_4)
         binding.lnIntro.setBackgroundResource(R.drawable.onboard_img_4)
+        binding.dot.setImageResource(R.drawable.dot4)
         binding.textContent.text = getString(R.string.content_onboard_4)
     }
 
@@ -383,13 +387,13 @@ class IntroFragment : Fragment() {
         binding.apply {
             if (!isShow && AdmobUtils.isNetworkConnected(requireActivity())) {
                 scrollView.gone()
-                lnNext.gone()
+            //    lnNext.gone()
                 flNative.gone()
                 frNativeFull.visible()
             } else {
                 scrollView.visible()
                 flNative.visible()
-                lnNext.visible()
+            //     lnNext.gone()
                 frNativeFull.gone()
             }
         }

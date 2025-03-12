@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
+import android.text.TextPaint
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
@@ -12,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -21,7 +23,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.tabs.TabLayout
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.adapter.ChannelsAdapter
 import com.iptv.smart.player.player.streamtv.live.watch.dialog.ImportPlaylistDialog
@@ -30,21 +31,28 @@ import com.iptv.smart.player.player.streamtv.live.watch.provider.ChannelsProvide
 
 class ChannelFragment : Fragment() {
 
-    private lateinit var tabLayout: TabLayout
+    private lateinit var tabContainer: LinearLayout
     private lateinit var recyclerView: RecyclerView
     private lateinit var emptyStateLayout: View
     private lateinit var loadingPanel: RelativeLayout
     private lateinit var channelAdapter: ChannelsAdapter
     private val channelsProvider: ChannelsProvider by viewModels()
-
-
+    private val tabViews = mutableListOf<View>()
+    private var selectedTabIndex = 0
+    private val tabTitles by lazy {
+        listOf(
+            getString(R.string.all_channel),
+            getString(R.string.favorite_channel),
+            getString(R.string.recent_channel)
+        )
+    }
 
     private val addPlaylistLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK) {
             Log.d("ChannelFragment", "Playlist added, forcing refresh")
             loadingPanel.visibility = View.VISIBLE
             channelsProvider.fetchChannelsFromRoom()
-            updateChannelList(tabLayout.selectedTabPosition)
+            updateChannelList(selectedTabIndex)
         }
     }
 
@@ -52,7 +60,7 @@ class ChannelFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         val view = inflater.inflate(R.layout.fragment_channel, container, false)
-        tabLayout = view.findViewById(R.id.tabLayout)
+        tabContainer = view.findViewById(R.id.tabContainer)
         recyclerView = view.findViewById(R.id.recyclerViewChannels)
         emptyStateLayout = view.findViewById(R.id.emptyStateLayout)
         loadingPanel = view.findViewById(R.id.loadingPanel)
@@ -60,15 +68,15 @@ class ChannelFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         channelAdapter = ChannelsAdapter(
             channels = mutableListOf(),
-            onChannelClicked = { channel -> nextActivity(channel)},
+            onChannelClicked = { channel -> nextActivity(channel) },
             onFavoriteClicked = { channel -> toggleFavorite(channel) },
             onRenameChannel = { channel, newName ->
                 channelsProvider.updateChannel(channel.copy(name = newName))
-                updateChannelList(tabLayout.selectedTabPosition)
+                updateChannelList(selectedTabIndex)
             },
             onDeleteChannel = { channel ->
                 channelsProvider.deleteChannel(channel)
-                updateChannelList(tabLayout.selectedTabPosition)
+                updateChannelList(selectedTabIndex)
             }
         )
 
@@ -84,11 +92,12 @@ class ChannelFragment : Fragment() {
 
         return view
     }
-    private fun nextActivity(channel: Channel){
+
+    private fun nextActivity(channel: Channel) {
         val intent = Intent(requireContext(), PlayerActivity::class.java).apply {
             putExtra("channel", channel)
         }
-        startActivityForResult(intent,1000)
+        startActivityForResult(intent, 1000)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -98,20 +107,19 @@ class ChannelFragment : Fragment() {
             loadingPanel.visibility = View.VISIBLE
             channelsProvider.fetchChannelsFromRoom(true)
             channelsProvider.channels.observe(viewLifecycleOwner) { channels ->
-                val currentTab = tabLayout.selectedTabPosition
-                if (currentTab == 1) {
+                if (selectedTabIndex == 1) {
                     channelsProvider.filterChannels("favorite")
-                } else if (currentTab == 2) {
+                } else if (selectedTabIndex == 2) {
                     channelsProvider.filterChannels("recent")
                 }
-                updateChannelList(currentTab)
+                updateChannelList(selectedTabIndex)
             }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        updateChannelList(tabLayout.selectedTabPosition)
+        updateChannelList(selectedTabIndex)
     }
 
     private fun setupAddButton(view: View) {
@@ -145,7 +153,8 @@ class ChannelFragment : Fragment() {
                             widget.setBackgroundColor(android.graphics.Color.TRANSPARENT)
                         }, 200)
                     }
-                    override fun updateDrawState(ds: android.text.TextPaint) {
+
+                    override fun updateDrawState(ds: TextPaint) {
                         ds.isUnderlineText = false
                         ds.color = resources.getColor(R.color.add_btn)
                     }
@@ -162,56 +171,55 @@ class ChannelFragment : Fragment() {
     }
 
     private fun setupTabs() {
-        val tabTitles = listOf(
-            getString(R.string.all_channel),
-            getString(R.string.favorite_channel),
-            getString(R.string.recent_channel)
-        )
+        tabTitles.forEachIndexed { index, title ->
+            val tabView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.custom_tab, tabContainer, false)
+            val tabText = tabView.findViewById<TextView>(R.id.tab_text)
+            val tabIcon = tabView.findViewById<ImageView>(R.id.tab_icon)
 
-        for (i in tabTitles.indices) {
-            val tab = tabLayout.newTab()
-            val customView = LayoutInflater.from(requireContext()).inflate(R.layout.custom_tab, null)
-            val tabText = customView.findViewById<TextView>(R.id.tab_text)
-            val tabIcon = customView.findViewById<ImageView>(R.id.tab_icon)
+            tabText.text = title
 
-            tabText.text = tabTitles[i]
-            tab.customView = customView
-            tabLayout.addTab(tab, i == 0)
-
-            if (i == 0) {
-                customView.setBackgroundResource(R.drawable.tab_selected_background)
+            if (index == 0) {
+                tabView.setBackgroundResource(R.drawable.tab_selected_background)
                 tabText.typeface = ResourcesCompat.getFont(requireContext(), R.font.inter_bold)
                 tabIcon.visibility = View.VISIBLE
             } else {
-                customView.setBackgroundResource(R.drawable.tab_background)
+                tabView.setBackgroundResource(R.drawable.tab_background)
                 tabText.typeface = ResourcesCompat.getFont(requireContext(), R.font.inter_regular)
                 tabIcon.visibility = View.GONE
             }
+
+            tabView.setOnClickListener {
+                selectTab(index)
+            }
+
+            tabViews.add(tabView)
+            tabContainer.addView(tabView)
+        }
+    }
+
+    private fun selectTab(index: Int) {
+        if (index == selectedTabIndex) return
+
+        // Deselect tab cũ
+        tabViews[selectedTabIndex].apply {
+            setBackgroundResource(R.drawable.tab_background)
+            findViewById<TextView>(R.id.tab_text)?.typeface =
+                ResourcesCompat.getFont(requireContext(), R.font.inter_regular)
+            findViewById<ImageView>(R.id.tab_icon)?.visibility = View.GONE
         }
 
-        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                tab?.customView?.apply {
-                    setBackgroundResource(R.drawable.tab_selected_background)
-                    findViewById<TextView>(R.id.tab_text).typeface = ResourcesCompat.getFont(requireContext(), R.font.inter_bold)
-                    findViewById<ImageView>(R.id.tab_icon).visibility = View.VISIBLE
-                }
-                tab?.position?.let {
-                    channelsProvider.setTabPosition(it)
-                    updateChannelList(it)
-                }
-            }
+        // Select tab mới
+        tabViews[index].apply {
+            setBackgroundResource(R.drawable.tab_selected_background)
+            findViewById<TextView>(R.id.tab_text)?.typeface =
+                ResourcesCompat.getFont(requireContext(), R.font.inter_bold)
+            findViewById<ImageView>(R.id.tab_icon)?.visibility = View.VISIBLE
+        }
 
-            override fun onTabUnselected(tab: TabLayout.Tab?) {
-                tab?.customView?.apply {
-                    setBackgroundResource(R.drawable.tab_background)
-                    findViewById<TextView>(R.id.tab_text).typeface = ResourcesCompat.getFont(requireContext(), R.font.inter_regular)
-                    findViewById<ImageView>(R.id.tab_icon).visibility = View.GONE
-                }
-            }
-
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
-        })
+        selectedTabIndex = index
+        channelsProvider.setTabPosition(index)
+        updateChannelList(index)
     }
 
     private fun updateChannelList(tabPosition: Int) {
@@ -237,14 +245,14 @@ class ChannelFragment : Fragment() {
     private fun observeChannels() {
         channelsProvider.channels.observe(viewLifecycleOwner) { channels ->
             loadingPanel.visibility = View.GONE
-            if (tabLayout.selectedTabPosition == 0) {
+            if (selectedTabIndex == 0) {
                 updateUI(channels ?: emptyList())
             }
         }
 
         channelsProvider.filteredChannels.observe(viewLifecycleOwner) { filteredChannels ->
             loadingPanel.visibility = View.GONE
-            if (tabLayout.selectedTabPosition != 0) {
+            if (selectedTabIndex != 0) {
                 updateUI(filteredChannels ?: emptyList())
             }
         }
@@ -257,17 +265,15 @@ class ChannelFragment : Fragment() {
             }
         }
 
-        // Quan sát yêu cầu làm mới từ ChannelsProvider
         channelsProvider.shouldRefresh.observe(viewLifecycleOwner) { shouldRefresh ->
             if (shouldRefresh == true) {
                 Log.d("ChannelFragment", "Refresh requested, forcing reload of channels")
                 loadingPanel.visibility = View.VISIBLE
-                channelsProvider.fetchChannelsFromRoom(true) // Buộc làm mới dữ liệu
+                channelsProvider.fetchChannelsFromRoom(true)
                 channelsProvider.channels.observe(viewLifecycleOwner) { channels ->
-                    // Sau khi dữ liệu được tải lại, cập nhật giao diện
-                    updateChannelList(tabLayout.selectedTabPosition)
+                    updateChannelList(selectedTabIndex)
                 }
-                channelsProvider.resetRefresh() // Reset flag sau khi yêu cầu làm mới
+                channelsProvider.resetRefresh()
             }
         }
     }
@@ -284,5 +290,10 @@ class ChannelFragment : Fragment() {
             else -> return
         }
         addPlaylistLauncher.launch(intent)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        tabViews.clear()
     }
 }

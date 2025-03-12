@@ -34,13 +34,10 @@ class VideoAdapter(
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         val videoItem = videoList[position]
 
-        // Hiển thị tên file video
         holder.title.text = videoItem.fileName
 
-        // Hiển thị thumbnail video
         holder.thumbnail.setImageBitmap(getVideoThumbnail(videoItem.uri))
 
-        // Xử lý sự kiện xóa
         holder.btnDelete.setOnClickListener {
             onDelete(videoItem)
         }
@@ -48,7 +45,6 @@ class VideoAdapter(
 
     override fun getItemCount() = videoList.size
 
-    // Lấy thumbnail video từ Uri
     private fun getVideoThumbnail(uri: Uri): Bitmap? {
         return try {
             val retriever = MediaMetadataRetriever()

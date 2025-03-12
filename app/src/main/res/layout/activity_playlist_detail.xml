@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:background="@color/white">
 
-    <!-- Nút Back -->
     <ImageView
         android:id="@+id/btnBack"
         android:layout_width="wrap_content"
@@ -18,7 +17,6 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="22dp" />
 
-    <!-- Tiêu đề -->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="0dp"
@@ -39,7 +37,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="28dp"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="72dp"/>
+        android:layout_marginEnd="54dp"/>
 
     <LinearLayout
         android:id="@+id/toolbar"
@@ -68,7 +66,7 @@
                 android:layout_weight="1"
                 android:hint="@string/search_channel"
                 android:fontFamily="@font/inter_regular"
-                android:maxLines="1"
+                android:singleLine="true"
                 android:paddingTop="14dp"
                 android:paddingBottom="14dp"
                 android:paddingStart="12dp"
@@ -109,10 +107,45 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
+    <ImageView
+        android:id="@+id/imgNotFound"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_not_found"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="38dp"
+        />
+
+    <TextView
+        android:id="@+id/txtNotFound"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:visibility="gone"
+        android:text="@string/not_found"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:fontFamily="@font/inter_regular"
+        android:gravity="center"
+        android:textColor="#3D4949"
+        android:layout_marginTop="18dp"
+        app:layout_constraintTop_toBottomOf="@+id/imgNotFound"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
+
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
+        android:paddingTop="14dp"
+        android:paddingLeft="14dp"
+        android:paddingRight="14dp"
+        android:paddingBottom="14dp"
         android:id="@+id/recyclerView"
         android:layout_marginBottom="24dp"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"

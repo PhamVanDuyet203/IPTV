@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iptv.smart.player.player.streamtv.live.watch.db.AppDatabase
 import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -80,6 +81,7 @@ class ChannelsProvider : ViewModel() {
             loadChannels()
         }
     }
+
 
     private suspend fun loadChannels() {
         Log.d("ChannelsProvider", "Loading channels")

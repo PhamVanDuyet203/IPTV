@@ -20,7 +20,6 @@
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="8dp" />
 
-            <!-- Tiêu đề -->
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="0dp"
@@ -41,11 +40,10 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="14dp"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="72dp"/>
+            android:layout_marginEnd="54dp"/>
 
 
 
-    <!-- Label "Playlist name" -->
     <TextView
         android:id="@+id/tvPlaylistName"
         android:layout_width="wrap_content"
@@ -58,7 +56,6 @@
         app:layout_constraintTop_toBottomOf="@id/tvTitle"
         android:layout_marginTop="24dp"/>
 
-    <!-- Ô nhập "Playlist name" -->
     <EditText
         android:id="@+id/etPlaylistName"
         android:layout_width="match_parent"
@@ -78,7 +75,18 @@
         android:gravity="center_vertical"
         android:layout_marginTop="8dp"/>
 
-    <!-- Label "Playlist URL" -->
+    <TextView
+        android:id="@+id/errorTextName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Please enter a name"
+        app:layout_constraintTop_toBottomOf="@+id/etPlaylistName"
+        android:visibility="gone"
+        android:fontFamily="@font/inter_italic"
+        android:textSize="12sp"
+        android:textColor="@color/gnt_red"
+        android:layout_marginTop="8dp"/>
+
     <TextView
         android:id="@+id/tvPlaylistUrl"
         android:layout_width="wrap_content"
@@ -88,10 +96,9 @@
         android:textColor="#171D1E"
         android:fontFamily="@font/inter_regular"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etPlaylistName"
+        app:layout_constraintTop_toBottomOf="@id/errorTextName"
         android:layout_marginTop="16dp"/>
 
-    <!-- Ô nhập "Playlist URL" -->
     <EditText
         android:id="@+id/etPlaylistUrl"
         android:layout_width="match_parent"
@@ -109,6 +116,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:singleLine="true"
         android:gravity="center_vertical"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:id="@+id/errorTextURL"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Please fill in a link"
+        app:layout_constraintTop_toBottomOf="@+id/etPlaylistUrl"
+        android:visibility="gone"
+        android:fontFamily="@font/inter_italic"
+        android:textSize="12sp"
+        android:textColor="@color/gnt_red"
         android:layout_marginTop="8dp"/>
 
 

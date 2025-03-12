@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">IPTV Smart Player: Stream TV</string>
-    <string name="title_language">भाषा</string>
+    <string name="title_language">Language</string>
     <string name="title_onboard_1">अपने पसंदीदा शो स्ट्रीम करें</string>
     <string name="content_onboard_1">हजारों फिल्मों, टीवी शो और बहुत कुछ के साथ असीमित मनोरंजन का आनंद लें।</string>
     <string name="title_onboard_2">अंतहीन मनोरंजन की खोज करें</string>
@@ -77,21 +77,21 @@
     <string name="favorite_channel">पसंदीदा</string>
     <string name="recent_channel">हाल ही का</string>
     <string name="do_you_want_to_delete_channel">क्या आप %1$s चैनल हटाना चाहते हैं?</string>
-    <string name="do_you_want_to_delete_playlist">क्या आप हटाना चाहते हैं </string>
+    <string name="do_you_want_to_delete_playlist">क्या आप हटाना चाहते हैं %s</string>
     <string name="search_channel">चैनल खोजें...</string>
     <string name="search_channel_detail">चैनल खोजें...</string>
-    <string name="english">अंग्रेज़ी</string>
-    <string name="korean">कोरियाई</string>
-    <string name="spanish">स्पैनिश</string>
-    <string name="french">फ़्रेंच</string>
-    <string name="arabic">अरबी</string>
-    <string name="bengali">बंगाली</string>
-    <string name="russian">रूसी</string>
-    <string name="portuguese">पुर्तगाली</string>
-    <string name="indonesia">इंडोनेशिया</string>
-    <string name="hindi">हिंदी</string>
-    <string name="italian">इतालवी</string>
-    <string name="german">जर्मन</string>
+    <string name="english">English</string>
+    <string name="korean">Korean</string>
+    <string name="spanish">Spanish</string>
+    <string name="french">French</string>
+    <string name="arabic">Arabic</string>
+    <string name="bengali">Bengali</string>
+    <string name="russian">Russian</string>
+    <string name="portuguese">Portuguese</string>
+    <string name="indonesia">Indonesia</string>
+    <string name="hindi">Hindi</string>
+    <string name="italian">Italian</string>
+    <string name="german">German</string>
     <string name="don_t_have_any_playlists_yet_ft_home">अभी तक कोई प्लेलिस्ट नहीं है</string>
     <string name="press_the_add_button_to_create_one_fr_home">जोड़ें बटन दबाएं एक बनाने के लिए।</string>
     <string name="channel_unavailable">चैनल अनुपलब्ध</string>
