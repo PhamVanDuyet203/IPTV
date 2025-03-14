@@ -118,8 +118,7 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        AppOpenManager.getInstance().enableAppResumeWithActivity(ActivityImportPlaylistM3U::class.java)
-
+        AppOpenManager.getInstance().enableAppResumeWithActivity(ActivityAddPlaylistFromDevice::class.java)
     }
     private fun openFilePicker() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -127,7 +126,7 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
             addCategory(Intent.CATEGORY_OPENABLE)
         }
         videoPicker.launch(intent)
-        AppOpenManager.getInstance().disableAppResumeWithActivity(ActivityImportPlaylistM3U::class.java)
+        AppOpenManager.getInstance().disableAppResumeWithActivity(ActivityAddPlaylistFromDevice::class.java)
     }
 
     private fun removeVideo(videoItem: VideoItem) {

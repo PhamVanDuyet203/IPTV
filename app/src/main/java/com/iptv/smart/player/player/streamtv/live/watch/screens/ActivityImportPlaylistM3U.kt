@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
+import com.admob.max.dktlibrary.AppOpenManager
 import com.iptv.smart.player.player.streamtv.live.watch.ChannelListActivity
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
@@ -131,6 +132,12 @@ class ActivityImportPlaylistM3U : BaseActivity() {
             addCategory(Intent.CATEGORY_OPENABLE)
         }
         filePicker.launch(intent)
+        AppOpenManager.getInstance().disableAppResumeWithActivity(ActivityImportPlaylistM3U::class.java)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AppOpenManager.getInstance().enableAppResumeWithActivity(ActivityImportPlaylistM3U::class.java)
     }
 
     private fun removeSelectedFile() {
