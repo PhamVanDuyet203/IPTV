@@ -286,7 +286,6 @@
         android:id="@+id/controlButtonsTop1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
         android:layout_marginStart="48dp"
         android:layout_marginEnd="48dp"
         android:gravity="center"
@@ -295,7 +294,6 @@
         android:weightSum="4"
         app:layout_constraintBottom_toTopOf="@+id/line">
 
-        <!-- Nút Mirroring -->
         <LinearLayout
             android:id="@+id/btn_mirroring1"
             android:layout_width="0dp"
@@ -328,7 +326,6 @@
                 android:textSize="12sp" />
         </LinearLayout>
 
-        <!-- Nút PiP -->
         <LinearLayout
             android:id="@+id/btn_pip1"
             android:layout_width="0dp"
@@ -348,7 +345,6 @@
                 android:layout_marginRight="8dp"
                 android:src="@drawable/ic_pips"
                 android:theme="@style/ClickableView"
-
                 app:tint="@color/white" />
 
             <TextView
@@ -394,7 +390,6 @@
                 android:textSize="12sp" />
         </LinearLayout>
 
-        <!-- Nút Lock -->
         <LinearLayout
             android:id="@+id/btn_lock1"
             android:layout_width="0dp"

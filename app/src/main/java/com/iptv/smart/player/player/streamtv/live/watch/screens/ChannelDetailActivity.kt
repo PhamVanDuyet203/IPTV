@@ -28,6 +28,8 @@ import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
 import com.iptv.smart.player.player.streamtv.live.watch.provider.ChannelsProvider
 import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
 import com.iptv.smart.player.player.streamtv.live.watch.screens.PlayerActivity
+import com.iptv.smart.player.player.streamtv.live.watch.util.parseM3U
+import com.iptv.smart.player.player.streamtv.live.watch.util.parseM3UFromFile
 import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

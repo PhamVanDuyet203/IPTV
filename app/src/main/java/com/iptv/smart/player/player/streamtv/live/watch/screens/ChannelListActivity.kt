@@ -36,6 +36,8 @@ import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.ActivityPlaylistDetailBinding
 import com.iptv.smart.player.player.streamtv.live.watch.db.PlaylistEntity
 import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
+import com.iptv.smart.player.player.streamtv.live.watch.util.parseM3U
+import com.iptv.smart.player.player.streamtv.live.watch.util.parseM3UFromFile
 import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -98,7 +98,10 @@ class PlayerActivity : BaseActivity() {
     private val binding by lazy { CustomControllerChannelBinding.inflate(layoutInflater) }
     private var isControlVisible = false
     private val controlHideHandler = Handler(Looper.getMainLooper())
-    private val hideControlRunnable = Runnable { binding.controlButtonsTop1.visibility = View.GONE }
+    private val hideControlRunnable = Runnable {
+        binding.controlButtonsTop1.visibility = View.GONE
+        playerView.hideController()
+    }
     private val CONTROL_HIDE_DELAY = 3000L
     private lateinit var touchOverlay: View
     private lateinit var frHome: FrameLayout
@@ -610,8 +613,8 @@ class PlayerActivity : BaseActivity() {
             }
 
             if (isFullScreen) {
-                playerView.useController = false
-                playerView.hideController()
+                playerView.useController = true
+                playerView.showController()
                 controlHideHandler.removeCallbacks(hideControlRunnable)
                 binding.controlButtonsTop1.visibility = View.VISIBLE
             }
@@ -699,6 +702,7 @@ class PlayerActivity : BaseActivity() {
     private fun setFullScreen() {
         Log.d(TAG, "setFullScreen: Setting up full screen button listener")
         imageViewFullScreen.setOnClickListener {
+            Log.d(TAG, "playerView.useController = ${playerView.useController}, isControllerVisible = ${playerView.isControllerVisible}")
             isFullScreen = !isFullScreen
             Log.d(TAG, "setFullScreen: Full screen toggled to $isFullScreen")
             imageViewFullScreen.setImageDrawable(
@@ -717,7 +721,7 @@ class PlayerActivity : BaseActivity() {
             val controlButtonsTop1Params = binding.controlButtonsTop1.layoutParams as ConstraintLayout.LayoutParams
 
             if (isFullScreen) {
-                binding.controlButtonsTop1.visibility = View.GONE
+                binding.controlButtonsTop1.visibility = View.VISIBLE
                 binding.btnMirroring1.visible()
                 binding.btnPip1.visible()
                 binding.root.setBackgroundColor(getColor(R.color.black))
@@ -727,7 +731,8 @@ class PlayerActivity : BaseActivity() {
                 controlButtonsTop.visibility = View.GONE
                 loadingProgress.visibility = View.GONE
                 playerView.useController = true
-                playerView.hideController()
+                playerView.showController()
+                isControlVisible = true
 
                 val params = playerView.layoutParams as ConstraintLayout.LayoutParams
                 params.height = ConstraintLayout.LayoutParams.MATCH_PARENT
@@ -736,7 +741,6 @@ class PlayerActivity : BaseActivity() {
                 params.topMargin = 0
                 params.bottomMargin = 0
                 playerView.layoutParams = params
-
 
                 touchOverlay.visibility = View.VISIBLE
                 val overlayParams = touchOverlay.layoutParams as ConstraintLayout.LayoutParams
@@ -751,6 +755,8 @@ class PlayerActivity : BaseActivity() {
                         if (isLock) {
                             toolbar.visible()
                             binding.controlButtonsTop1.visibility = View.VISIBLE
+                            playerView.useController = true
+                            playerView.showController()
                             controlHideHandler.removeCallbacks(hideControlRunnable)
                             controlHideHandler.postDelayed(hideControlRunnable, CONTROL_HIDE_DELAY)
                         } else {
@@ -761,11 +767,6 @@ class PlayerActivity : BaseActivity() {
 
             toolbar.visible()
 
-                controlButtonsTop1Params.topToBottom = ConstraintLayout.LayoutParams.UNSET
-                controlButtonsTop1Params.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
-                controlButtonsTop1Params.bottomMargin = 0
-                controlButtonsTop1Params.topMargin = 0
-                binding.controlButtonsTop1.layoutParams = controlButtonsTop1Params
 
                 setupControlsForFullscreen()
             } else {
@@ -802,11 +803,6 @@ class PlayerActivity : BaseActivity() {
 
                 toolbar.gone()
 
-                controlButtonsTop1Params.topToBottom = R.id.playerView
-                controlButtonsTop1Params.bottomToBottom = ConstraintLayout.LayoutParams.UNSET
-                controlButtonsTop1Params.topMargin = 24
-                controlButtonsTop1Params.bottomMargin = 0
-                binding.controlButtonsTop1.layoutParams = controlButtonsTop1Params
 
                 tvTitle.setTextColor(Color.parseColor("#000000"))
                 btnBack.clearColorFilter()
@@ -905,9 +901,12 @@ class PlayerActivity : BaseActivity() {
 
     private fun showControlsInFullscreen() {
         Log.d(TAG, "showControlsInFullscreen: Showing controls")
+        Log.d(TAG, "playerView.useController = ${playerView.useController}, isControllerVisible = ${playerView.isControllerVisible}")
         isControlVisible = true
 
         binding.controlButtonsTop1.visibility = View.VISIBLE
+        playerView.useController = true
+        playerView.showController()
 
         controlHideHandler.removeCallbacks(hideControlRunnable)
         controlHideHandler.postDelayed(hideControlRunnable, CONTROL_HIDE_DELAY)
@@ -916,8 +915,6 @@ class PlayerActivity : BaseActivity() {
         tvTitle.visibility = if (isLock) View.GONE else View.VISIBLE
         controlButtonsTop.visibility = View.GONE
 
-        playerView.useController = true
-        playerView.showController()
 
         tvTitle.setTextColor(Color.parseColor("#FFFFFF"))
         findViewById<TextView>(R.id.txt_mirroring1)?.setTextColor(Color.parseColor("#FFFFFF"))
@@ -928,18 +925,10 @@ class PlayerActivity : BaseActivity() {
         exoPosition.setTextColor(Color.parseColor("#FFFFFF"))
         exoDuration.setTextColor(Color.parseColor("#FFFFFF"))
 
-        findViewById<ImageView>(R.id.img_mirroring1)?.setColorFilter(
-            Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN
-        )
-        findViewById<ImageView>(R.id.img_pip1)?.setColorFilter(
-            Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN
-        )
-        findViewById<ImageView>(R.id.img_fav1)?.setColorFilter(
-            Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN
-        )
-        findViewById<ImageView>(R.id.img_lock1)?.setColorFilter(
-            Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN
-        )
+        findViewById<ImageView>(R.id.img_mirroring1)?.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
+        findViewById<ImageView>(R.id.img_pip1)?.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
+        findViewById<ImageView>(R.id.img_fav1)?.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
+        findViewById<ImageView>(R.id.img_lock1)?.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
         btnBack.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
 
         exoPlay.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
@@ -953,25 +942,23 @@ class PlayerActivity : BaseActivity() {
         binding.controlButtonsTop1.getChildAt(2)?.setBackgroundResource(R.drawable.bg_menu_playcontrol1)
         binding.controlButtonsTop1.getChildAt(3)?.setBackgroundResource(R.drawable.bg_menu_playcontrol1)
 
+        // Cập nhật ràng buộc
         val controlButtonsParams = binding.controlButtonsTop1.layoutParams as ConstraintLayout.LayoutParams
-        controlButtonsParams.topToBottom = ConstraintLayout.LayoutParams.UNSET
-        controlButtonsParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
-        controlButtonsParams.bottomMargin =
-            resources.getDimensionPixelSize(R.dimen.fullscreen_control_margin_bottom) * 2
+        controlButtonsParams.bottomToTop = R.id.fr_home // Đáy gắn với đỉnh của frHome
+        controlButtonsParams.bottomToBottom = ConstraintLayout.LayoutParams.UNSET // Xóa ràng buộc đáy với parent
+        controlButtonsParams.topToBottom = ConstraintLayout.LayoutParams.UNSET // Xóa ràng buộc đỉnh nếu không cần
+        controlButtonsParams.bottomMargin = 8 // Khoảng cách 8dp
         binding.controlButtonsTop1.layoutParams = controlButtonsParams
 
-        val timeBar =
-            linearLayoutControlBottom.findViewById<com.google.android.exoplayer2.ui.DefaultTimeBar>(
-                R.id.exo_progress
-            )
+        val timeBar = linearLayoutControlBottom.findViewById<com.google.android.exoplayer2.ui.DefaultTimeBar>(R.id.exo_progress)
         timeBar?.visibility = View.VISIBLE
 
         touchOverlay.isClickable = true
-
     }
 
     private fun hideControlsInFullscreen() {
         Log.d(TAG, "hideControlsInFullscreen: Hiding controls")
+        Log.d("TAGffffffffffffffffffff", "playerView.useController = ${playerView.useController}, isControllerVisible = ${playerView.isControllerVisible}")
         isControlVisible = false
 
         btnBack.visibility = View.GONE
@@ -979,7 +966,7 @@ class PlayerActivity : BaseActivity() {
         binding.controlButtonsTop1.visibility = View.GONE
         loadingProgress.visibility = View.GONE
 
-        playerView.useController = false
+        playerView.useController = true
         playerView.hideController()
 
         tvTitle.setTextColor(Color.parseColor("#000000"))
@@ -1215,7 +1202,7 @@ class PlayerActivity : BaseActivity() {
             supportActionBar?.hide()
             Log.d(TAG, "onConfigurationChanged: Entered full screen mode")
             if (!isControlVisible) {
-                hideControlsInFullscreen()
+                showControlsInFullscreen()
                 touchOverlay.visibility = View.VISIBLE
             }
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
