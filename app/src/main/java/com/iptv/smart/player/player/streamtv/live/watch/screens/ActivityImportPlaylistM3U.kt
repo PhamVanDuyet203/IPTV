@@ -20,6 +20,7 @@ import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.INTER_SAVE_ADD
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
+import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.visible
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.ImportPlaylistDeviceBinding
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.ImportPlaylistM3uBinding
@@ -67,7 +68,9 @@ class ActivityImportPlaylistM3U : BaseActivity() {
         btnBack.setOnClickListener { finish() }
         lnUpload.setOnClickListener { openFilePicker() }
         btnRemoveFile.setOnClickListener { removeSelectedFile() }
-        btnAddPlaylist.setOnClickListener { savePlaylist() }
+        btnAddPlaylist.setOnClickListener {
+            savePlaylist()
+        }
 
         binding.etPlaylistName.addTextChangedListener() {
             binding.btnAddPlaylist.visibility = View.VISIBLE
@@ -166,20 +169,25 @@ class ActivityImportPlaylistM3U : BaseActivity() {
         } else {
             val currentTime = System.currentTimeMillis()
             if (isSaving || currentTime - lastSaveTime < debounceDuration) return
+
             isSaving = true
             lastSaveTime = currentTime
             binding.btnAddPlaylist.isEnabled = false
+            binding.progressBar.visible()
+
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val existingPlaylist = playlistDao.getPlaylistByName(name)
                     if (existingPlaylist != null) {
                         withContext(Dispatchers.Main) {
+                            binding.progressBar.gone()
                             etPlaylistName.error = "Playlist name already exists"
                             binding.btnAddPlaylist.isEnabled = true
                             isSaving = false
                         }
                         return@launch
                     }
+
                     val channelCount = countChannelsInM3U(selectedFileUri!!)
                     val playlist = PlaylistEntity(
                         name = name,
@@ -190,7 +198,6 @@ class ActivityImportPlaylistM3U : BaseActivity() {
                     playlistDao.insertPlaylist(playlist)
                     withContext(Dispatchers.Main) {
                         startAds()
-                        setResult(RESULT_OK)
                     }
                 } finally {
                     isSaving = false
@@ -210,6 +217,7 @@ class ActivityImportPlaylistM3U : BaseActivity() {
             "0" -> {
                 setResult(RESULT_OK)
                 finish()
+                binding.progressBar.gone()
             }
 
             else -> {
@@ -218,10 +226,13 @@ class ActivityImportPlaylistM3U : BaseActivity() {
                     AdsManager.loadAndShowInter(this, INTER_SAVE_ADD) {
                         setResult(RESULT_OK)
                         finish()
+                        binding.progressBar.gone()
                     }
                 } else {
                     setResult(RESULT_OK)
                     finish()
+                    binding.progressBar.gone()
+
                 }
             }
         }

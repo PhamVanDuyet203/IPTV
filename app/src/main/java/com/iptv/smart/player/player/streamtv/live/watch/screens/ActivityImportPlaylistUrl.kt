@@ -11,6 +11,7 @@ import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.INTER_SAVE_ADD
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
+import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.visible
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.ImportPlaylistUrlBinding
 import com.iptv.smart.player.player.streamtv.live.watch.db.AppDatabase
@@ -48,7 +49,8 @@ class ActivityImportPlaylistUrl : BaseActivity() {
         tvTitle.isSelected = true
 
         btnBack.setOnClickListener { finish() }
-        btnAddPlaylist.setOnClickListener { savePlaylist() }
+        btnAddPlaylist.setOnClickListener {
+            savePlaylist() }
 
         binding.etPlaylistName.addTextChangedListener() {
             binding.errorTextName.visibility = View.GONE
@@ -92,6 +94,7 @@ class ActivityImportPlaylistUrl : BaseActivity() {
         else {
             val currentTime = System.currentTimeMillis()
             if (isSaving || currentTime - lastSaveTime < debounceDuration) return
+            binding.progressBar.visible()
 
             isSaving = true
             lastSaveTime = currentTime
@@ -101,6 +104,7 @@ class ActivityImportPlaylistUrl : BaseActivity() {
                     val existingPlaylist = playlistDao.getPlaylistByName(name)
                     if (existingPlaylist != null) {
                         withContext(Dispatchers.Main) {
+                            binding.progressBar.gone()
                             etPlaylistName.error = "Playlist name already exists"
                             binding.btnAddPlaylist.isEnabled = true
                             isSaving = false
@@ -110,6 +114,8 @@ class ActivityImportPlaylistUrl : BaseActivity() {
                     val channelCount = fetchAndCountChannelsFromUrl(url)
                     if (channelCount == 0) {
                         withContext(Dispatchers.Main) {
+                            binding.progressBar.gone()
+
                             etPlaylistUrl.error = "Invalid URL or no channels found"
                         }
                         return@launch
@@ -125,7 +131,6 @@ class ActivityImportPlaylistUrl : BaseActivity() {
 
                     withContext(Dispatchers.Main) {
                         startAds()
-                        setResult(RESULT_OK)
                     }
                 } finally {
                     isSaving = false
@@ -147,16 +152,22 @@ class ActivityImportPlaylistUrl : BaseActivity() {
     private fun startAds() {
         when (RemoteConfig.INTER_SAVE_ADD_050325) {
             "0" -> {
+                setResult(RESULT_OK)
                 finish()
+                binding.progressBar.gone()
             }
             else -> {
                 Common.countInterAdd++
                 if (Common.countInterAdd % RemoteConfig.INTER_SAVE_ADD_050325.toInt() == 0) {
                     AdsManager.loadAndShowInter(this, INTER_SAVE_ADD) {
+                        setResult(RESULT_OK)
                         finish()
+                        binding.progressBar.gone()
                     }
                 } else {
+                    setResult(RESULT_OK)
                     finish()
+                    binding.progressBar.gone()
                 }
             }
         }

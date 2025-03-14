@@ -1,7 +1,5 @@
 package com.iptv.smart.player.player.streamtv.live.watch
 
-import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -18,8 +16,6 @@ import android.widget.PopupWindow
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,13 +24,10 @@ import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.INTER_SELECT_CATEG_OR_CHANNEL
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
-import com.iptv.smart.player.player.streamtv.live.watch.databinding.ActivityPlaylistDetailBinding
 import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
 import com.iptv.smart.player.player.streamtv.live.watch.provider.ChannelsProvider
 import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
 import com.iptv.smart.player.player.streamtv.live.watch.screens.PlayerActivity
-import com.iptv.smart.player.player.streamtv.live.watch.util.parseM3U
-import com.iptv.smart.player.player.streamtv.live.watch.util.parseM3UFromFile
 import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

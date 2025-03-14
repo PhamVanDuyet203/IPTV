@@ -27,6 +27,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import androidx.core.content.edit
 
 
 // Data class để lưu thông tin recent channel
@@ -248,24 +249,35 @@ class ChannelsProvider : ViewModel() {
         }
     }
 
-    fun toggleFavorite(channel: Channel,isCHeckGroupFavorite : Boolean ) {
+    fun toggleFavorite(channel: Channel, isCheckGroupFavorite: Boolean) {
         Log.d("ChannelsProvider", "Toggling favorite for channel: ${channel.name}")
-        _channels.value?.let { currentList ->
-            val index = currentList.indexOfFirst { it.streamUrl == channel.streamUrl }
-            if (index != -1) {
-                val updatedChannel = currentList[index].copy(isFavorite = !currentList[index].isFavorite)
-                sharedPreferences.edit().putBoolean(channel.streamUrl, updatedChannel.isFavorite).apply()
-                if (isCHeckGroupFavorite){
-                    val updatedList = currentList.toMutableList().apply { set(index, updatedChannel) }
-                    _channels.value = updatedList
-                    if (tabLayoutSelectedPosition() == 1) {
-                        _filteredChannels.value = updatedList.filter { it.isFavorite }
-                    }
-                }
 
+        _channels.value?.let { currentList ->
+            val updatedList = currentList.map {
+                if (it.streamUrl == channel.streamUrl) {
+                    val newFavStatus = !it.isFavorite
+                    sharedPreferences.edit().putBoolean(it.streamUrl, newFavStatus).apply()
+                    Log.d("ChannelsProvider", "Updated favorite status for channel: ${it.streamUrl}, isFavorite: $newFavStatus")
+                    it.copy(isFavorite = newFavStatus)
+                } else {
+                    it.copy(isFavorite = sharedPreferences.getBoolean(it.streamUrl, it.isFavorite))
+                }
+            }.toMutableList()
+
+            _channels.value = updatedList
+
+            if (isCheckGroupFavorite && tabLayoutSelectedPosition() == 1) {
+                val favoriteChannels = updatedList.filter { it.isFavorite }
+                _filteredChannels.value = favoriteChannels
+                Log.d("ChannelsProvider", "Updated favorite list: ${favoriteChannels.map { it.name }}")
             }
         }
     }
+
+
+
+
+
 
     fun updateChannel(updatedChannel: Channel) {
         viewModelScope.launch(Dispatchers.IO) {

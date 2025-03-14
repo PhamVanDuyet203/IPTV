@@ -38,15 +38,19 @@ class ChannelsAdapter(
     override fun getItemCount(): Int = channels.size
     var listUrl = mutableListOf<Channel>()
     fun updateChannels(newChannels: List<Channel>) {
-        val diffResult = DiffUtil.calculateDiff(ChannelDiffCallback(channels, newChannels))
-        newChannels.forEach {
-            Log.d("TAGTAGlistUrl", "updateChannels: " + it.streamUrl)
-            listUrl.add(it)
+        val uniqueNewChannels = newChannels.distinctBy { it.streamUrl }
+        val diffResult = DiffUtil.calculateDiff(ChannelDiffCallback(channels, uniqueNewChannels))
+        uniqueNewChannels.forEach {
+            if (listUrl.none { existing -> existing.streamUrl == it.streamUrl }) {
+                listUrl.add(it)
+            }
         }
         channels.clear()
-        channels.addAll(newChannels)
+        channels.addAll(uniqueNewChannels)
+
         diffResult.dispatchUpdatesTo(this)
     }
+
 
     fun updateChannel(channel: Channel) {
         val position = channels.indexOfFirst { it.streamUrl == channel.streamUrl }
