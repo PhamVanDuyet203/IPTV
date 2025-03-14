@@ -160,12 +160,14 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
             isSaving = true
             lastSaveTime = currentTime
             binding.btnAddPlaylist.isEnabled = false
+            binding.progressBar.visible()
 
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val existingPlaylist = playlistDao.getPlaylistByName(name)
                     if (existingPlaylist != null) {
                         withContext(Dispatchers.Main) {
+                            binding.progressBar.gone()
                             etPlaylistName.error = "Playlist name already exists"
                             binding.btnAddPlaylist.isEnabled = true
                             isSaving = false
@@ -182,7 +184,6 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
 
                     withContext(Dispatchers.Main) {
                         startAds()
-                        setResult(RESULT_OK)
                     }
                 } catch (e: Exception) {
                     android.util.Log.e("SavePlaylist", "Error saving playlist: ${e.message}")
@@ -202,6 +203,8 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
     private fun startAds() {
         when (RemoteConfig.INTER_SAVE_ADD_050325) {
             "0" -> {
+                binding.progressBar.gone()
+                setResult(RESULT_OK)
                 finish()
             }
             else -> {
@@ -210,9 +213,13 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
                 Common.countInterAdd++
                 if (Common.countInterAdd % RemoteConfig.INTER_SAVE_ADD_050325.toInt() == 0) {
                     AdsManager.loadAndShowInter(this, INTER_SAVE_ADD) {
+                        setResult(RESULT_OK)
                         finish()
+                        binding.progressBar.gone()
                     }
                 } else {
+                    binding.progressBar.gone()
+                    setResult(RESULT_OK)
                     finish()
                 }
             }
