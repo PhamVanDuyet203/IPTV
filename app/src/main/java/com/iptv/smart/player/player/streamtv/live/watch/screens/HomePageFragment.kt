@@ -67,7 +67,7 @@ class HomePageFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = playlistAdapter
 
-        // Thiết lập TextView "Add button" với màu và click
+
         setupAddButton(view)
 
         playlistViewModel.filteredPlaylists.observe(viewLifecycleOwner) { playlists ->

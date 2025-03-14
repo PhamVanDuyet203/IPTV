@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
@@ -16,12 +17,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.admob.max.dktlibrary.AppOpenManager
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.adapter.VideoAdapter
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.INTER_ADD
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.INTER_SAVE_ADD
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
+import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.visible
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.ImportPlaylistDeviceBinding
 import com.iptv.smart.player.player.streamtv.live.watch.db.AppDatabase
@@ -64,6 +67,13 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
 
         videoAdapter = VideoAdapter(this, videoList) { videoItem -> removeVideo(videoItem) }
         rvVideo.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+
+        if (binding.etPlaylistName.getText().toString().isEmpty()) {
+            binding.btnAddPlaylist.visibility = View.GONE
+        } else {
+            binding.btnAddPlaylist.visibility = View.VISIBLE
+        }
+
         rvVideo.adapter = videoAdapter
 
         btnBack.setOnClickListener { finish() }
@@ -73,10 +83,11 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
         }
 
         binding.etPlaylistName.addTextChangedListener() {
+            binding.btnAddPlaylist.visibility = View.VISIBLE
             binding.errorTextName.visibility = View.GONE
         }
 
-        showNativeAd()
+
 
     }
 
@@ -105,17 +116,28 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
             }
         }
 
+    override fun onResume() {
+        super.onResume()
+        AppOpenManager.getInstance().enableAppResumeWithActivity(ActivityImportPlaylistM3U::class.java)
+
+    }
     private fun openFilePicker() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             type = "video/*"
             addCategory(Intent.CATEGORY_OPENABLE)
         }
         videoPicker.launch(intent)
+        AppOpenManager.getInstance().disableAppResumeWithActivity(ActivityImportPlaylistM3U::class.java)
     }
 
     private fun removeVideo(videoItem: VideoItem) {
         videoList.remove(videoItem)
         videoAdapter.notifyDataSetChanged()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        showNativeAd()
     }
 
 
@@ -183,6 +205,8 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
                 finish()
             }
             else -> {
+                Log.d("TAG121212212", "startAds: "+Common.countInterAdd)
+                Log.d("TAG121212212", "startAdsINTER_SAVE_ADD_050325: "+RemoteConfig.INTER_SAVE_ADD_050325)
                 Common.countInterAdd++
                 if (Common.countInterAdd % RemoteConfig.INTER_SAVE_ADD_050325.toInt() == 0) {
                     AdsManager.loadAndShowInter(this, INTER_SAVE_ADD) {

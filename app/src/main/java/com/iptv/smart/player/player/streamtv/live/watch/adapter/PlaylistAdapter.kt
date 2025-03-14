@@ -54,16 +54,10 @@ class PlaylistAdapter(
         setupItems()
     }
 
-    // Logic chèn Native Ad vào danh sách
     private fun setupItems() {
         items.clear()
-        var adCount = 0
         playlists.forEachIndexed { index, playlist ->
-            if (RemoteConfig.NATIVE_PLAYLIST_CHANNEL_050325 != "0" &&
-                (index == 2 || (index > 2 && (index - 2) % 4 == 0))) {
-                items.add("Native Ad $adCount")
-                adCount++
-            }
+
             items.add(playlist)
         }
     }
@@ -87,7 +81,7 @@ class PlaylistAdapter(
             }
             ViewType.NATIVE_AD -> {
                 val view = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.ad_template_small_bot, parent, false) // Layout cho Native Ad
+                    .inflate(R.layout.ad_template_item, parent, false) // Layout cho Native Ad
                 NativeAdViewHolder(view)
             }
             else -> throw IllegalArgumentException("Invalid view type")
@@ -154,8 +148,8 @@ class PlaylistAdapter(
             when (RemoteConfig.INTER_ITEMS_PLAYLIST_050325) {
                 "0" -> nextActivity(playlist)
                 else -> {
-                    Common.countInterAdd++
-                    if (Common.countInterAdd % RemoteConfig.INTER_ITEMS_PLAYLIST_050325.toInt() == 0) {
+                    Common.countInterItemPlaylist++
+                    if (Common.countInterItemPlaylist % RemoteConfig.INTER_ITEMS_PLAYLIST_050325.toInt() == 0) {
                         AdsManager.loadAndShowInter(activity, AdsManager.INTER_ITEMS_PLAYLIST) {
                             nextActivity(playlist)
                         }

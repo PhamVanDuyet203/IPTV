@@ -83,8 +83,8 @@ class ImportPlaylistDialog : DialogFragment() {
                 checkCLick()
             }
             else -> {
-                Common.countInterAdd++
-                if (Common.countInterAdd % RemoteConfig.INTER_ADD_050325.toInt() == 0) {
+                Common.countInterAddOption++
+                if (Common.countInterAddOption % RemoteConfig.INTER_ADD_050325.toInt() == 0) {
                     AdsManager.loadAndShowInter(requireActivity(), INTER_ADD) {
                         checkCLick()
                     }

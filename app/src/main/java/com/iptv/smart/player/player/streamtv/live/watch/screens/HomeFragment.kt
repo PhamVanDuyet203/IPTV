@@ -68,15 +68,13 @@ class HomeFragment : Fragment() {
                 PlayerActivity.start(requireContext(), channel)
             },
             onFavoriteClicked = { channel ->
-                channelsProvider.toggleFavorite(channel)
+                channelsProvider.toggleFavorite(channel, true)
             },
             onRenameChannel = { channel, newName ->
                 channelsProvider.updateChannel(channel.copy(name = newName))
-                // Không cần gọi fetchData() vì ChannelsProvider sẽ cập nhật LiveData
             },
             onDeleteChannel = { channel ->
                 channelsProvider.deleteChannel(channel)
-                // Không cần gọi fetchData() vì ChannelsProvider sẽ cập nhật LiveData
             }
         )
 

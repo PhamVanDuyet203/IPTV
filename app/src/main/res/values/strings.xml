@@ -114,5 +114,8 @@
     <string name="facebook_id">" "</string>
     <string name="this_action_can_contain_ads">This action can contain ads...</string>
     <string name="not_found">Not result for %1$s</string>
+    <string name="no_wi_fi_detected">No Wi-Fi Detected</string>
+    <string name="opps_just_lost_internet_connection_please_reconnect">Opps! Just lost internet connection, please reconnect.</string>
+    <string name="connect">Connect</string>
 </resources>
 

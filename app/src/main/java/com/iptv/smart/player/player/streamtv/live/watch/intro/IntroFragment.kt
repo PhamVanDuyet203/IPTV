@@ -26,39 +26,39 @@ class IntroFragment : Fragment() {
     }
 
     private fun showIntro1() {
-        binding.nextText.text = getString(R.string.next)
+        binding.imgNext.text = getString(R.string.next)
         showNativeIntro(0)
-        binding.textTitle.text = getString(R.string.title_onboard_1)
-        binding.lnIntro.setBackgroundResource(R.drawable.onboard_img_1)
+        binding.tvText.text = getString(R.string.title_onboard_1)
+        binding.root.setBackgroundResource(R.drawable.onboard_img_1)
         binding.dot.setImageResource(R.drawable.dot1)
-        binding.textContent.text = getString(R.string.content_onboard_1)
+        binding.tvContent.text = getString(R.string.content_onboard_1)
     }
 
     private fun showIntro2() {
-        binding.nextText.text = getString(R.string.next)
+        binding.imgNext.text = getString(R.string.next)
         showNativeIntro(1)
-        binding.textTitle.text = getString(R.string.title_onboard_2)
-        binding.lnIntro.setBackgroundResource(R.drawable.onboard_img_2)
+        binding.tvText.text = getString(R.string.title_onboard_2)
+        binding.root.setBackgroundResource(R.drawable.onboard_img_2)
         binding.dot.setImageResource(R.drawable.dot2)
-        binding.textContent.text = getString(R.string.content_onboard_2)
+        binding.tvContent.text = getString(R.string.content_onboard_2)
     }
 
     private fun showIntro3() {
-        binding.nextText.text = getString(R.string.next)
+        binding.imgNext.text = getString(R.string.next)
         showNativeIntro(2)
-        binding.textTitle.text = getString(R.string.title_onboard_3)
-        binding.lnIntro.setBackgroundResource(R.drawable.onboard_img_3)
+        binding.tvText.text = getString(R.string.title_onboard_3)
+        binding.root.setBackgroundResource(R.drawable.onboard_img_3)
         binding.dot.setImageResource(R.drawable.dot3)
-        binding.textContent.text = getString(R.string.content_onboard_3)
+        binding.tvContent.text = getString(R.string.content_onboard_3)
     }
 
     private fun showIntro4() {
-        binding.nextText.text = getString(R.string.start)
+        binding.imgNext.text = getString(R.string.start)
         showNativeIntro(3)
-        binding.textTitle.text = getString(R.string.title_onboard_4)
-        binding.lnIntro.setBackgroundResource(R.drawable.onboard_img_4)
+        binding.tvText.text = getString(R.string.title_onboard_4)
+        binding.root.setBackgroundResource(R.drawable.onboard_img_4)
         binding.dot.setImageResource(R.drawable.dot4)
-        binding.textContent.text = getString(R.string.content_onboard_4)
+        binding.tvContent.text = getString(R.string.content_onboard_4)
     }
 
 
@@ -66,7 +66,7 @@ class IntroFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         if (activity is CallbackIntro) callbackIntro = activity as CallbackIntro
         position = arguments?.getInt(ARG_POSITION) ?: 0
-        binding.nextText.setOnClickListener {
+        binding.imgNext.setOnClickListener {
             callbackIntro.onNext(position)
         }
         if (arguments != null) {
@@ -387,13 +387,13 @@ class IntroFragment : Fragment() {
         binding.apply {
             if (!isShow && AdmobUtils.isNetworkConnected(requireActivity())) {
                 scrollView.gone()
-            //    lnNext.gone()
+                imgNext.gone()
                 flNative.gone()
                 frNativeFull.visible()
             } else {
                 scrollView.visible()
                 flNative.visible()
-            //     lnNext.gone()
+                imgNext.visible()
                 frNativeFull.gone()
             }
         }

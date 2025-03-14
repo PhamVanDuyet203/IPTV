@@ -1,7 +1,14 @@
 package com.iptv.smart.player.player.streamtv.live.watch.screens
 
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextPaint
@@ -18,6 +25,8 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -46,6 +55,9 @@ class ChannelFragment : Fragment() {
             getString(R.string.recent_channel)
         )
     }
+    private var noInternetDialog: AlertDialog? = null
+    private var connectivityManager: ConnectivityManager? = null
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
     private val addPlaylistLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK) {
@@ -56,6 +68,7 @@ class ChannelFragment : Fragment() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -87,39 +100,132 @@ class ChannelFragment : Fragment() {
         setupAddButton(view)
         observeChannels()
 
-        loadingPanel.visibility = View.VISIBLE
-        channelsProvider.fetchChannelsFromRoom()
+        setupNetworkMonitoring()
+        checkInternetConnection()
 
         return view
     }
 
-    private fun nextActivity(channel: Channel) {
-        val intent = Intent(requireContext(), PlayerActivity::class.java).apply {
-            putExtra("channel", channel)
+    private fun setupNetworkMonitoring() {
+        val context = context ?: return
+        connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                requireActivity().runOnUiThread {
+                    Log.d("ChannelFragment", "Network available")
+                    dismissNoInternetDialog()
+                    loadingPanel.visibility = View.VISIBLE
+                    channelsProvider.fetchChannelsFromRoom()
+                    updateChannelList(selectedTabIndex)
+                }
+            }
+
+            override fun onLost(network: Network) {
+                requireActivity().runOnUiThread {
+                    Log.d("ChannelFragment", "Network lost")
+                    showNoInternetDialog()
+                }
+            }
         }
-        startActivityForResult(intent, 1000)
+
+        val networkRequest = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            .build()
+
+        networkCallback?.let {
+            connectivityManager?.registerNetworkCallback(networkRequest, it)
+        }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun checkInternetConnection() {
+        if (!isInternetAvailable()) {
+            showNoInternetDialog()
+        } else {
+            dismissNoInternetDialog()
+            loadingPanel.visibility = View.VISIBLE
+            channelsProvider.fetchChannelsFromRoom()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun isInternetAvailable(): Boolean {
+        val context = context ?: return false
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+
+        return networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+    }
+
+    private fun showNoInternetDialog() {
+        val context = context ?: return
+        if (noInternetDialog == null || !noInternetDialog!!.isShowing) {
+            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_no_internet, null)
+            noInternetDialog = AlertDialog.Builder(context)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create()
+
+            val width = (320 * context.resources.displayMetrics.density).toInt()
+            val height = (312 * context.resources.displayMetrics.density).toInt()
+            noInternetDialog?.window?.apply {
+                setLayout(width, height)
+                setBackgroundDrawableResource(R.drawable.bg_no_connect)
+            }
+
+            dialogView.findViewById<TextView>(R.id.btn_Connect).setOnClickListener {
+                startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
+            }
+
+            noInternetDialog?.show()
+        }
+    }
+
+    private fun dismissNoInternetDialog() {
+        noInternetDialog?.takeIf { it.isShowing }?.dismiss()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun nextActivity(channel: Channel) {
+        if (isInternetAvailable()) {
+            val intent = Intent(requireContext(), PlayerActivity::class.java).apply {
+                putExtra("channel", channel)
+            }
+            startActivityForResult(intent, 1000)
+        } else {
+            showNoInternetDialog()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1000) {
             Log.d("TAGLOADATAAAAA", "onActivityResult: Reloading data after PlayerActivity")
-            loadingPanel.visibility = View.VISIBLE
-            channelsProvider.fetchChannelsFromRoom(true)
-            channelsProvider.channels.observe(viewLifecycleOwner) { channels ->
-                if (selectedTabIndex == 1) {
-                    channelsProvider.filterChannels("favorite")
-                } else if (selectedTabIndex == 2) {
-                    channelsProvider.filterChannels("recent")
-                }
-                updateChannelList(selectedTabIndex)
-            }
+            checkInternetConnection()
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onResume() {
         super.onResume()
-        updateChannelList(selectedTabIndex)
+        checkInternetConnection()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        networkCallback?.let {
+            connectivityManager?.unregisterNetworkCallback(it)
+        }
+        networkCallback = null
+        connectivityManager = null
+        dismissNoInternetDialog()
+        noInternetDialog = null
+        tabViews.clear()
     }
 
     private fun setupAddButton(view: View) {
@@ -146,12 +252,17 @@ class ChannelFragment : Fragment() {
             )
             spannableString.setSpan(
                 object : ClickableSpan() {
+                    @RequiresApi(Build.VERSION_CODES.M)
                     override fun onClick(widget: View) {
-                        widget.setBackgroundColor(android.graphics.Color.WHITE)
-                        ImportPlaylistDialog().show(parentFragmentManager, "ImportPlaylistDialog")
-                        widget.postDelayed({
-                            widget.setBackgroundColor(android.graphics.Color.TRANSPARENT)
-                        }, 200)
+                        if (isInternetAvailable()) {
+                            widget.setBackgroundColor(android.graphics.Color.WHITE)
+                            ImportPlaylistDialog().show(parentFragmentManager, "ImportPlaylistDialog")
+                            widget.postDelayed({
+                                widget.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                            }, 200)
+                        } else {
+                            showNoInternetDialog()
+                        }
                     }
 
                     override fun updateDrawState(ds: TextPaint) {
@@ -170,6 +281,7 @@ class ChannelFragment : Fragment() {
         textView2.highlightColor = android.graphics.Color.TRANSPARENT
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun setupTabs() {
         tabTitles.forEachIndexed { index, title ->
             val tabView = LayoutInflater.from(requireContext())
@@ -190,7 +302,11 @@ class ChannelFragment : Fragment() {
             }
 
             tabView.setOnClickListener {
-                selectTab(index)
+                if (isInternetAvailable()) {
+                    selectTab(index)
+                } else {
+                    showNoInternetDialog()
+                }
             }
 
             tabViews.add(tabView)
@@ -201,7 +317,6 @@ class ChannelFragment : Fragment() {
     private fun selectTab(index: Int) {
         if (index == selectedTabIndex) return
 
-        // Deselect tab cũ
         tabViews[selectedTabIndex].apply {
             setBackgroundResource(R.drawable.tab_background)
             findViewById<TextView>(R.id.tab_text)?.typeface =
@@ -209,7 +324,6 @@ class ChannelFragment : Fragment() {
             findViewById<ImageView>(R.id.tab_icon)?.visibility = View.GONE
         }
 
-        // Select tab mới
         tabViews[index].apply {
             setBackgroundResource(R.drawable.tab_selected_background)
             findViewById<TextView>(R.id.tab_text)?.typeface =
@@ -220,6 +334,8 @@ class ChannelFragment : Fragment() {
         selectedTabIndex = index
         channelsProvider.setTabPosition(index)
         updateChannelList(index)
+        recyclerView.scrollToPosition(0)
+
     }
 
     private fun updateChannelList(tabPosition: Int) {
@@ -242,6 +358,7 @@ class ChannelFragment : Fragment() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun observeChannels() {
         channelsProvider.channels.observe(viewLifecycleOwner) { channels ->
             loadingPanel.visibility = View.GONE
@@ -266,7 +383,7 @@ class ChannelFragment : Fragment() {
         }
 
         channelsProvider.shouldRefresh.observe(viewLifecycleOwner) { shouldRefresh ->
-            if (shouldRefresh == true) {
+            if (shouldRefresh == true && isInternetAvailable()) {
                 Log.d("ChannelFragment", "Refresh requested, forcing reload of channels")
                 loadingPanel.visibility = View.VISIBLE
                 channelsProvider.fetchChannelsFromRoom(true)
@@ -279,21 +396,21 @@ class ChannelFragment : Fragment() {
     }
 
     private fun toggleFavorite(channel: Channel) {
-        channelsProvider.toggleFavorite(channel)
+        channelsProvider.toggleFavorite(channel, true)
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     fun openAddPlaylistActivity(type: String) {
-        val intent = when (type) {
-            "URL" -> Intent(requireContext(), ActivityImportPlaylistUrl::class.java)
-            "FILE" -> Intent(requireContext(), ActivityImportPlaylistM3U::class.java)
-            "DEVICE" -> Intent(requireContext(), ActivityAddPlaylistFromDevice::class.java)
-            else -> return
+        if (isInternetAvailable()) {
+            val intent = when (type) {
+                "URL" -> Intent(requireContext(), ActivityImportPlaylistUrl::class.java)
+                "FILE" -> Intent(requireContext(), ActivityImportPlaylistM3U::class.java)
+                "DEVICE" -> Intent(requireContext(), ActivityAddPlaylistFromDevice::class.java)
+                else -> return
+            }
+            addPlaylistLauncher.launch(intent)
+        } else {
+            showNoInternetDialog()
         }
-        addPlaylistLauncher.launch(intent)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        tabViews.clear()
     }
 }

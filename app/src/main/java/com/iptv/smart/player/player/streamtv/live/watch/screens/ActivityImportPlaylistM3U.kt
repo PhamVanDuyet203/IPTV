@@ -69,10 +69,10 @@ class ActivityImportPlaylistM3U : BaseActivity() {
         btnAddPlaylist.setOnClickListener { savePlaylist() }
 
         binding.etPlaylistName.addTextChangedListener() {
+            binding.btnAddPlaylist.visibility = View.VISIBLE
             binding.errorTextName.visibility = View.GONE
         }
 
-        showNativeAd()
     }
 
 
@@ -137,6 +137,11 @@ class ActivityImportPlaylistM3U : BaseActivity() {
         selectedFileUri = null
         lnUpload.visibility = View.VISIBLE
         fileUploadedLayout.visibility = View.GONE
+    }
+
+    override fun onStart() {
+        super.onStart()
+        showNativeAd()
     }
 
     private var isSaving = false

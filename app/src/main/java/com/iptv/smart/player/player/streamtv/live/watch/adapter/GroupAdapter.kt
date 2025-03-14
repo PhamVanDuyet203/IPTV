@@ -62,7 +62,7 @@ class GroupAdapter(private var groups: List<PlaylistEntity>) :
             }
             ViewTypeGroup.NATIVE_AD_G -> {
                 val view = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.ad_template_small_bot, parent, false)
+                    .inflate(R.layout.ad_template_item, parent, false)
                 NativeAdViewHolder(view)
             }
             else -> throw IllegalArgumentException("Invalid view type: $viewType")

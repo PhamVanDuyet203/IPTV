@@ -1,6 +1,7 @@
 package com.iptv.smart.player.player.streamtv.live.watch.adapter
 
 import android.app.AlertDialog
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,11 +26,8 @@ class ChannelsAdapter(
 ) : RecyclerView.Adapter<ChannelsAdapter.ChannelViewHolder>() {
 
 
-
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChannelViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_channel, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_channel, parent, false)
         return ChannelViewHolder(view)
     }
 
@@ -38,12 +36,24 @@ class ChannelsAdapter(
     }
 
     override fun getItemCount(): Int = channels.size
-
+    var listUrl = mutableListOf<Channel>()
     fun updateChannels(newChannels: List<Channel>) {
         val diffResult = DiffUtil.calculateDiff(ChannelDiffCallback(channels, newChannels))
+        newChannels.forEach {
+            Log.d("TAGTAGlistUrl", "updateChannels: " + it.streamUrl)
+            listUrl.add(it)
+        }
         channels.clear()
         channels.addAll(newChannels)
         diffResult.dispatchUpdatesTo(this)
+    }
+
+    fun updateChannel(channel: Channel) {
+        val position = channels.indexOfFirst { it.streamUrl == channel.streamUrl }
+        if (position != -1) {
+            channels[position] = channel
+            notifyItemChanged(position)
+        }
     }
 
     inner class ChannelViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -53,9 +63,7 @@ class ChannelsAdapter(
 
         fun bind(channel: Channel) {
             nameTextView.text = channel.name
-            Glide.with(itemView.context)
-                .load(channel.logoUrl)
-                .placeholder(R.drawable.ic_tv)
+            Glide.with(itemView.context).load(channel.logoUrl).placeholder(R.drawable.ic_tv)
                 .into(logoImageView)
 
             updateFavoriteIcon(channel.isFavorite)
@@ -110,9 +118,7 @@ class ChannelsAdapter(
         private fun showRenameDialog(channel: Channel) {
             val context = itemView.context
             val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_rename, null)
-            val dialog = AlertDialog.Builder(context)
-                .setView(dialogView)
-                .create()
+            val dialog = AlertDialog.Builder(context).setView(dialogView).create()
 
             val width = (290 * context.resources.displayMetrics.density).toInt()
             val height = (215 * context.resources.displayMetrics.density).toInt()
@@ -140,9 +146,7 @@ class ChannelsAdapter(
         private fun showConfirmDeleteDialog(channel: Channel) {
             val context = itemView.context
             val dialogView = LayoutInflater.from(context).inflate(R.layout.confirm_del, null)
-            val dialog = AlertDialog.Builder(context)
-                .setView(dialogView)
-                .create()
+            val dialog = AlertDialog.Builder(context).setView(dialogView).create()
 
             val width = (290 * context.resources.displayMetrics.density).toInt()
             val height = (215 * context.resources.displayMetrics.density).toInt()
@@ -165,14 +169,14 @@ class ChannelsAdapter(
     }
 
     private class ChannelDiffCallback(
-        private val oldList: List<Channel>,
-        private val newList: List<Channel>
+        private val oldList: List<Channel>, private val newList: List<Channel>
     ) : DiffUtil.Callback() {
         override fun getOldListSize(): Int = oldList.size
         override fun getNewListSize(): Int = newList.size
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
             return oldList[oldItemPosition].streamUrl == newList[newItemPosition].streamUrl
         }
+
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
             return oldList[oldItemPosition] == newList[newItemPosition]
         }

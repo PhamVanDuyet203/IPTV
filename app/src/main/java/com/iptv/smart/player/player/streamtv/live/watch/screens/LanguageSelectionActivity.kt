@@ -1,6 +1,7 @@
 package com.iptv.smart.player.player.streamtv.live.watch.screens
 
 import android.content.Intent
+import android.nfc.Tag
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -42,11 +43,15 @@ class LanguageSelectionActivity : BaseActivity() {
 
         if (fromSplash) {
             binding.icBack.gone()
-            AdsManager.showNativeBottom(this, binding.frNative, AdsManager.NATIVE_LANGUAGE)
-        }
-        else {
+            if (RemoteConfig.NATIVE_LANGUAGE_050325=="1"){
+                AdsManager.showNativeBottom(this, binding.frNative, AdsManager.NATIVE_LANGUAGE)
+            }else{
+                binding.frNative.gone()
+            }
+            loadNativeAd()
+
+        } else {
             binding.icBack.visible()
-            AdsManager.loadAndShowAdsNative(this,binding.frNative,AdsManager.NATIVE_LANGUAGE)
         }
 
 
@@ -84,28 +89,21 @@ class LanguageSelectionActivity : BaseActivity() {
                 }
             }
         }
-
-
-
         checkIcon.setOnClickListener {
             if (fromSplash) {
+                val selectedLanguage = adapter.getSelectedLanguage()
+                if (selectedLanguage == null){
+                    Toast.makeText(this@LanguageSelectionActivity, "Please select a language first!", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
                 if (RemoteConfig.INTER_LANGUAGE_050325 == "1") {
-                    AdsManager.showAdInter(this,AdsManager.INTER_LANGUAGE,object : AdsManager.AdListener{
-                        override fun onAdClosed() {
-                            val selectedLanguage = adapter.getSelectedLanguage()
-                            if (selectedLanguage != null) {
-                                saveLanguageAndProceed(selectedLanguage.code)
-                            } else {
-                                Toast.makeText(this@LanguageSelectionActivity, "Please select a language first!", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-
-                    } ,"")
+                    AdsManager.loadAndShowInter(this, AdsManager.INTER_LANGUAGE) {
+                        saveLanguage()
+                    }
                 } else {
                     saveLanguage()
                 }
-            }
-            else {
+            } else {
                 saveLanguage()
             }
 
@@ -117,16 +115,21 @@ class LanguageSelectionActivity : BaseActivity() {
         val selectedLanguage = adapter.getSelectedLanguage()
         if (selectedLanguage != null) {
             saveLanguageAndProceed(selectedLanguage.code)
-        } else {
-            Toast.makeText(this, "Please select a language first!", Toast.LENGTH_SHORT).show()
         }
     }
 
 
-
     private fun loadNativeAd() {
-        AdsManager.loadAdsNative(this, AdsManager.NATIVE_INTRO)
-        AdsManager.loadNativeFullScreen(this, AdsManager.NATIVE_FULL_SCREEN_INTRO)
+        if (RemoteConfig.NATIVE_INTRO_050325.contains("1") || RemoteConfig.NATIVE_INTRO_050325.contains("2")
+            || RemoteConfig.NATIVE_INTRO_050325.contains("3") || RemoteConfig.NATIVE_INTRO_050325.contains("4")) {
+            AdsManager.loadAdsNative(this, AdsManager.NATIVE_INTRO)
+        }
+
+        if (RemoteConfig.NATIVE_FULL_SCREEN_INTRO_050325.contains("1") || RemoteConfig.NATIVE_FULL_SCREEN_INTRO_050325.contains("2")
+            || RemoteConfig.NATIVE_FULL_SCREEN_INTRO_050325.contains("3") || RemoteConfig.NATIVE_FULL_SCREEN_INTRO_050325.contains("4")) {
+            AdsManager.loadNativeFullScreen(this, AdsManager.NATIVE_FULL_SCREEN_INTRO)
+        }
+
     }
 
 
@@ -134,13 +137,10 @@ class LanguageSelectionActivity : BaseActivity() {
         if (isFirstLanguageClick && fromSplash) {
             isFirstLanguageClick = false
             if (RemoteConfig.NATIVE_LANGUAGE_050325 == "1") {
-                binding.frNative.visible()
                 AdsManager.showNativeBottom(this, binding.frNative, AdsManager.NATIVE_LANGUAGE_ID2)
-
-            } else binding.frNative.gone()
-        }
-        else {
-            loadNativeAd()
+            } else {
+                binding.frNative.gone()
+            }
         }
     }
 
@@ -169,9 +169,9 @@ class LanguageSelectionActivity : BaseActivity() {
     override fun onStart() {
         super.onStart()
         if (!fromSplash) {
-            if (RemoteConfig.NATIVE_LANGUAGE_050325 == "1"){
+            if (RemoteConfig.NATIVE_LANGUAGE_050325 == "1") {
                 AdsManager.loadAndShowAdsNative(this, binding.frNative, AdsManager.NATIVE_LANGUAGE)
-            }else binding.frNative.gone()
+            } else binding.frNative.gone()
         }
     }
 

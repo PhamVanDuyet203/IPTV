@@ -1,5 +1,6 @@
 package com.iptv.smart.player.player.streamtv.live.watch.util
 
+import android.util.Log
 import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
 import java.io.BufferedReader
 import java.io.InputStream
@@ -22,7 +23,6 @@ suspend fun parseM3UFromFile(inputStream: InputStream): List<Channel> = withCont
     parseM3UContent(reader, channels)
     channels
 }
-
 private fun parseM3UContent(reader: BufferedReader, channels: MutableList<Channel>) {
     var currentName = ""
     var currentGroup: String? = null
@@ -50,6 +50,7 @@ private fun parseM3UContent(reader: BufferedReader, channels: MutableList<Channe
                         isFavorite = false
                     )
                 )
+
                 currentName = ""
                 currentGroup = null
                 currentUrl = ""

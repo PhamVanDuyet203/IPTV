@@ -162,7 +162,6 @@
         />
     <FrameLayout
         android:id="@+id/fr_home"
-        android:minHeight="50dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -1,8 +1,16 @@
 package com.iptv.smart.player.player.streamtv.live.watch
 
+import android.content.Context
+import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -16,6 +24,8 @@ import android.widget.PopupWindow
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -47,20 +57,23 @@ class ChannelListActivity : BaseActivity() {
     private lateinit var searchEditText: EditText
     private lateinit var searchIcon: ImageView
     private lateinit var sortIcon: ImageView
-    private lateinit var progressBar: ProgressBar // Thêm ProgressBar
+    private lateinit var progressBar: ProgressBar
     private lateinit var frNative: FrameLayout
     private lateinit var vLine: View
     private var debounceHandler: Handler? = null
     private var isSearchVisible: Boolean = false
     private var fullGroupList: List<PlaylistEntity> = emptyList()
     private var currentSortMode = "AZ"
-
     private lateinit var imgNotFound: ImageView
     private lateinit var txtNotFound: TextView
-
+    private var noInternetDialog: AlertDialog? = null
+    private var connectivityManager: ConnectivityManager? = null
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
+    private var sourcePath: String = ""
 
     private lateinit var binding: ActivityPlaylistDetailBinding
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_playlist_detail)
@@ -71,33 +84,23 @@ class ChannelListActivity : BaseActivity() {
         searchEditText = findViewById(R.id.searchEditText)
         searchIcon = findViewById(R.id.search_icon)
         sortIcon = findViewById(R.id.pop_sort)
-        progressBar = findViewById(R.id.progressBar) // Khởi tạo ProgressBar
-
+        progressBar = findViewById(R.id.progressBar)
         frNative = findViewById(R.id.fr_home)
         vLine = findViewById(R.id.line)
-
         imgNotFound = findViewById(R.id.imgNotFound)
         txtNotFound = findViewById(R.id.txtNotFound)
+
         imgNotFound.visibility = View.GONE
         txtNotFound.visibility = View.GONE
         recyclerView.visibility = View.VISIBLE
-
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = GroupAdapter(emptyList())
         recyclerView.adapter = adapter
 
 
-        if (RemoteConfig.BANNER_DETAIL_PLAYLIST_CHANNEL_050325 == "1") {
-            AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_DETAIL_PLAYLIST_CHANNEL, frNative , vLine)
-        }
-        else {
-            frNative.gone()
-            vLine.gone()
-        }
-
         val playlistName = intent.getStringExtra("GROUP_NAME") ?: "Unknown Playlist"
-        val sourcePath = intent.getStringExtra("SOURCE_PATH") ?: ""
+        sourcePath = intent.getStringExtra("SOURCE_PATH") ?: ""
 
         Log.d("ChannelListActivity", "Received source file path: $sourcePath")
         Log.d("ChannelListActivity", "Playlist name: $playlistName")
@@ -122,18 +125,103 @@ class ChannelListActivity : BaseActivity() {
         })
 
         sortIcon.setOnClickListener {
-            startAds()
-            showSortPopup(it)
+
+                showSortPopup(it)
+
         }
 
-        loadGroupedChannels(sourcePath)
+        setupNetworkMonitoring()
+        checkInternetConnection()
     }
 
+    private fun setupNetworkMonitoring() {
+        connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        networkCallback = object : ConnectivityManager.NetworkCallback() {
+            @RequiresApi(Build.VERSION_CODES.M)
+            override fun onAvailable(network: Network) {
+                runOnUiThread {
+                    Log.d("ChannelListActivity", "Network available")
+                    dismissNoInternetDialog()
+                    loadGroupedChannels(sourcePath)
+                }
+            }
+
+            override fun onLost(network: Network) {
+                runOnUiThread {
+                    Log.d("ChannelListActivity", "Network lost")
+                    showNoInternetDialog()
+                }
+            }
+        }
+
+        val networkRequest = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            .build()
+
+        networkCallback?.let {
+            connectivityManager?.registerNetworkCallback(networkRequest, it)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun checkInternetConnection() {
+        if (!isInternetAvailable()) {
+            showNoInternetDialog()
+        } else {
+            dismissNoInternetDialog()
+            loadGroupedChannels(sourcePath)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun isInternetAvailable(): Boolean {
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+    }
+
+    private fun showNoInternetDialog() {
+        if (noInternetDialog == null || !noInternetDialog!!.isShowing) {
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_no_internet, null)
+            noInternetDialog = AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create()
+
+            val width = (320 * resources.displayMetrics.density).toInt()
+            val height = (312 * resources.displayMetrics.density).toInt()
+            noInternetDialog?.window?.apply {
+                setLayout(width, height)
+                setBackgroundDrawableResource(R.drawable.bg_no_connect)
+            }
+
+            dialogView.findViewById<TextView>(R.id.btn_Connect).setOnClickListener {
+                startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
+            }
+
+            noInternetDialog?.show()
+        }
+    }
+
+    private fun dismissNoInternetDialog() {
+        noInternetDialog?.takeIf { it.isShowing }?.dismiss()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun loadGroupedChannels(sourcePath: String) {
+        if (!isInternetAvailable() && sourcePath.startsWith("http")) {
+            showNoInternetDialog()
+            return
+        }
+
         Log.d("ChannelListActivity", "Loading channels from sourcePath: $sourcePath")
         CoroutineScope(Dispatchers.Main).launch {
             try {
-                progressBar.visibility = View.VISIBLE // Hiển thị ProgressBar khi bắt đầu tải
+                progressBar.visibility = View.VISIBLE
                 val channels = if (sourcePath.startsWith("http://") || sourcePath.startsWith("https://")) {
                     Log.d("ChannelListActivity", "Parsing M3U from URL: $sourcePath")
                     parseM3U(sourcePath)
@@ -178,11 +266,11 @@ class ChannelListActivity : BaseActivity() {
                 fullGroupList = playlistEntities
                 adapter.updateData(playlistEntities)
                 Log.d("ChannelListActivity", "Loaded ${playlistEntities.size} playlist entities from source file")
-                progressBar.visibility = View.GONE // Ẩn ProgressBar khi dữ liệu tải xong
+                progressBar.visibility = View.GONE
             } catch (e: Exception) {
                 Toast.makeText(this@ChannelListActivity, "Lỗi khi tải dữ liệu: ${e.message}", Toast.LENGTH_LONG).show()
                 Log.e("ChannelListActivity", "Error loading channels: ${e.message}", e)
-                progressBar.visibility = View.GONE // Ẩn ProgressBar khi có lỗi
+                progressBar.visibility = View.GONE
             }
         }
     }
@@ -202,7 +290,6 @@ class ChannelListActivity : BaseActivity() {
         }
         adapter.updateData(sortedList)
 
-
         if (sortedList.isEmpty()) {
             imgNotFound.visibility = View.VISIBLE
             txtNotFound.visibility = View.VISIBLE
@@ -212,33 +299,36 @@ class ChannelListActivity : BaseActivity() {
             imgNotFound.visibility = View.GONE
             txtNotFound.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
+            recyclerView.scrollToPosition(0)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (RemoteConfig.BANNER_DETAIL_PLAYLIST_CHANNEL_050325 == "1") {
+            AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_DETAIL_PLAYLIST_CHANNEL, frNative, vLine)
+        } else {
+            frNative.gone()
+            vLine.gone()
         }
     }
 
     private fun toggleSearchBar() {
-
+        // Implement toggle logic if needed
+        isSearchVisible = !isSearchVisible
+        searchEditText.visibility = if (isSearchVisible) View.VISIBLE else View.GONE
     }
-
-
-
 
     private fun startAds() {
         when (RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325) {
-            "0" -> {
-
-            }
+            "0" -> {}
             else -> {
                 Common.countInterSelect++
                 if (Common.countInterSelect % RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325.toInt() == 0) {
-                    AdsManager.loadAndShowInter(this, INTER_SELECT_CATEG_OR_CHANNEL) {
-
-                    }
-                } else {
-
+                    AdsManager.loadAndShowInter(this, INTER_SELECT_CATEG_OR_CHANNEL) {}
                 }
             }
         }
-
     }
 
     private fun showSortPopup(anchorView: View) {
@@ -291,5 +381,23 @@ class ChannelListActivity : BaseActivity() {
             filterGroups(searchEditText.text.toString())
             popupWindow.dismiss()
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    override fun onResume() {
+        super.onResume()
+        checkInternetConnection()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        networkCallback?.let {
+            connectivityManager?.unregisterNetworkCallback(it)
+        }
+        networkCallback = null
+        connectivityManager = null
+        dismissNoInternetDialog()
+        noInternetDialog = null
+        debounceHandler?.removeCallbacksAndMessages(null)
     }
 }

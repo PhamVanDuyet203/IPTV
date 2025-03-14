@@ -101,16 +101,12 @@ class ChannelDetailActivity : BaseActivity() {
                 channelsProvider.deleteChannel(channel)
             }
         )
+
+
         recyclerView.adapter = adapter
 
 
-        if (RemoteConfig.BANNER_DETAIL_PLAYLIST_CHANNEL_050325 == "1") {
-            AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_DETAIL_PLAYLIST_CHANNEL, frNative , vLine)
-        }
-        else {
-            frNative.gone()
-            vLine.gone()
-        }
+
 
         groupName = intent.getStringExtra("GROUP_NAME") ?: "Unknown"
         val sourcePath = intent.getStringExtra("SOURCE_PATH") ?: ""
@@ -141,6 +137,8 @@ class ChannelDetailActivity : BaseActivity() {
 
         loadChannels(sourcePath)
         observeChannels()
+
+
     }
 
     private fun nextActivity(channel: Channel) {
@@ -169,9 +167,9 @@ class ChannelDetailActivity : BaseActivity() {
 
     private fun loadChannels(sourcePath: String) {
         CoroutineScope(Dispatchers.Main).launch {
-            progressBar.visibility = View.VISIBLE // Hiển thị ProgressBar trên luồng Main
+            progressBar.visibility = View.VISIBLE
             try {
-                val channels = withContext(Dispatchers.IO) { // Chuyển tải dữ liệu sang luồng IO
+                val channels = withContext(Dispatchers.IO) {
                     if (sourcePath.startsWith("http://") || sourcePath.startsWith("https://")) {
                         Log.d("ChannelDetailActivity", "Loading from URL: $sourcePath")
                         parseM3U(sourcePath)
@@ -215,35 +213,53 @@ class ChannelDetailActivity : BaseActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        if (RemoteConfig.BANNER_DETAIL_PLAYLIST_CHANNEL_050325 == "1") {
+            AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_DETAIL_PLAYLIST_CHANNEL, frNative , vLine)
+        }
+        else {
+            frNative.gone()
+            vLine.gone()
+        }
+    }
+
 
     private fun filterChannels(query: String) {
-        val allChannels = channelsProvider.channels.value ?: emptyList()
-        val filteredList = allChannels.filter { it.groupTitle == groupName }
-            .let { list ->
-                if (query.isEmpty()) list
-                else list.filter { it.name.contains(query, ignoreCase = true) }
+        CoroutineScope(Dispatchers.IO).launch{
+            val allChannels = channelsProvider.channels.value ?: emptyList()
+            val filteredList = allChannels.filter { it.groupTitle == groupName }
+                .let { list ->
+                    if (query.isEmpty()) list
+                    else list.filter { it.name.contains(query, ignoreCase = true) }
+                }
+
+            val sortedList = when (currentSortMode) {
+                "AZ" -> filteredList.sortedBy { it.name }
+                "ZA" -> filteredList.sortedByDescending { it.name }
+                else -> filteredList
             }
 
-        val sortedList = when (currentSortMode) {
-            "AZ" -> filteredList.sortedBy { it.name }
-            "ZA" -> filteredList.sortedByDescending { it.name }
-            else -> filteredList
+            Log.d("ChannelDetailActivity", "Filtered ${sortedList.size} channels with query: $query")
+
+            withContext(Dispatchers.Main){
+                adapter.updateChannels(sortedList)
+
+                if (sortedList.isEmpty()) {
+                    imgNotFound.visibility = View.VISIBLE
+                    txtNotFound.visibility = View.VISIBLE
+                    recyclerView.visibility = View.GONE
+                    txtNotFound.text = getString(R.string.not_found, query)
+                } else {
+                    imgNotFound.visibility = View.GONE
+                    txtNotFound.visibility = View.GONE
+                    recyclerView.visibility = View.VISIBLE
+                    recyclerView.scrollToPosition(0)
+                }
+            }
         }
 
-        Log.d("ChannelDetailActivity", "Filtered ${sortedList.size} channels with query: $query")
 
-        adapter.updateChannels(sortedList)
-
-        if (sortedList.isEmpty()) {
-            imgNotFound.visibility = View.VISIBLE
-            txtNotFound.visibility = View.VISIBLE
-            recyclerView.visibility = View.GONE
-            txtNotFound.text = getString(R.string.not_found, query)
-        } else {
-            imgNotFound.visibility = View.GONE
-            txtNotFound.visibility = View.GONE
-            recyclerView.visibility = View.VISIBLE
-        }
     }
 
 
@@ -286,10 +302,10 @@ class ChannelDetailActivity : BaseActivity() {
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+
     private fun toggleFavorite(channel: Channel) {
-        channelsProvider.toggleFavorite(channel)
-        adapter.notifyDataSetChanged()
+        val updatedChannel = channel.copy(isFavorite = !channel.isFavorite)
+        channelsProvider.toggleFavorite(updatedChannel,false )
     }
 
     private fun observeChannels() {
@@ -311,6 +327,7 @@ class ChannelDetailActivity : BaseActivity() {
                 imgNotFound.visibility = View.GONE
                 txtNotFound.visibility = View.GONE
                 recyclerView.visibility = View.VISIBLE
+                recyclerView.scrollToPosition(0)
             }
         }
     }

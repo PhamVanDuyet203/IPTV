@@ -16,13 +16,14 @@
         android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/ic_tv"
+        android:icon="@drawable/logo"
         android:label="@string/app_name"
         android:roundIcon="@drawable/ic_tv"
         android:supportsPictureInPicture="true"
         android:supportsRtl="false"
         android:theme="@style/Theme.IPTV"
         tools:replace="android:supportsRtl"
+        android:largeHeap="true"
         tools:targetApi="31">
 
         <activity
@@ -34,9 +35,11 @@
             android:supportsPictureInPicture="true" />
         <activity
             android:name=".screens.LanguageSelectionActivity"
+            android:screenOrientation="portrait"
             android:exported="true" />
         <activity
             android:name=".screens.SplashActivity"
+            android:screenOrientation="portrait"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,35 +48,46 @@
         </activity>
         <activity
             android:name=".screens.OnboardingActivity"
+            android:screenOrientation="portrait"
             android:exported="true" />
         <activity
             android:name=".screens.HowToUseActivity"
+            android:screenOrientation="portrait"
             android:exported="true" />
         <activity
             android:name=".screens.HomePageActivity"
+            android:screenOrientation="portrait"
             android:exported="true" />
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="portrait"
             android:exported="true" />
         <activity
             android:name=".screens.ActivityAddPlaylistFromDevice"
+            android:screenOrientation="portrait"
             android:exported="true" />
         <activity
             android:name=".screens.ActivityImportPlaylistM3U"
+            android:screenOrientation="portrait"
             android:exported="true" />
         <activity
             android:name=".screens.ActivityImportPlaylistUrl"
+            android:screenOrientation="portrait"
             android:exported="true" />
         <activity
             android:name=".ChannelListActivity"
+            android:screenOrientation="portrait"
             android:exported="true" />
         <activity
             android:name=".ChannelDetailActivity"
+            android:screenOrientation="portrait"
             android:exported="true" />
         <activity
             android:name=".screens.VideoDetailActivity"
+            android:screenOrientation="portrait"
             android:exported="true" />
         <activity android:name=".intro.IntroActivity"
+            android:screenOrientation="portrait"
             android:exported="true"/>
 
         <meta-data

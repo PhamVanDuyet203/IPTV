@@ -120,7 +120,6 @@ class ChannelsProvider : ViewModel() {
         }
     }
 
-    // Thêm hàm để thêm kênh từ parseM3U vào danh sách chung
     fun addChannelsFromM3U(channels: List<Channel>) {
         viewModelScope.launch(Dispatchers.Main) {
             val currentList = _channels.value?.toMutableList() ?: mutableListOf()
@@ -220,29 +219,24 @@ class ChannelsProvider : ViewModel() {
     private fun isValidUrl(url: String): Boolean = url.startsWith("https") || url.startsWith("http")
 
     fun filterChannels(type: String) {
-        Log.d("ChannelsProvider", "Filtering channels by type: $type")
-        _channels.value?.let { channelList ->
-            val filtered = when (type) {
-                "favorite" -> channelList.filter { it.isFavorite }
-                "recent" -> {
-                    // Lấy danh sách recent đã sắp xếp theo thời gian
-                    val recentChannels = getRecentChannels()
-                    // Sắp xếp channelList theo thứ tự trong recentChannels
-                    val sortedRecent = recentChannels
-                        .mapNotNull { recent -> channelList.find { it.streamUrl == recent.streamUrl } }
-                    sortedRecent
+            _channels.value?.let { channelList ->
+                val filtered = when (type) {
+                    "favorite" -> channelList.filter { it.isFavorite }
+                    "recent" -> {
+                        val recentChannels = getRecentChannels()
+                        val sortedRecent = recentChannels
+                            .mapNotNull { recent -> channelList.find { it.streamUrl == recent.streamUrl } }
+                        sortedRecent
+                    }
+
+                    else -> channelList
                 }
-                else -> channelList
+                _filteredChannels.value = filtered
+            } ?: run {
+                _filteredChannels.value = emptyList()
             }
-            _filteredChannels.value = filtered
-            Log.d("ChannelsProvider", "Filtered channels ($type): ${filtered.size}")
-        } ?: run {
-            _filteredChannels.value = emptyList()
-            Log.d("ChannelsProvider", "No channels to filter, set empty list")
-        }
     }
 
-    // Hàm để lấy danh sách recent từ SharedPreferences
     private fun getRecentChannels(): List<RecentChannel> {
         val recentJson = sharedPreferences.getString("recent_channels_json", "[]") ?: "[]"
         return try {
@@ -254,24 +248,21 @@ class ChannelsProvider : ViewModel() {
         }
     }
 
-    fun toggleFavorite(channel: Channel) {
+    fun toggleFavorite(channel: Channel,isCHeckGroupFavorite : Boolean ) {
         Log.d("ChannelsProvider", "Toggling favorite for channel: ${channel.name}")
         _channels.value?.let { currentList ->
-            val updatedList = currentList.map {
-                if (it.streamUrl == channel.streamUrl) {
-                    val newFavoriteStatus = !it.isFavorite
-                    sharedPreferences.edit().putBoolean(it.streamUrl, newFavoriteStatus).apply()
-                    it.copy(isFavorite = newFavoriteStatus)
-                } else it
-            }
-            // Cập nhật danh sách kênh chính
-            _channels.postValue(updatedList)
-            Log.d("ChannelsProvider", "Toggled favorite, updated channels: ${updatedList.size}")
+            val index = currentList.indexOfFirst { it.streamUrl == channel.streamUrl }
+            if (index != -1) {
+                val updatedChannel = currentList[index].copy(isFavorite = !currentList[index].isFavorite)
+                sharedPreferences.edit().putBoolean(channel.streamUrl, updatedChannel.isFavorite).apply()
+                if (isCHeckGroupFavorite){
+                    val updatedList = currentList.toMutableList().apply { set(index, updatedChannel) }
+                    _channels.value = updatedList
+                    if (tabLayoutSelectedPosition() == 1) {
+                        _filteredChannels.value = updatedList.filter { it.isFavorite }
+                    }
+                }
 
-            // Nếu đang ở tab "favorite", cập nhật danh sách filteredChannels
-            if (tabLayoutSelectedPosition() == 1) {
-                _filteredChannels.postValue(updatedList.filter { it.isFavorite })
-                Log.d("ChannelsProvider", "Updated filteredChannels for favorite tab: ${_filteredChannels.value?.size}")
             }
         }
     }

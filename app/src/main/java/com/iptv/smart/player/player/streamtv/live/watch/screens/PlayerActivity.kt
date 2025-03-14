@@ -11,6 +11,10 @@ import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -93,13 +97,16 @@ class PlayerActivity : BaseActivity() {
     private val binding by lazy { CustomControllerChannelBinding.inflate(layoutInflater) }
     private var isControlVisible = false
     private val controlHideHandler = Handler(Looper.getMainLooper())
-    private val hideControlRunnable = Runnable { hideControlsInFullscreen() }
+    private val hideControlRunnable = Runnable { binding.controlButtonsTop1.visibility = View.GONE }
     private val CONTROL_HIDE_DELAY = 3000L
     private lateinit var touchOverlay: View
     private lateinit var frHome: FrameLayout
     private lateinit var vLine: View
-
     private var wasPlayingBeforePause = false
+    private var noInternetDialog: AlertDialog? = null
+    private var connectivityManager: ConnectivityManager? = null
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
+    private var isLocalFile = false
 
     companion object {
         private const val INCREMENT_MILLIS = 5000L
@@ -136,7 +143,9 @@ class PlayerActivity : BaseActivity() {
         channelsProvider.init(this)
 
         setFindViewById()
-        setupPlayer()
+        isLocalFile = Uri.parse(channel.streamUrl).scheme in listOf("content", "file")
+        setupNetworkMonitoring()
+        checkInternetConnection()
         setLockScreen()
         setFullScreen()
         setupFavorite()
@@ -148,18 +157,12 @@ class PlayerActivity : BaseActivity() {
         binding.btnMirroring1.gone()
         binding.btnPip1.gone()
 
-        if (RemoteConfig.ADS_PLAY_CONTROL_050325 == "1") {
-            AdsManager.showAdsBanner(this, AdsManager.BANNER_PLAY_CONTROL, binding.frHome, binding.line)
-        } else if (RemoteConfig.ADS_PLAY_CONTROL_050325 == "2") {
-            AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_COLLAP_PLAY_CONTROL, binding.frHome, binding.line)
-        } else {
-            binding.frHome.gone()
-            binding.line.gone()
-        }
+
 
         Log.d(TAG, "onCreate: Adding channel to recent: ${channel.name}")
         channelsProvider.addToRecent(channel)
         controlButtonsTop.visibility = View.VISIBLE
+        binding.controlButtonsTop1.visibility = View.GONE
 
         channelsProvider.channels.observe(this) { channels ->
             channels.find { it.streamUrl == channel.streamUrl }?.let { updatedChannel ->
@@ -175,6 +178,99 @@ class PlayerActivity : BaseActivity() {
         }
 
         channelsProvider.fetchChannelsFromRoom()
+    }
+
+
+    private fun setupNetworkMonitoring() {
+        if (isLocalFile) return
+
+        connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        networkCallback = object : ConnectivityManager.NetworkCallback() {
+            @RequiresApi(Build.VERSION_CODES.M)
+            override fun onAvailable(network: Network) {
+                runOnUiThread {
+                    Log.d(TAG, "Network available")
+                    dismissNoInternetDialog()
+                    if (!::player.isInitialized || !player.isPlaying) {
+                        setupPlayer()
+                    }
+                }
+            }
+
+            override fun onLost(network: Network) {
+                runOnUiThread {
+                    Log.d(TAG, "Network lost")
+                    if (::player.isInitialized) {
+                        wasPlayingBeforePause = player.isPlaying
+                        player.playWhenReady = false
+                    }
+                    showNoInternetDialog()
+                }
+            }
+        }
+
+        val networkRequest = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            .build()
+
+        networkCallback?.let {
+            connectivityManager?.registerNetworkCallback(networkRequest, it)
+        }
+    }
+
+
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun checkInternetConnection() {
+        if (isLocalFile) {
+            setupPlayer()
+            return // Không kiểm tra mạng cho file cục bộ
+        }
+
+        if (!isInternetAvailable()) {
+            showNoInternetDialog()
+        } else {
+            dismissNoInternetDialog()
+            setupPlayer()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun isInternetAvailable(): Boolean {
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+    }
+
+    private fun showNoInternetDialog() {
+        if (noInternetDialog == null || !noInternetDialog!!.isShowing) {
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_no_internet, null)
+            noInternetDialog = AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create()
+
+            val width = (320 * resources.displayMetrics.density).toInt()
+            val height = (312 * resources.displayMetrics.density).toInt()
+            noInternetDialog?.window?.apply {
+                setLayout(width, height)
+                setBackgroundDrawableResource(R.drawable.bg_no_connect)
+            }
+
+            dialogView.findViewById<TextView>(R.id.btn_Connect).setOnClickListener {
+                startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
+            }
+
+            noInternetDialog?.show()
+        }
+    }
+
+    private fun dismissNoInternetDialog() {
+        noInternetDialog?.takeIf { it.isShowing }?.dismiss()
     }
 
     private fun startAds() {
@@ -195,6 +291,7 @@ class PlayerActivity : BaseActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun setFindViewById() {
         Log.d(TAG, "setFindViewById: Initializing UI components")
         playerView = findViewById(R.id.playerView)
@@ -231,11 +328,11 @@ class PlayerActivity : BaseActivity() {
         Log.d(TAG, "setFindViewById: Set tvTitle to ${channel.name}")
 
         btnMirroring.setOnClickListener {
-            wifiDisplay()
+            if (isLocalFile || isInternetAvailable()) wifiDisplay() else showNoInternetDialog()
         }
 
         binding.btnMirroring1.setOnClickListener {
-            wifiDisplay()
+            if (isLocalFile || isInternetAvailable()) wifiDisplay() else showNoInternetDialog()
         }
 
         btnBack.setOnClickListener {
@@ -300,13 +397,15 @@ class PlayerActivity : BaseActivity() {
 
         favoriteBtn?.setOnClickListener {
             Log.d(TAG, "setupFavorite: Toggling favorite for channel: ${channel.name}")
-            channelsProvider.toggleFavorite(channel)
+            channelsProvider.toggleFavorite(channel, true)
             updateFavoriteIcon(favoriteIcon)
         }
     }
 
     private fun updateFavoriteIcon(
-        favoriteIcon: ImageView? = controlButtonsTop.getChildAt(2)?.findViewById(R.id.img_fav)
+        favoriteIcon: ImageView? = if (isFullScreen)
+            binding.controlButtonsTop1.getChildAt(2)?.findViewById(R.id.img_fav1)
+        else controlButtonsTop.getChildAt(2)?.findViewById(R.id.img_fav)
     ) {
         val updatedChannel =
             channelsProvider.channels.value?.find { it.streamUrl == channel.streamUrl }
@@ -318,6 +417,10 @@ class PlayerActivity : BaseActivity() {
     }
 
     private fun showErrorDialog() {
+        if (!this.isFinishing && !isDestroyed) {
+            return
+        }
+
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_unavailable, null)
         val dialog = AlertDialog.Builder(this).setView(dialogView).setCancelable(false).create()
 
@@ -338,8 +441,17 @@ class PlayerActivity : BaseActivity() {
         } ?: Log.e(TAG, "showErrorDialog: btn_ok not found in dialog_unavailable.xml")
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun setupPlayer() {
+        if (!isLocalFile && !isInternetAvailable()) {
+            showNoInternetDialog()
+            return
+        }
+
         Log.d(TAG, "setupPlayer: Setting up ExoPlayer for stream URL: ${channel.streamUrl}")
+        if (::player.isInitialized) {
+            player.release()
+        }
         player = ExoPlayer.Builder(this).setSeekBackIncrementMs(INCREMENT_MILLIS)
             .setSeekForwardIncrementMs(INCREMENT_MILLIS).build().also { exoPlayer ->
                 playerView.player = exoPlayer
@@ -458,17 +570,18 @@ class PlayerActivity : BaseActivity() {
         Log.d(TAG, "lockScreen: Setting lock state to $lock")
         isLock = lock
 
-        val lockLayout = findViewById<LinearLayout>(R.id.btn_lock)
-        val lockIcon = findViewById<ImageView>(R.id.img_lock)
-        val lockText = findViewById<TextView>(R.id.txt_lock)
+        val controlButtons = if (isFullScreen) binding.controlButtonsTop1 else controlButtonsTop
+        val lockLayout = controlButtons.findViewById<LinearLayout>(if (isFullScreen) R.id.btn_lock1 else R.id.btn_lock)
+        val lockIcon = controlButtons.findViewById<ImageView>(if (isFullScreen) R.id.img_lock1 else R.id.img_lock)
+        val lockText = controlButtons.findViewById<TextView>(if (isFullScreen) R.id.txt_lock1 else R.id.txt_lock)
 
         if (lock) {
             linearLayoutControlUp.visibility = View.INVISIBLE
             linearLayoutControlBottom.visibility = View.INVISIBLE
-            controlButtonsTop.visibility = View.VISIBLE
+            controlButtons.visibility = View.VISIBLE
 
-            for (i in 0 until controlButtonsTop.childCount) {
-                val child = controlButtonsTop.getChildAt(i)
+            for (i in 0 until controlButtons.childCount) {
+                val child = controlButtons.getChildAt(i)
                 if (child != lockLayout) {
                     originalLayoutParams[child] = child.layoutParams as LinearLayout.LayoutParams
                     child.visibility = View.GONE
@@ -476,22 +589,20 @@ class PlayerActivity : BaseActivity() {
             }
 
             lockIcon.setImageDrawable(
-                ContextCompat.getDrawable(
-                    applicationContext, R.drawable.ic_lock_screen
-                )
+                ContextCompat.getDrawable(applicationContext, R.drawable.ic_lock_screen)
             )
             lockText.text = getString(R.string.screen_lock_long_press_to_unlock)
-            lockLayout.setBackgroundColor(Color.WHITE)
+            if (!isFullScreen) lockLayout.setBackgroundColor(Color.WHITE) else lockLayout.setBackgroundColor(Color.parseColor("#0E0E0E"))
             lockText.setTextColor(Color.parseColor("#000000"))
         } else {
             linearLayoutControlUp.visibility = if (isFullScreen) View.GONE else View.VISIBLE
             linearLayoutControlBottom.visibility = if (isFullScreen) View.GONE else View.VISIBLE
-            controlButtonsTop.visibility = View.VISIBLE
+            controlButtons.visibility = View.VISIBLE
 
             val margin4dp = resources.getDimensionPixelSize(R.dimen.button_margin)
 
-            for (i in 0 until controlButtonsTop.childCount) {
-                val child = controlButtonsTop.getChildAt(i)
+            for (i in 0 until controlButtons.childCount) {
+                val child = controlButtons.getChildAt(i)
                 child.visibility = View.VISIBLE
 
                 originalLayoutParams[child]?.let {
@@ -504,25 +615,20 @@ class PlayerActivity : BaseActivity() {
             }
 
             lockIcon.setImageDrawable(
-                ContextCompat.getDrawable(
-                    applicationContext, R.drawable.ic_lock
-                )
+                ContextCompat.getDrawable(applicationContext, R.drawable.ic_lock)
             )
             lockText.text = "Lock"
-            lockLayout.setBackgroundResource(R.drawable.bg_menu_playcontrol)
-            lockText.setTextColor(Color.parseColor("#3F484A"))
+            lockLayout.setBackgroundResource(R.drawable.bg_menu_playcontrol1)
+            lockText.setTextColor(Color.WHITE)
 
-            controlButtonsTop.requestLayout()
+            controlButtons.requestLayout()
 
             if (isFullScreen && !isControlVisible) {
                 hideControlsInFullscreen()
             }
         }
 
-        Log.d(
-            TAG,
-            "lockScreen: UI state - controlButtonsTop childCount=${controlButtonsTop.childCount}"
-        )
+        Log.d(TAG, "lockScreen: UI state - controlButtons childCount=${controlButtons.childCount}")
     }
 
     private fun setLockScreen() {
@@ -547,6 +653,7 @@ class PlayerActivity : BaseActivity() {
             if (isLock) {
                 Log.d(TAG, "setLockScreen: Long press detected, unlocking")
                 isLock = false
+
                 lockIcon.setImageDrawable(
                     ContextCompat.getDrawable(
                         applicationContext, R.drawable.ic_lock
@@ -580,7 +687,7 @@ class PlayerActivity : BaseActivity() {
             }
 
             if (isFullScreen) {
-                binding.controlButtonsTop1.visibility = View.VISIBLE
+                binding.controlButtonsTop1.visibility = View.GONE
                 binding.btnMirroring1.visible()
                 binding.btnPip1.visible()
                 binding.root.setBackgroundColor(getColor(R.color.black))
@@ -596,7 +703,7 @@ class PlayerActivity : BaseActivity() {
                 params.topToBottom = ConstraintLayout.LayoutParams.UNSET
                 params.bottomToTop = ConstraintLayout.LayoutParams.UNSET
                 params.topMargin = 0
-                params.bottomMargin = 280
+                params.bottomMargin = 160
                 playerView.layoutParams = params
 
                 touchOverlay.visibility = View.VISIBLE
@@ -604,15 +711,16 @@ class PlayerActivity : BaseActivity() {
                 overlayParams.height = ConstraintLayout.LayoutParams.MATCH_PARENT
                 overlayParams.topToBottom = ConstraintLayout.LayoutParams.UNSET
                 overlayParams.bottomToTop = ConstraintLayout.LayoutParams.UNSET
-                overlayParams.bottomMargin = 100
+                overlayParams.bottomMargin = 80
                 touchOverlay.layoutParams = overlayParams
-
                 touchOverlay.setOnClickListener {
                     Log.d(TAG, "Touch overlay clicked in fullscreen")
                     if (isFullScreen) {
                         toggleControlsInFullscreen()
                     }
                 }
+
+                setupControlsForFullscreen()
             } else {
                 loadingProgress.visibility = View.GONE
                 binding.controlButtonsTop1.visibility = View.GONE
@@ -677,6 +785,60 @@ class PlayerActivity : BaseActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun setupControlsForFullscreen() {
+        binding.btnMirroring1.setOnClickListener {
+            if (isLocalFile || isInternetAvailable()) wifiDisplay() else showNoInternetDialog()
+        }
+        binding.btnMirroring1.setBackgroundResource(R.drawable.bg_menu_playcontrol1)
+
+        if (Build.VERSION.SDK_INT >= MIN_PIP_API) {
+            binding.btnPip1.setOnClickListener {
+                enterPictureInPictureModeIfAvailable()
+            }
+        }
+        binding.btnPip1.setBackgroundResource(R.drawable.bg_menu_playcontrol1)
+
+        val favoriteLayout = binding.controlButtonsTop1.getChildAt(2) as? LinearLayout
+        val favoriteIcon = favoriteLayout?.findViewById<ImageView>(R.id.img_fav1)
+        val favoriteBtn = favoriteLayout?.findViewById<LinearLayout>(R.id.btn_fa)
+        updateFavoriteIcon(favoriteIcon)
+        favoriteBtn?.setBackgroundResource(R.drawable.bg_menu_playcontrol1)
+
+        favoriteBtn?.setOnClickListener {
+            channelsProvider.toggleFavorite(channel, true)
+            updateFavoriteIcon(favoriteIcon)
+        }
+
+        val lockLayout = binding.controlButtonsTop1.getChildAt(3) as? LinearLayout
+        val lockIcon = lockLayout?.findViewById<ImageView>(R.id.img_lock1)
+        val lockButton = lockLayout?.findViewById<LinearLayout>(R.id.btn_lock1)
+        lockLayout?.setBackgroundResource(R.drawable.bg_menu_playcontrol1)
+
+        lockButton?.setOnClickListener {
+            if (!isLock) {
+                isLock = true
+                lockIcon?.setImageDrawable(
+                    ContextCompat.getDrawable(applicationContext, R.drawable.ic_lock_screen)
+                )
+                lockScreen(true)
+            }
+        }
+
+        lockButton?.setOnLongClickListener {
+            if (isLock) {
+                isLock = false
+                lockIcon?.setImageDrawable(
+                    ContextCompat.getDrawable(applicationContext, R.drawable.ic_lock)
+                )
+                lockScreen(false)
+                true
+            } else {
+                false
+            }
+        }
+    }
+
     private fun toggleControlsInFullscreen() {
         if (isControlVisible) {
             hideControlsInFullscreen()
@@ -689,6 +851,11 @@ class PlayerActivity : BaseActivity() {
         Log.d(TAG, "showControlsInFullscreen: Showing controls")
         isControlVisible = true
 
+        binding.controlButtonsTop1.visibility = View.VISIBLE
+
+        controlHideHandler.removeCallbacks(hideControlRunnable)
+        controlHideHandler.postDelayed(hideControlRunnable, CONTROL_HIDE_DELAY)
+
         btnBack.visibility = if (isLock) View.GONE else View.VISIBLE
         tvTitle.visibility = if (isLock) View.GONE else View.VISIBLE
         controlButtonsTop.visibility = View.GONE
@@ -697,24 +864,24 @@ class PlayerActivity : BaseActivity() {
         playerView.showController()
 
         tvTitle.setTextColor(Color.parseColor("#FFFFFF"))
-        findViewById<TextView>(R.id.txt_mirroring)?.setTextColor(Color.parseColor("#FFFFFF"))
-        findViewById<TextView>(R.id.txt_pip)?.setTextColor(Color.parseColor("#FFFFFF"))
-        findViewById<TextView>(R.id.txt_fav)?.setTextColor(Color.parseColor("#FFFFFF"))
-        findViewById<TextView>(R.id.txt_lock)?.setTextColor(Color.parseColor("#FFFFFF"))
+        findViewById<TextView>(R.id.txt_mirroring1)?.setTextColor(Color.parseColor("#FFFFFF"))
+        findViewById<TextView>(R.id.txt_pip1)?.setTextColor(Color.parseColor("#FFFFFF"))
+        findViewById<TextView>(R.id.txt_fav1)?.setTextColor(Color.parseColor("#FFFFFF"))
+        findViewById<TextView>(R.id.txt_lock1)?.setTextColor(Color.parseColor("#FFFFFF"))
 
         exoPosition.setTextColor(Color.parseColor("#FFFFFF"))
         exoDuration.setTextColor(Color.parseColor("#FFFFFF"))
 
-        findViewById<ImageView>(R.id.img_mirroring)?.setColorFilter(
+        findViewById<ImageView>(R.id.img_mirroring1)?.setColorFilter(
             Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN
         )
-        findViewById<ImageView>(R.id.img_pip)?.setColorFilter(
+        findViewById<ImageView>(R.id.img_pip1)?.setColorFilter(
             Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN
         )
-        findViewById<ImageView>(R.id.img_fav)?.setColorFilter(
+        findViewById<ImageView>(R.id.img_fav1)?.setColorFilter(
             Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN
         )
-        findViewById<ImageView>(R.id.img_lock)?.setColorFilter(
+        findViewById<ImageView>(R.id.img_lock1)?.setColorFilter(
             Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN
         )
         btnBack.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
@@ -725,17 +892,17 @@ class PlayerActivity : BaseActivity() {
         exoFfwd.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
         imageViewFullScreen.setColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_IN)
 
-        findViewById<LinearLayout>(R.id.btn_mirroring)?.setBackgroundColor(Color.parseColor("#111111"))
-        findViewById<LinearLayout>(R.id.btn_pip)?.setBackgroundColor(Color.parseColor("#111111"))
-        controlButtonsTop.getChildAt(2)?.setBackgroundColor(Color.parseColor("#111111"))
-        controlButtonsTop.getChildAt(3)?.setBackgroundColor(Color.parseColor("#111111"))
+        findViewById<LinearLayout>(R.id.btn_mirroring1)?.setBackgroundResource(R.drawable.bg_menu_playcontrol1)
+        findViewById<LinearLayout>(R.id.btn_pip1)?.setBackgroundResource(R.drawable.bg_menu_playcontrol1)
+        binding.controlButtonsTop1.getChildAt(2)?.setBackgroundResource(R.drawable.bg_menu_playcontrol1)
+        binding.controlButtonsTop1.getChildAt(3)?.setBackgroundResource(R.drawable.bg_menu_playcontrol1)
 
-        val controlButtonsParams = controlButtonsTop.layoutParams as ConstraintLayout.LayoutParams
+        val controlButtonsParams = binding.controlButtonsTop1.layoutParams as ConstraintLayout.LayoutParams
         controlButtonsParams.topToBottom = ConstraintLayout.LayoutParams.UNSET
         controlButtonsParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
         controlButtonsParams.bottomMargin =
             resources.getDimensionPixelSize(R.dimen.fullscreen_control_margin_bottom) * 2
-        controlButtonsTop.layoutParams = controlButtonsParams
+        binding.controlButtonsTop1.layoutParams = controlButtonsParams
 
         val timeBar =
             linearLayoutControlBottom.findViewById<com.google.android.exoplayer2.ui.DefaultTimeBar>(
@@ -755,25 +922,25 @@ class PlayerActivity : BaseActivity() {
 
         btnBack.visibility = View.GONE
         tvTitle.visibility = View.GONE
-        controlButtonsTop.visibility = View.GONE
+        binding.controlButtonsTop1.visibility = View.GONE
         loadingProgress.visibility = View.GONE
 
         playerView.useController = false
         playerView.hideController()
 
         tvTitle.setTextColor(Color.parseColor("#000000"))
-        findViewById<TextView>(R.id.txt_mirroring)?.setTextColor(Color.parseColor("#3F484A"))
-        findViewById<TextView>(R.id.txt_pip)?.setTextColor(Color.parseColor("#3F484A"))
-        findViewById<TextView>(R.id.txt_fav)?.setTextColor(Color.parseColor("#3F484A"))
-        findViewById<TextView>(R.id.txt_lock)?.setTextColor(Color.parseColor("#3F484A"))
+        findViewById<TextView>(R.id.txt_mirroring1)?.setTextColor(Color.parseColor("#3F484A"))
+        findViewById<TextView>(R.id.txt_pip1)?.setTextColor(Color.parseColor("#3F484A"))
+        findViewById<TextView>(R.id.txt_fav1)?.setTextColor(Color.parseColor("#3F484A"))
+        findViewById<TextView>(R.id.txt_lock1)?.setTextColor(Color.parseColor("#3F484A"))
 
         exoPosition.setTextColor(Color.parseColor("#FFFFFF"))
         exoDuration.setTextColor(Color.parseColor("#CBCDC8"))
 
-        findViewById<ImageView>(R.id.img_mirroring)?.clearColorFilter()
-        findViewById<ImageView>(R.id.img_pip)?.clearColorFilter()
-        findViewById<ImageView>(R.id.img_fav)?.clearColorFilter()
-        findViewById<ImageView>(R.id.img_lock)?.clearColorFilter()
+        findViewById<ImageView>(R.id.img_mirroring1)?.clearColorFilter()
+        findViewById<ImageView>(R.id.img_pip1)?.clearColorFilter()
+        findViewById<ImageView>(R.id.img_fav1)?.clearColorFilter()
+        findViewById<ImageView>(R.id.img_lock1)?.clearColorFilter()
         btnBack.clearColorFilter()
 
         exoPlay.clearColorFilter()
@@ -782,18 +949,18 @@ class PlayerActivity : BaseActivity() {
         exoFfwd.clearColorFilter()
         imageViewFullScreen.clearColorFilter()
 
-        findViewById<LinearLayout>(R.id.btn_mirroring)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
-        findViewById<LinearLayout>(R.id.btn_pip)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
-        controlButtonsTop.getChildAt(2)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
-        controlButtonsTop.getChildAt(3)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
+        findViewById<LinearLayout>(R.id.btn_mirroring1)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
+        findViewById<LinearLayout>(R.id.btn_pip1)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
+        binding.controlButtonsTop1.getChildAt(2)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
+        binding.controlButtonsTop1.getChildAt(3)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
 
-        val controlButtonsParams = controlButtonsTop.layoutParams as ConstraintLayout.LayoutParams
+        val controlButtonsParams = binding.controlButtonsTop1.layoutParams as ConstraintLayout.LayoutParams
         controlButtonsParams.topToBottom = R.id.playerView
         controlButtonsParams.bottomToBottom = ConstraintLayout.LayoutParams.UNSET
         controlButtonsParams.bottomMargin = 0
         controlButtonsParams.topMargin =
             resources.getDimensionPixelSize(R.dimen.control_margin_default)
-        controlButtonsTop.layoutParams = controlButtonsParams
+        binding.controlButtonsTop1.layoutParams = controlButtonsParams
 
         touchOverlay.isClickable = true
 
@@ -932,6 +1099,7 @@ class PlayerActivity : BaseActivity() {
             tvTitle.visibility = View.VISIBLE
             linearLayoutControlUp.visibility = View.VISIBLE
             controlButtonsTop.visibility = View.VISIBLE
+            binding.controlButtonsTop1.visibility = View.GONE
             loadingProgress.visibility = if (player.isLoading) View.VISIBLE else View.GONE
 
             playerView.useController = true
@@ -951,7 +1119,6 @@ class PlayerActivity : BaseActivity() {
             params.rightMargin = 0
             playerView.layoutParams = params
 
-            binding.controlButtonsTop1.visibility = View.VISIBLE
             binding.root.setBackgroundColor(getColor(R.color.white))
 
             imageViewFullScreen.setImageDrawable(
@@ -1015,24 +1182,20 @@ class PlayerActivity : BaseActivity() {
 
     override fun onStart() {
         super.onStart()
-        if (!::player.isInitialized) {
-            setupPlayer()
-        } else if (wasPlayingBeforePause && !isInPictureInPictureMode) {
-            player.playWhenReady = true
-        }
-        if (Util.SDK_INT > 23) {
-            player.playWhenReady = true
+        if (RemoteConfig.ADS_PLAY_CONTROL_050325 == "1") {
+            AdsManager.showAdsBanner(this, AdsManager.BANNER_PLAY_CONTROL, binding.frHome, binding.line)
+        } else if (RemoteConfig.ADS_PLAY_CONTROL_050325 == "2") {
+            AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_COLLAP_PLAY_CONTROL, binding.frHome, binding.line)
+        } else {
+            binding.frHome.gone()
+            binding.line.gone()
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onResume() {
         super.onResume()
-        channelsProvider.fetchChannelsFromRoom()
-        if (!::player.isInitialized) {
-            setupPlayer()
-        } else if (wasPlayingBeforePause && !isInPictureInPictureMode) {
-            player.playWhenReady = true
-        }
+        checkInternetConnection()
     }
 
     override fun onPause() {
@@ -1064,6 +1227,13 @@ class PlayerActivity : BaseActivity() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "onDestroy: Cleaning up")
+        networkCallback?.let {
+            connectivityManager?.unregisterNetworkCallback(it)
+        }
+        networkCallback = null
+        connectivityManager = null
+        dismissNoInternetDialog()
+        noInternetDialog = null
         if (::player.isInitialized && !isInPictureInPictureMode) {
             player.release()
         }

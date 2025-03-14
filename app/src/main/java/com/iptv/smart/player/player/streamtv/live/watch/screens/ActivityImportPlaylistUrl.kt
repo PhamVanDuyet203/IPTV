@@ -52,12 +52,13 @@ class ActivityImportPlaylistUrl : BaseActivity() {
 
         binding.etPlaylistName.addTextChangedListener() {
             binding.errorTextName.visibility = View.GONE
+            binding.btnAddPlaylist.visibility = View.VISIBLE
         }
         binding.etPlaylistUrl.addTextChangedListener() {
+            binding.btnAddPlaylist.visibility = View.VISIBLE
             binding.errorTextURL.visibility = View.GONE
         }
 
-        showNativeAd()
     }
 
     private fun showNativeAd() {
@@ -136,6 +137,11 @@ class ActivityImportPlaylistUrl : BaseActivity() {
         }
 
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        showNativeAd()
     }
 
     private fun startAds() {

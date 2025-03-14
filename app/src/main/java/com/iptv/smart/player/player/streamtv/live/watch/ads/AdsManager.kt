@@ -126,7 +126,7 @@ object AdsManager {
                 }
 
                 override fun onLoadedAndGetNativeAd(ad: NativeAd?) {
-                    checkAdsTest(ad)
+                  //  checkAdsTest(ad)
                     IntroActivity.isIntroFullFail1 = false
                 }
 
@@ -406,7 +406,7 @@ object AdsManager {
                 }
 
                 override fun onLoaded(nativeAd: NativeAd) {
-                    checkAdsTest(ad = nativeAd)
+                  //  checkAdsTest(ad = nativeAd)
                 }
             })
     }
@@ -415,33 +415,6 @@ object AdsManager {
         fun onLoading()
     }
 
-    private fun checkAdsTest(ad: NativeAd?) {
-        if (isTestDevice) {
-            return
-        }
-        try {
-            val testAdResponse = ad?.headline.toString().replace(" ", "").split(":")[0]
-            Log.d("===Native", ad?.headline.toString().replace(" ", "").split(":")[0])
-            val testAdResponses = arrayOf(
-                "TestAd",
-                "Anunciodeprueba",
-                "Annoncetest",
-                "테스트광고",
-                "Annuncioditesto",
-                "Testanzeige",
-                "TesIklan",
-                "Anúnciodeteste",
-                "Тестовоеобъявление",
-                "পরীক্ষামূলকবিজ্ঞাপন",
-                "जाँचविज्ञापन",
-                "إعلانتجريبي", "Quảngcáothửnghiệm"
-            )
-            isTestDevice = testAdResponses.contains(testAdResponse)
-        } catch (_: Exception) {
-            isTestDevice = true
-            Log.d("===Native", "Error")
-        }
-    }
 
 
     fun showAdsBanner(activity: Activity, adsEnum: String, view: ViewGroup, line: View) {

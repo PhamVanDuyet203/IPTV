@@ -1,11 +1,18 @@
 package com.iptv.smart.player.player.streamtv.live.watch.screens
 
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.widget.ImageView
+import androidx.annotation.RequiresApi
 import androidx.core.os.postDelayed
 import com.admob.max.dktlibrary.AOAManager
 import com.admob.max.dktlibrary.AdmobUtils
@@ -20,6 +27,7 @@ import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.visible
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.ActivitySplashBinding
 import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
+import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -38,26 +46,31 @@ class SplashActivity : BaseActivity() {
             .load(R.drawable.loader)
             .into(loaderGif)
 
-        if (AdmobUtils.isNetworkConnected(this)) {
+        Common.countInterAdd=0
+        Common.countInterSelect=0
+        Common.countInterBackPLay=0
+        Common.countInterItemPlaylist=0
+        Common.countInterAddOption=0
+        RemoteConfig.setReload(this, false)
+
+        if (AdmobUtils.isNetworkConnected(this)){
             getKeyRemoteConfig()
-        } else {
+        }else{
             Handler(Looper.getMainLooper()).postDelayed({
                 nextActivity()
-            }, 3000)
+            },2000)
         }
     }
+
 
     private fun nextActivity() {
         val intent = Intent(this, LanguageSelectionActivity::class.java)
         intent.putExtra("FROMSPLASH", true)
-
         intent.putExtra("btn_back", "GONE")
-
-
-
         intent.flags =
             Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
+        finish()
     }
 
     private fun getKeyRemoteConfig() {
@@ -75,26 +88,26 @@ class SplashActivity : BaseActivity() {
                 RemoteConfig.NATIVE_FULL_SCREEN_INTRO_050325 =
                     RemoteConfig.getValueAbTest("NATIVE_FULL_SCREEN_INTRO_050325")
                 RemoteConfig.ADS_HOME_050325 = RemoteConfig.getValueAbTest("ADS_HOME_050325")
-               RemoteConfig.INTER_ADD_050325 = RemoteConfig.getValueAbTest("INTER_ADD_050325")
-               RemoteConfig.NATIVE_ADD_050325 = RemoteConfig.getValueAbTest("NATIVE_ADD_050325")
+                RemoteConfig.INTER_ADD_050325 = RemoteConfig.getValueAbTest("INTER_ADD_050325")
+                RemoteConfig.NATIVE_ADD_050325 = RemoteConfig.getValueAbTest("NATIVE_ADD_050325")
                 RemoteConfig.INTER_SAVE_ADD_050325 =
                     RemoteConfig.getValueAbTest("INTER_SAVE_ADD_050325")
-               RemoteConfig.INTER_ITEMS_PLAYLIST_050325 =
+                RemoteConfig.INTER_ITEMS_PLAYLIST_050325 =
                     RemoteConfig.getValueAbTest("INTER_ITEMS_PLAYLIST_050325")
-              RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325 =
+                RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325 =
                     RemoteConfig.getValueAbTest("INTER_SELECT_CATEG_OR_CHANNEL_050325")
                 RemoteConfig.NATIVE_PLAYLIST_CHANNEL_050325 =
                     RemoteConfig.getValueAbTest("NATIVE_PLAYLIST_CHANNEL_050325")
-               RemoteConfig.BANNER_DETAIL_PLAYLIST_CHANNEL_050325 =
+                RemoteConfig.BANNER_DETAIL_PLAYLIST_CHANNEL_050325 =
                     RemoteConfig.getValueAbTest("BANNER_DETAIL_PLAYLIST_CHANNEL_050325")
                 RemoteConfig.INTER_BACK_PLAY_TO_LIST_050325 =
                     RemoteConfig.getValueAbTest("INTER_BACK_PLAY_TO_LIST_050325")
-               RemoteConfig.ADS_PLAY_CONTROL_050325 =
+                RemoteConfig.ADS_PLAY_CONTROL_050325 =
                     RemoteConfig.getValueAbTest("ADS_PLAY_CONTROL_050325")
                 RemoteConfig.ONRESUME_050325 = RemoteConfig.getValueAbTest("ONRESUME_050325")
                 setupCMP()
+                Log.d("TAG121212121", "onComplete: "+RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325)
             }
-
         })
     }
 
@@ -109,7 +122,6 @@ class SplashActivity : BaseActivity() {
                 initializeMobileAdsSdk()
             }
         }
-
     }
 
     private fun initializeMobileAdsSdk() {
@@ -129,8 +141,8 @@ class SplashActivity : BaseActivity() {
         if (RemoteConfig.BANNER_SPLASH_050325 == "1") {
             binding.frBanner.visible()
             binding.view.visible()
-            binding.loaderGif.gone()
-            binding.textView.gone()
+            binding.textView.visible()
+
             AdsManager.showAdsBannerSplash(this,
                 AdsManager.BANNER_SPLASH,
                 binding.frBanner,
@@ -141,23 +153,23 @@ class SplashActivity : BaseActivity() {
                             checkRemoteConFigSPlash()
                         }, 1000)
                     }
-
                 })
-        }else{
+        } else {
             checkRemoteConFigSPlash()
         }
-        AdsManager.loadAdsNative(this, AdsManager.NATIVE_INTRO)
-        AdsManager.loadAdsNative(this, AdsManager.NATIVE_LANGUAGE)
-        AdsManager.loadAdsNative(this, AdsManager.NATIVE_LANGUAGE_ID2)
+        if (RemoteConfig.NATIVE_LANGUAGE_050325 == "1") {
+            AdsManager.loadAdsNative(this, AdsManager.NATIVE_LANGUAGE)
+            AdsManager.loadAdsNative(this, AdsManager.NATIVE_LANGUAGE_ID2)
+        }
 
         binding.loaderGif.visible()
-        binding.textView.visible()
     }
-
 
     private fun checkRemoteConFigSPlash() {
         when (RemoteConfig.ADS_SPLASH_050325) {
             "1" -> {
+                binding.textView.visible()
+
                 val aoaManager = AOAManager(this,
                     AdsManager.AOA_SPLASH,
                     20000,
@@ -179,6 +191,8 @@ class SplashActivity : BaseActivity() {
             }
 
             "2" -> {
+                binding.textView.visible()
+
                 AdsManager.loadAndShowInterSplash(this,
                     AdsManager.INTER_SPLASH,
                     object : AdsManager.AdListener {
@@ -189,10 +203,14 @@ class SplashActivity : BaseActivity() {
             }
 
             else -> {
+                binding.textView.gone()
                 nextActivity()
             }
         }
+    }
 
+    override fun onDestroy() {
+        super.onDestroy()
     }
 
     private fun applyLocale(languageCode: String) {
@@ -202,4 +220,5 @@ class SplashActivity : BaseActivity() {
         config.setLocale(locale)
         resources.updateConfiguration(config, resources.displayMetrics)
     }
+
 }

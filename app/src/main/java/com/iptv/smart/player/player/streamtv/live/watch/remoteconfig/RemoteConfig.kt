@@ -27,8 +27,8 @@ object RemoteConfig {
     var INTER_SELECT_CATEG_OR_CHANNEL_050325="0"
     var NATIVE_PLAYLIST_CHANNEL_050325="0"
     var BANNER_DETAIL_PLAYLIST_CHANNEL_050325="0"
-    var INTER_BACK_PLAY_TO_LIST_050325=""
-    var ADS_PLAY_CONTROL_050325="1"
+    var INTER_BACK_PLAY_TO_LIST_050325="0"
+    var ADS_PLAY_CONTROL_050325="2"
     var ONRESUME_050325="0"
 
     fun initRemoteConfig(completeListener: CompleteListener) {

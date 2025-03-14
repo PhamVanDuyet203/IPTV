@@ -27,17 +27,6 @@ class HomePageActivity : BaseActivity() {
         setContentView(binding.root)
 
 
-        if (RemoteConfig.ADS_HOME_050325 == "1") {
-           AdsManager.showAdsBanner(this, AdsManager.BANNER_HOME, binding.frHome, binding.line)
-        }
-        else if (RemoteConfig.ADS_HOME_050325 == "2") {
-            AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_COLLAP_HOME, binding.frHome,binding.line)
-        }
-        else {
-            binding.frHome.gone()
-            binding.line.gone()
-        }
-
         val sharedPreferences = getSharedPreferences("AppSettings", MODE_PRIVATE)
         val selectedLanguageCode = sharedPreferences.getString("selectedLanguage", "en") ?: "en"
         updateLanguageIcon(selectedLanguageCode)
@@ -78,6 +67,22 @@ class HomePageActivity : BaseActivity() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit()
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        if (RemoteConfig.ADS_HOME_050325 == "1") {
+            AdsManager.showAdsBanner(this, AdsManager.BANNER_HOME, binding.frHome, binding.line)
+        }
+        else if (RemoteConfig.ADS_HOME_050325 == "2") {
+            AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_COLLAP_HOME, binding.frHome,binding.line)
+        }
+        else {
+            binding.frHome.gone()
+            binding.line.gone()
+        }
+
     }
 
     private fun setSelected(selectedLayout: LinearLayout) {
