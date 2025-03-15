@@ -94,7 +94,8 @@ class ActivityImportPlaylistUrl : BaseActivity() {
         else {
             val currentTime = System.currentTimeMillis()
             if (isSaving || currentTime - lastSaveTime < debounceDuration) return
-            binding.progressBar.visible()
+
+            showOverlay()
 
             isSaving = true
             lastSaveTime = currentTime
@@ -104,7 +105,7 @@ class ActivityImportPlaylistUrl : BaseActivity() {
                     val existingPlaylist = playlistDao.getPlaylistByName(name)
                     if (existingPlaylist != null) {
                         withContext(Dispatchers.Main) {
-                            binding.progressBar.gone()
+                            hideOverlay()
                             etPlaylistName.error = "Playlist name already exists"
                             binding.btnAddPlaylist.isEnabled = true
                             isSaving = false
@@ -114,8 +115,7 @@ class ActivityImportPlaylistUrl : BaseActivity() {
                     val channelCount = fetchAndCountChannelsFromUrl(url)
                     if (channelCount == 0) {
                         withContext(Dispatchers.Main) {
-                            binding.progressBar.gone()
-
+                            hideOverlay()
                             etPlaylistUrl.error = "Invalid URL or no channels found"
                         }
                         return@launch
@@ -130,6 +130,7 @@ class ActivityImportPlaylistUrl : BaseActivity() {
                     playlistDao.insertPlaylist(playlist)
 
                     withContext(Dispatchers.Main) {
+                        hideOverlay()
                         startAds()
                     }
                 } finally {
@@ -142,6 +143,14 @@ class ActivityImportPlaylistUrl : BaseActivity() {
         }
 
 
+    }
+
+    private fun showOverlay() {
+        binding.progressBar.visibility = View.VISIBLE
+    }
+
+    private fun hideOverlay() {
+        binding.progressBar.visibility = View.GONE
     }
 
     override fun onStart() {

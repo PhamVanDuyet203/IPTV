@@ -9,14 +9,14 @@ plugins {
 
 android {
     namespace = "com.iptv.smart.player.player.streamtv.live.watch"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.iptv.smart.player.player.streamtv.live.watch"
-        minSdk = 21
-        targetSdk = 34
-        versionCode = 5
-        versionName = "1.0.4"
+        minSdk = 28
+        targetSdk = 35
+        versionCode = 1
+        versionName = "TEST"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -130,7 +130,7 @@ dependencies {
     //CMP
     implementation ("com.google.android.ump:user-messaging-platform:3.0.0")
 
-    implementation ("com.github.thienlp201097:smart-app-rate:1.0.5")
+    implementation ("com.github.thienlp201097:smart-app-rate:1.0.7")
 
     implementation ("com.facebook.android:facebook-android-sdk:[8,9)")
     implementation ("com.google.android.gms:play-services-ads:23.0.0")

@@ -49,6 +49,7 @@ import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.WindowManager
 import android.widget.FrameLayout
+import android.widget.RelativeLayout
 import androidx.annotation.NonNull
 import androidx.annotation.RequiresApi
 import com.admob.max.dktlibrary.AppOpenManager
@@ -87,23 +88,27 @@ class PlayerActivity : BaseActivity() {
     private lateinit var channel: Channel
     private lateinit var channelsProvider: ChannelsProvider
     private lateinit var btnMirroring: LinearLayout
+    private lateinit var toolPlayer: View
     private var playbackPosition = 0L
     private var isPlayerReady = false
     private var isFullScreen = false
     private var isLock = false
     private var isInPictureInPictureMode = false
     private val handler = Handler(Looper.getMainLooper())
-    private val TAG = "PlayerActivity"
+    private val TAG = "hnvytnynvynynyj"
     private lateinit var tvTitle: TextView
     private val binding by lazy { CustomControllerChannelBinding.inflate(layoutInflater) }
     private var isControlVisible = false
     private val controlHideHandler = Handler(Looper.getMainLooper())
     private val hideControlRunnable = Runnable {
-        binding.controlButtonsTop1.visibility = View.GONE
+        if (!isLock && isFullScreen ){
+            binding.controlButtonsTop1.visibility = View.INVISIBLE
+            btnBack.visibility = View.INVISIBLE
+            tvTitle.visibility = View.INVISIBLE
+        }
         playerView.hideController()
     }
     private val CONTROL_HIDE_DELAY = 3000L
-    private lateinit var touchOverlay: View
     private lateinit var frHome: FrameLayout
     private lateinit var vLine: View
     private var wasPlayingBeforePause = false
@@ -111,6 +116,7 @@ class PlayerActivity : BaseActivity() {
     private var connectivityManager: ConnectivityManager? = null
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var isLocalFile = false
+
 
     companion object {
         private const val INCREMENT_MILLIS = 3000L
@@ -149,7 +155,6 @@ class PlayerActivity : BaseActivity() {
         setFindViewById()
         isLocalFile = Uri.parse(channel.streamUrl).scheme in listOf("content", "file")
         setupNetworkMonitoring()
-        checkInternetConnection()
         setLockScreen()
         setFullScreen()
         setupFavorite()
@@ -299,7 +304,6 @@ class PlayerActivity : BaseActivity() {
     private fun setFindViewById() {
         Log.d(TAG, "setFindViewById: Initializing UI components")
         playerView = findViewById(R.id.playerView)
-        touchOverlay = findViewById(R.id.touchOverlay)
         loadingProgress = findViewById(R.id.loadingProgress)
         btnBack = findViewById(R.id.btnBack)
         exoPlay = findViewById(R.id.exo_play)
@@ -513,8 +517,7 @@ class PlayerActivity : BaseActivity() {
                 exoPlayer.addListener(object : Player.Listener {
                     override fun onIsLoadingChanged(isLoading: Boolean) {
                         Log.d(TAG, "onIsLoadingChanged: isLoading = $isLoading")
-                        loadingProgress.visibility =
-                            if (isLoading && !exoPlayer.isPlaying) View.VISIBLE else View.GONE
+                        loadingProgress.visibility = if (isLoading && !exoPlayer.isPlaying) View.VISIBLE else View.GONE
                     }
 
                     override fun onPlayerError(error: PlaybackException) {
@@ -530,6 +533,7 @@ class PlayerActivity : BaseActivity() {
                         Log.d(TAG, "onPlaybackStateChanged: State = $playbackState")
                         when (playbackState) {
                             Player.STATE_READY -> {
+                                loadingProgress.visibility = View.GONE
                                 isPlayerReady = true
                                 Log.d(TAG, "onPlaybackStateChanged: Player ready")
                             }
@@ -608,20 +612,19 @@ class PlayerActivity : BaseActivity() {
                 lockText.setTextColor(Color.parseColor("#3F484A"))
             } else
             {
+                btnBack.gone()
+                tvTitle.gone()
+                playerView.useController = false
+                playerView.hideController()
                 lockLayout.setBackgroundResource(R.drawable.bg_menu_playcontrol1)
                 lockText.gone()
-            }
-
-            if (isFullScreen) {
-                playerView.useController = true
-                playerView.showController()
-                controlHideHandler.removeCallbacks(hideControlRunnable)
-                binding.controlButtonsTop1.visibility = View.VISIBLE
             }
 
         } else {
             linearLayoutControlUp.visibility =  View.VISIBLE
             linearLayoutControlBottom.visibility = View.VISIBLE
+            btnBack.visible()
+            tvTitle.visible()
             lockText.visible()
             playerView.useController = true
             playerView.showController()
@@ -697,6 +700,26 @@ class PlayerActivity : BaseActivity() {
         }
     }
 
+    private fun showBottomTool(){
+        if (isFullScreen && !isInPictureInPictureMode){
+            Log.d(TAG, "onResume: ")
+            binding.controlButtonsTop1.visible()
+            btnBack.visible()
+            tvTitle.visible()
+            tvTitle.setTextColor(Color.WHITE)
+            btnBack.setColorFilter(Color.WHITE)
+            handler.removeCallbacks(hideControlRunnable)
+            handler.postDelayed(hideControlRunnable,3000)
+        }
+        if (isInPictureInPictureMode){
+            btnBack.gone()
+            tvTitle.gone()
+            playerView.hideController()
+        }
+
+
+    }
+
     @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("SourceLockedOrientationActivity")
     private fun setFullScreen() {
@@ -718,15 +741,26 @@ class PlayerActivity : BaseActivity() {
             }
 
             val toolbar = playerView.findViewById<View>(R.id.toolbar_player)
-            val controlButtonsTop1Params = binding.controlButtonsTop1.layoutParams as ConstraintLayout.LayoutParams
-
+            val mainCustomControl = findViewById<RelativeLayout>(R.id.mainCustomControl)
+            val playserView = findViewById<PlayerView>(R.id.playerView)
+            playserView.setOnClickListener {
+                linearLayoutControlUp.visible()
+                linearLayoutControlBottom.visible()
+                showBottomTool()
+            }
+            mainCustomControl.setOnClickListener {
+                linearLayoutControlUp.gone()
+                linearLayoutControlBottom.gone()
+                showBottomTool()
+            }
             if (isFullScreen) {
-                binding.controlButtonsTop1.visibility = View.VISIBLE
+                showBottomTool()
                 binding.btnMirroring1.visible()
                 binding.btnPip1.visible()
                 binding.root.setBackgroundColor(getColor(R.color.black))
-                btnBack.visibility = View.GONE
-                tvTitle.visibility = View.GONE
+                btnBack.visibility = View.VISIBLE
+                tvTitle.visibility = View.VISIBLE
+
                 binding.line.gone()
                 controlButtonsTop.visibility = View.GONE
                 loadingProgress.visibility = View.GONE
@@ -742,39 +776,19 @@ class PlayerActivity : BaseActivity() {
                 params.bottomMargin = 0
                 playerView.layoutParams = params
 
-                touchOverlay.visibility = View.VISIBLE
-                val overlayParams = touchOverlay.layoutParams as ConstraintLayout.LayoutParams
-                overlayParams.height = ConstraintLayout.LayoutParams.MATCH_PARENT
-                overlayParams.topToBottom = ConstraintLayout.LayoutParams.UNSET
-                overlayParams.bottomToTop = ConstraintLayout.LayoutParams.UNSET
-                overlayParams.bottomMargin = 0
-                touchOverlay.layoutParams = overlayParams
-                touchOverlay.setOnClickListener {
-                    Log.d(TAG, "Touch overlay clicked in fullscreen")
-                    if (isFullScreen) {
-                        if (isLock) {
-                            toolbar.visible()
-                            binding.controlButtonsTop1.visibility = View.VISIBLE
-                            playerView.useController = true
-                            playerView.showController()
-                            controlHideHandler.removeCallbacks(hideControlRunnable)
-                            controlHideHandler.postDelayed(hideControlRunnable, CONTROL_HIDE_DELAY)
-                        } else {
-                            toggleControlsInFullscreen()
-                        }
-                    }
-                }
-
-            toolbar.visible()
+                toolbar.visible()
 
 
                 setupControlsForFullscreen()
             } else {
+                showBottomTool()
                 loadingProgress.visibility = View.GONE
                 binding.controlButtonsTop1.visibility = View.GONE
                 binding.root.setBackgroundColor(getColor(R.color.white))
                 btnBack.visibility = View.VISIBLE
+                btnBack.clearColorFilter()
                 tvTitle.visibility = View.VISIBLE
+                tvTitle.setTextColor(Color.BLACK)
                 linearLayoutControlUp.visibility = View.VISIBLE
                 linearLayoutControlBottom.visibility = View.VISIBLE
                 controlButtonsTop.visibility = View.VISIBLE
@@ -792,14 +806,6 @@ class PlayerActivity : BaseActivity() {
                 params.topMargin = resources.getDimensionPixelSize(R.dimen.player_margin_top)
                 params.bottomMargin = 0
                 playerView.layoutParams = params
-
-                val overlayParams = touchOverlay.layoutParams as ConstraintLayout.LayoutParams
-                overlayParams.height = resources.getDimensionPixelSize(R.dimen.player_height)
-                overlayParams.topToBottom = R.id.tvTitle
-                overlayParams.bottomToTop = R.id.linearLayoutControlUp
-                touchOverlay.layoutParams = overlayParams
-                touchOverlay.visibility = View.GONE
-                touchOverlay.setOnClickListener(null)
 
                 toolbar.gone()
 
@@ -843,12 +849,12 @@ class PlayerActivity : BaseActivity() {
             if (isLocalFile || isInternetAvailable()) wifiDisplay() else showNoInternetDialog()
         }
         binding.btnMirroring1.setBackgroundResource(R.drawable.bg_menu_playcontrol1)
-
-        if (Build.VERSION.SDK_INT >= MIN_PIP_API) {
-            binding.btnPip1.setOnClickListener {
-                enterPictureInPictureModeIfAvailable()
-            }
-        }
+//
+//        if (Build.VERSION.SDK_INT >= MIN_PIP_API) {
+//            binding.btnPip1.setOnClickListener {
+//                enterPictureInPictureModeIfAvailable()
+//            }
+//        }
         binding.btnPip1.setBackgroundResource(R.drawable.bg_menu_playcontrol1)
 
         val favoriteLayout = binding.controlButtonsTop1.getChildAt(2) as? LinearLayout
@@ -905,14 +911,11 @@ class PlayerActivity : BaseActivity() {
         isControlVisible = true
 
         binding.controlButtonsTop1.visibility = View.VISIBLE
-        playerView.useController = true
-        playerView.showController()
-
-        controlHideHandler.removeCallbacks(hideControlRunnable)
-        controlHideHandler.postDelayed(hideControlRunnable, CONTROL_HIDE_DELAY)
 
         btnBack.visibility = if (isLock) View.GONE else View.VISIBLE
         tvTitle.visibility = if (isLock) View.GONE else View.VISIBLE
+        playerView.useController = true
+        playerView.showController()
         controlButtonsTop.visibility = View.GONE
 
 
@@ -942,18 +945,14 @@ class PlayerActivity : BaseActivity() {
         binding.controlButtonsTop1.getChildAt(2)?.setBackgroundResource(R.drawable.bg_menu_playcontrol1)
         binding.controlButtonsTop1.getChildAt(3)?.setBackgroundResource(R.drawable.bg_menu_playcontrol1)
 
-        // Cập nhật ràng buộc
-        val controlButtonsParams = binding.controlButtonsTop1.layoutParams as ConstraintLayout.LayoutParams
-        controlButtonsParams.bottomToTop = R.id.fr_home // Đáy gắn với đỉnh của frHome
-        controlButtonsParams.bottomToBottom = ConstraintLayout.LayoutParams.UNSET // Xóa ràng buộc đáy với parent
-        controlButtonsParams.topToBottom = ConstraintLayout.LayoutParams.UNSET // Xóa ràng buộc đỉnh nếu không cần
-        controlButtonsParams.bottomMargin = 8 // Khoảng cách 8dp
-        binding.controlButtonsTop1.layoutParams = controlButtonsParams
 
         val timeBar = linearLayoutControlBottom.findViewById<com.google.android.exoplayer2.ui.DefaultTimeBar>(R.id.exo_progress)
         timeBar?.visibility = View.VISIBLE
+        showBottomTool()
 
-        touchOverlay.isClickable = true
+
+        controlHideHandler.removeCallbacks(hideControlRunnable)
+        controlHideHandler.postDelayed(hideControlRunnable, CONTROL_HIDE_DELAY)
     }
 
     private fun hideControlsInFullscreen() {
@@ -995,15 +994,6 @@ class PlayerActivity : BaseActivity() {
         binding.controlButtonsTop1.getChildAt(2)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
         binding.controlButtonsTop1.getChildAt(3)?.setBackgroundResource(R.drawable.bg_menu_playcontrol)
 
-        val controlButtonsParams = binding.controlButtonsTop1.layoutParams as ConstraintLayout.LayoutParams
-        controlButtonsParams.topToBottom = R.id.playerView
-        controlButtonsParams.bottomToBottom = ConstraintLayout.LayoutParams.UNSET
-        controlButtonsParams.bottomMargin = 0
-        controlButtonsParams.topMargin =
-            resources.getDimensionPixelSize(R.dimen.control_margin_default)
-        binding.controlButtonsTop1.layoutParams = controlButtonsParams
-
-        touchOverlay.isClickable = true
 
         controlHideHandler.removeCallbacks(hideControlRunnable)
     }
@@ -1014,12 +1004,12 @@ class PlayerActivity : BaseActivity() {
                 enterPictureInPictureModeIfAvailable()
             }
             binding.btnPip1.setOnClickListener {
+
                 enterPictureInPictureModeIfAvailable()
+
             }
         } else {
-            btnPip.visibility = View.GONE
-            Log.w(TAG, "setupPip: PiP not supported on this device (API < 26)")
-        }
+            btnPip.visibility = View.GONE }
     }
 
     private fun isPipPermissionGranted(): Boolean {
@@ -1055,25 +1045,47 @@ class PlayerActivity : BaseActivity() {
             wasPlayingBeforePause = player.isPlaying
             player.playWhenReady = false
         }
-        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+
+        val intent = Intent("android.settings.PICTURE_IN_PICTURE_SETTINGS").apply {
+            data = Uri.parse("package:$packageName")
+        }
+
+        try {
+            pipPermissionLauncher.launch(intent)
+            Toast.makeText(
+                this,
+                "Please enable Picture-in-Picture for this app",
+                Toast.LENGTH_LONG
+            ).show()
+        } catch (e: ActivityNotFoundException) {
+            val fallbackIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                 data = Uri.fromParts("package", packageName, null)
             }
-        } else {
-            Intent(Settings.ACTION_APPLICATION_SETTINGS)
+            try {
+                pipPermissionLauncher.launch(fallbackIntent)
+                Toast.makeText(
+                    this,
+                    "Go to Picture-in-Picture settings and enable it for $packageName",
+                    Toast.LENGTH_LONG
+                ).show()
+            } catch (e: ActivityNotFoundException) {
+                val finalFallbackIntent = Intent(Settings.ACTION_SETTINGS)
+                pipPermissionLauncher.launch(finalFallbackIntent)
+                Toast.makeText(
+                    this,
+                    "Go to Apps > $packageName > Picture-in-Picture and enable it",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
-        pipPermissionLauncher.launch(intent)
-        val message = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            "Go to 'Picture-in-Picture' and enable it for this app"
-        } else {
-            "PiP settings not applicable on this device"
-        }
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
     private fun enterPictureInPictureModeIfAvailable() {
         if (Build.VERSION.SDK_INT < MIN_PIP_API) return
-
+        Log.d("dgdfgdfgfgfg", "enterPictureInPictureModeIfAvailable: ")
+        binding.btnBack.gone()
+        binding.btnBack.gone()
+        playerView.hideController()
         if (!packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
             Toast.makeText(this, "PiP not supported on this device", Toast.LENGTH_SHORT).show()
             return
@@ -1098,7 +1110,6 @@ class PlayerActivity : BaseActivity() {
             val params = PictureInPictureParams.Builder().setAspectRatio(aspectRatio).build()
             if (enterPictureInPictureMode(params)) {
                 isInPictureInPictureMode = true
-                Log.d(TAG, "Entered PiP mode successfully")
                 if (::player.isInitialized && wasPlayingBeforePause) {
                     player.playWhenReady = true
                 }
@@ -1120,6 +1131,8 @@ class PlayerActivity : BaseActivity() {
         if (isInPictureInPictureMode) {
             btnBack.visibility = View.GONE
             tvTitle.visibility = View.GONE
+            toolPlayer = findViewById(R.id.toolbar_player)
+            toolPlayer.visibility = View.GONE
             linearLayoutControlUp.visibility = View.GONE
             controlButtonsTop.visibility = View.GONE
             loadingProgress.visibility = View.GONE
@@ -1139,6 +1152,8 @@ class PlayerActivity : BaseActivity() {
         } else {
             btnBack.visibility = View.VISIBLE
             tvTitle.visibility = View.VISIBLE
+            btnBack.clearColorFilter()
+            tvTitle.setTextColor(Color.BLACK)
             linearLayoutControlUp.visibility = View.VISIBLE
             controlButtonsTop.visibility = View.VISIBLE
             binding.controlButtonsTop1.visibility = View.GONE
@@ -1173,6 +1188,7 @@ class PlayerActivity : BaseActivity() {
             if (::player.isInitialized && wasPlayingBeforePause) {
                 player.playWhenReady = true
             }
+
         }
     }
 
@@ -1197,20 +1213,15 @@ class PlayerActivity : BaseActivity() {
         super.onConfigurationChanged(newConfig)
         Log.d(TAG, "onConfigurationChanged: Orientation changed to ${newConfig.orientation}")
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE && isFullScreen) {
-            window.decorView.systemUiVisibility =
-                (View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
-            supportActionBar?.hide()
+
             Log.d(TAG, "onConfigurationChanged: Entered full screen mode")
             if (!isControlVisible) {
                 showControlsInFullscreen()
-                touchOverlay.visibility = View.VISIBLE
             }
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
-            supportActionBar?.show()
+
             Log.d(TAG, "onConfigurationChanged: Returned to portrait mode")
             isControlVisible = false
-            touchOverlay.visibility = View.GONE
         }
     }
 
@@ -1240,6 +1251,8 @@ class PlayerActivity : BaseActivity() {
         checkInternetConnection()
         AppOpenManager.getInstance().disableAppResumeWithActivity(PlayerActivity::class.java)
         if (isLock) {
+            Log.d(TAG, "onResume: ")
+            binding.btnLock1.visible()
             linearLayoutControlUp.visibility = View.INVISIBLE
             linearLayoutControlBottom.visibility = View.INVISIBLE
             playerView.useController = false

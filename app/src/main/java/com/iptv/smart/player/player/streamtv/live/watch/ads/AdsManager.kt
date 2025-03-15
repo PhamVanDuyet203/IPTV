@@ -2,6 +2,7 @@ package com.iptv.smart.player.player.streamtv.live.watch.ads
 
 import android.app.Activity
 import android.content.Context
+import android.os.Build
 import android.os.Handler
 import android.util.Log
 import android.view.View
@@ -21,11 +22,15 @@ import com.admob.max.dktlibrary.utils.admod.callback.AdCallBackInterLoad
 import com.admob.max.dktlibrary.utils.admod.callback.AdsInterCallBack
 import com.admob.max.dktlibrary.utils.admod.callback.NativeAdmobCallback
 import com.admob.max.dktlibrary.utils.admod.callback.NativeFullScreenCallBack
+import com.example.ratingdialog.MaybeLaterCallback
+import com.example.ratingdialog.RatingDialog
+
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdValue
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MediaAspectRatio
 import com.google.android.gms.ads.nativead.NativeAd
+import com.iptv.smart.player.player.streamtv.live.watch.BuildConfig
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.intro.IntroActivity
 
@@ -167,7 +172,54 @@ object AdsManager {
 
             })
     }
+var isShowRate = false
+    fun showRate(context: Context) {
+        if (isShowRate || getRate(context)) {
+            return
+        }
+        isShowRate = true
+        try {
+            AppOpenManager.getInstance().disableAppResumeWithActivity(context.javaClass)
+            val ratingDialog: RatingDialog = RatingDialog.Builder(context as Activity)
+                .session(1)
+                .date(1)
+                .setNameApp(context.getString(R.string.app_name))
+                .setIcon(R.mipmap.ic_launcher)
+                .setEmail("nguyenhuuchinh.031019931@gmail.com")
+            .setOnlickRate { rate ->
+                AppOpenManager.getInstance().disableAppResumeWithActivity(context.javaClass)
+                if (rate>=4){
+                    setRate(context,true)
+                }
+            }
+                .setDeviceInfo(BuildConfig.VERSION_NAME, Build.VERSION.SDK_INT.toString(), Build.MANUFACTURER + "_" + Build.MODEL)
+                .ignoreRated(false)
+                .isShowButtonLater(true)
+                .isClickLaterDismiss(true)
+                .setTextButtonLater("Maybe Later")
+                .setOnlickMaybeLate(MaybeLaterCallback {
 
+                })
+                .ratingButtonColor(R.color.red)
+                .build()
+            ratingDialog.setCanceledOnTouchOutside(false)
+            ratingDialog.show()
+        } catch (_: Exception) {
+        } catch (_: IllegalStateException) {
+        }
+    }
+
+    private fun setRate(context: Context, open: Boolean) {
+        val preferences =
+            context.getSharedPreferences(context.packageName, Context.MODE_MULTI_PROCESS)
+        preferences.edit().putBoolean("RATE_COUNT", open).apply()
+    }
+
+    private fun getRate(mContext: Context): Boolean {
+        val preferences =
+            mContext.getSharedPreferences(mContext.packageName, Context.MODE_MULTI_PROCESS)
+        return preferences.getBoolean("RATE_COUNT", false)
+    }
 
     fun loadAdsNative(context: Context, holder: NativeHolderAdmob) {
         AdmobUtils.loadAndGetNativeAds(context, holder, object : NativeAdmobCallback {

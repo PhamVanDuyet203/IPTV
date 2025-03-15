@@ -9,12 +9,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.INTER_ADD
-import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
-import com.iptv.smart.player.player.streamtv.live.watch.databinding.ItemImportOptionBinding
 import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
 import com.iptv.smart.player.player.streamtv.live.watch.screens.ActivityAddPlaylistFromDevice
 import com.iptv.smart.player.player.streamtv.live.watch.screens.ActivityImportPlaylistM3U
@@ -24,6 +23,7 @@ import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
 
 class ImportPlaylistDialog : DialogFragment() {
     private var place = 0
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

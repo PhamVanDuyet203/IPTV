@@ -166,7 +166,11 @@ class ChannelListActivity : BaseActivity() {
             showNoInternetDialog()
         } else {
             dismissNoInternetDialog()
-            loadGroupedChannels(sourcePath)
+            if (fullGroupList.isEmpty()) {
+                loadGroupedChannels(sourcePath)
+            } else {
+                progressBar.visibility = View.GONE
+            }
         }
     }
 
@@ -210,6 +214,12 @@ class ChannelListActivity : BaseActivity() {
     private fun loadGroupedChannels(sourcePath: String) {
         if (!isInternetAvailable() && sourcePath.startsWith("http")) {
             showNoInternetDialog()
+            return
+        }
+
+        if (fullGroupList.isNotEmpty()) {
+            adapter.updateData(fullGroupList)
+            progressBar.visibility = View.GONE
             return
         }
 
@@ -382,6 +392,10 @@ class ChannelListActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         checkInternetConnection()
+        if (fullGroupList.isNotEmpty()) {
+            adapter.updateData(fullGroupList)
+            progressBar.visibility = View.GONE
+        }
     }
 
     override fun onDestroy() {

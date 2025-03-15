@@ -102,8 +102,8 @@ class SplashActivity : BaseActivity() {
                     RemoteConfig.getValueAbTest("BANNER_DETAIL_PLAYLIST_CHANNEL_050325")
                 RemoteConfig.INTER_BACK_PLAY_TO_LIST_050325 =
                     RemoteConfig.getValueAbTest("INTER_BACK_PLAY_TO_LIST_050325")
-                RemoteConfig.ADS_PLAY_CONTROL_050325 =
-                    RemoteConfig.getValueAbTest("ADS_PLAY_CONTROL_050325")
+//                RemoteConfig.ADS_PLAY_CONTROL_050325 =
+//                    RemoteConfig.getValueAbTest("ADS_PLAY_CONTROL_050325")
                 RemoteConfig.ONRESUME_050325 = RemoteConfig.getValueAbTest("ONRESUME_050325")
                 setupCMP()
                 Log.d("TAG121212121", "onComplete: "+RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325)
@@ -166,6 +166,9 @@ class SplashActivity : BaseActivity() {
     }
 
     private fun checkRemoteConFigSPlash() {
+        val timeoutDuration = 8000L
+        val handler = Handler(Looper.getMainLooper())
+
         when (RemoteConfig.ADS_SPLASH_050325) {
             "1" -> {
                 binding.textView.visible()
@@ -174,8 +177,11 @@ class SplashActivity : BaseActivity() {
                     AdsManager.AOA_SPLASH,
                     20000,
                     object : AOAManager.AppOpenAdsListener {
-                        override fun onAdsLoaded() {}
+                        override fun onAdsLoaded() {
+                            handler.removeCallbacksAndMessages(null)
+                        }
                         override fun onAdsFailed(s: String) {
+                            handler.removeCallbacksAndMessages(null)
                             nextActivity()
                         }
 
@@ -184,9 +190,15 @@ class SplashActivity : BaseActivity() {
                         }
 
                         override fun onAdsClose() {
+                            handler.removeCallbacksAndMessages(null)
                             nextActivity()
                         }
                     })
+
+                handler.postDelayed({
+                    nextActivity()
+                },timeoutDuration)
+
                 aoaManager.loadAoA()
             }
 
@@ -197,9 +209,16 @@ class SplashActivity : BaseActivity() {
                     AdsManager.INTER_SPLASH,
                     object : AdsManager.AdListener {
                         override fun onAdClosed() {
+                            handler.removeCallbacksAndMessages(null)
                             nextActivity()
                         }
-                    })
+                    }
+
+                )
+                handler.postDelayed({
+                    nextActivity()
+                },timeoutDuration)
+
             }
 
             else -> {

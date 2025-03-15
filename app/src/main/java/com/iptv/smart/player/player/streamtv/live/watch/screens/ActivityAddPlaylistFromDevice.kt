@@ -38,6 +38,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class ActivityAddPlaylistFromDevice : BaseActivity() {
     private lateinit var btnBack: ImageView
@@ -108,14 +109,36 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
                     )
                     binding.errorTextFile.visibility = View.GONE
                     val fileName = getFileName(uri)
-                    if (fileName != null) {
+                    val fileSize = getFileSizeFromFileUri(uri) ?: return@let
+                    val maxSize = 30 * 1024 * 1024 // 30MB
+                    if (fileName != null && fileSize <= maxSize) {
                         videoList.add(VideoItem(uri, fileName))
                         videoAdapter.notifyDataSetChanged()
+                    } else {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.error_file_size),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
         }
-
+    fun getFileSizeFromFileUri(uri: Uri): Long? {
+        return try {
+            contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                    if (sizeIndex != -1) cursor.getLong(sizeIndex) else null
+                } else {
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
     override fun onResume() {
         super.onResume()
         AppOpenManager.getInstance().enableAppResumeWithActivity(ActivityAddPlaylistFromDevice::class.java)

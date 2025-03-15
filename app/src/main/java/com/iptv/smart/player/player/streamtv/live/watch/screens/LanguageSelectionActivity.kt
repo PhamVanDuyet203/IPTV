@@ -64,6 +64,7 @@ class LanguageSelectionActivity : BaseActivity() {
         }
 
 
+
         val languageList = findViewById<RecyclerView>(R.id.language_list)
         checkIcon = findViewById(R.id.check_icon)
 
@@ -110,6 +111,18 @@ class LanguageSelectionActivity : BaseActivity() {
         }
 
     }
+
+    override fun onBackPressed() {
+        if (!fromSplash) {
+            val intent = Intent(this, HomePageActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
+            finish()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
 
     private fun saveLanguage() {
         val selectedLanguage = adapter.getSelectedLanguage()

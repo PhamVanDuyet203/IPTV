@@ -117,5 +117,6 @@
     <string name="no_wi_fi_detected">No Wi-Fi Detected</string>
     <string name="opps_just_lost_internet_connection_please_reconnect">Opps! Just lost internet connection, please reconnect.</string>
     <string name="connect">Connect</string>
+    <string name="error_file_size">Cannot read files larger than 30 MB</string>
 </resources>
 

@@ -60,7 +60,7 @@ class ChannelDetailActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_playlist_detail)
+        setContentView(R.layout.activity_playlist_detail_item)
 
         recyclerView = findViewById(R.id.recyclerView)
         tvTitle = findViewById(R.id.tvTitle)

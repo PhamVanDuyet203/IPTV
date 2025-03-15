@@ -52,31 +52,25 @@ class VideoDetailActivity : BaseActivity() {
         searchEditText = findViewById(R.id.searchEditText)
         searchIcon = findViewById(R.id.search_icon)
         sortIcon = findViewById(R.id.pop_sort)
-        progressBar = findViewById(R.id.progressBar) // Thêm ProgressBar
+        progressBar = findViewById(R.id.progressBar)
 
-        // Hiển thị ProgressBar khi bắt đầu tải
         showLoading()
 
-        // Lấy dữ liệu từ Intent
         val groupName = intent.getStringExtra("GROUP_NAME") ?: "Unknown"
         val sourcePath = intent.getStringExtra("SOURCE_PATH") ?: ""
         Log.d("VideoDetailActivity", "onCreate: GROUP_NAME=$groupName, SOURCE_PATH=$sourcePath")
 
-        // Thiết lập tiêu đề và nút back
         tvTitle.text = groupName
         tvTitle.isSelected = true
         btnBack.setOnClickListener { finish() }
 
-        // Tải dữ liệu trong Coroutine để không chặn UI thread
         CoroutineScope(Dispatchers.Main).launch {
             loadVideoData(sourcePath, groupName)
-            hideLoading() // Ẩn ProgressBar sau khi tải xong
+            hideLoading()
         }
 
-        // Xử lý nút tìm kiếm
         searchIcon.setOnClickListener { toggleSearchBar() }
 
-        // Xử lý tìm kiếm
         searchEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -85,12 +79,10 @@ class VideoDetailActivity : BaseActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        // Xử lý nút sắp xếp
         sortIcon.setOnClickListener { showSortPopup(it) }
     }
 
     private suspend fun loadVideoData(sourcePath: String, groupName: String) {
-        // Chuẩn bị danh sách video từ sourcePath
         videoListFull = sourcePath.split(";")
             .filter { it.isNotEmpty() }
             .map { uriString ->
@@ -102,7 +94,6 @@ class VideoDetailActivity : BaseActivity() {
                 )
             }.toMutableList()
 
-        // Thiết lập RecyclerView với VideoDetailAdapter
         adapter = VideoDetailAdapter(
             context = this,
             videoList = videoListFull,
@@ -140,7 +131,6 @@ class VideoDetailActivity : BaseActivity() {
         progressBar.visibility = View.GONE
     }
 
-    // Các hàm khác giữ nguyên
     private fun getFileName(uriString: String): String? {
         val uri = android.net.Uri.parse(uriString)
         return try {
@@ -175,11 +165,10 @@ class VideoDetailActivity : BaseActivity() {
     }
 
     private fun toggleSearchBar() {
-        // Giữ nguyên code gốc
     }
 
     private fun filterVideos(query: String) {
-        showLoading() // Hiển thị ProgressBar khi bắt đầu lọc
+        showLoading()
         val filteredList = videoListFull.filter { it.fileName.contains(query, ignoreCase = true) }
         val sortedList = when (currentSortMode) {
             "AZ" -> filteredList.sortedBy { it.fileName }
@@ -212,11 +201,10 @@ class VideoDetailActivity : BaseActivity() {
             }
         )
         recyclerView.adapter = adapter
-        hideLoading() // Ẩn ProgressBar sau khi lọc xong
+        hideLoading()
     }
 
     private fun showSortPopup(anchorView: View) {
-        // Giữ nguyên code gốc
         val inflater = LayoutInflater.from(this)
         val popupView = inflater.inflate(R.layout.popup_sorting_channel, null)
 
