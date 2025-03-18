@@ -97,7 +97,6 @@
             android:fontFamily="@font/inter_regular"/>
     </LinearLayout>
 
-    <!-- Loading Panel -->
     <RelativeLayout
         android:id="@+id/loadingPanel"
         android:layout_width="match_parent"

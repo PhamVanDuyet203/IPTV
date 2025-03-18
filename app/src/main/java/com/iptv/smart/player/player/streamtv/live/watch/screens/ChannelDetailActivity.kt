@@ -25,6 +25,7 @@ import com.iptv.smart.player.player.streamtv.live.watch.adapter.ChannelsAdapter
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.INTER_SELECT_CATEG_OR_CHANNEL
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
+import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.visible
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
 import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
 import com.iptv.smart.player.player.streamtv.live.watch.provider.ChannelsProvider
@@ -216,6 +217,9 @@ class ChannelDetailActivity : BaseActivity() {
                 initialChannels = filteredChannels
                 channelsProvider.addChannelsFromM3U(filteredChannels)
                 if (filteredChannels.isEmpty()) {
+                    txtNotFound.setText("Not found")
+                    txtNotFound.visible()
+                    imgNotFound.visible()
                     Toast.makeText(this@ChannelDetailActivity,
                         getString(R.string.there_are_no_channels_in_the_group, groupName), Toast.LENGTH_SHORT).show()
                 }

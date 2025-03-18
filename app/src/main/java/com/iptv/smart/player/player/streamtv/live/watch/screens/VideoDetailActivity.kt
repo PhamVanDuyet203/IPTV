@@ -9,6 +9,8 @@ import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -40,6 +42,8 @@ class VideoDetailActivity : BaseActivity() {
     private var videoListFull = mutableListOf<Channel>()
     private var currentSortMode = "AZ"
     private var groupName: String = "Unknown"
+    private lateinit var imgNotFound: ImageView
+    private lateinit var txtNotFound: TextView
 
 
     // new
@@ -70,6 +74,11 @@ class VideoDetailActivity : BaseActivity() {
         sortIcon = findViewById(R.id.pop_sort)
         progressBar = findViewById(R.id.progressBar)
 
+        imgNotFound = findViewById(R.id.imgNotFound)
+        txtNotFound = findViewById(R.id.txtNotFound)
+        imgNotFound.visibility = View.GONE
+        txtNotFound.visibility = View.GONE
+
         adapter = VideoDetailAdapter(
             context = this,
             videoList = mutableListOf(),
@@ -77,7 +86,7 @@ class VideoDetailActivity : BaseActivity() {
                 val channel = Channel(
                     name = videoItem.name,
                     streamUrl = videoItem.run { streamUrl },
-                    logoUrl = "assets/images/ic_tv.png",
+                    logoUrl = videoItem.streamUrl,
                     isFavorite = videoItem.isFavorite,
                     groupTitle = videoItem.groupTitle ?: groupName
                 )
@@ -121,6 +130,16 @@ class VideoDetailActivity : BaseActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
+        searchEditText.setOnEditorActionListener { v, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(v.windowToken, 0)
+                true
+            } else {
+                false
+            }
+        }
+
         sortIcon.setOnClickListener { showSortPopup(it) }
     }
     private fun toggleFavorite(context: Context, channel: Channel) {
@@ -146,6 +165,12 @@ class VideoDetailActivity : BaseActivity() {
     private suspend fun loadVideoData(sourcePath: String, groupName: String) {
 
         val favoriteChannels = Common.getChannels(this)
+
+        if (videoListFull.isNotEmpty()) {
+            adapter.updateData(videoListFull)
+            progressBar.visibility = View.GONE
+            return
+        }
 
         videoListFull = sourcePath.split(";")
             .filter { it.isNotEmpty() }
@@ -212,7 +237,20 @@ class VideoDetailActivity : BaseActivity() {
             "ZA" -> filteredList.sortedByDescending { it.name }
             else -> filteredList
         }
+
         adapter.updateData(sortedList.toMutableList())
+
+        if (sortedList.isEmpty()) {
+            imgNotFound.visibility = View.VISIBLE
+            txtNotFound.visibility = View.VISIBLE
+            recyclerView.visibility = View.GONE
+            txtNotFound.text = getString(R.string.not_found, query)
+        } else {
+            imgNotFound.visibility = View.GONE
+            txtNotFound.visibility = View.GONE
+            recyclerView.visibility = View.VISIBLE
+            recyclerView.scrollToPosition(0)
+        }
         hideLoading()
     }
 

@@ -319,7 +319,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/inter_regular"
                     android:paddingTop="4dp"
-                    android:text="Mirroring"
+                    android:text="@string/mirroring_btn1"
                     android:textColor="@color/white"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -351,7 +351,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/inter_regular"
                     android:paddingTop="4dp"
-                    android:text="PiP"
+                    android:text="@string/pip_btn1"
                     android:textColor="@color/white"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -383,7 +383,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/inter_regular"
                     android:paddingTop="4dp"
-                    android:text="Favorite"
+                    android:text="@string/favorite_btn1"
                     android:textColor="@color/white"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -415,7 +415,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/inter_regular"
                     android:paddingTop="4dp"
-                    android:text="Lock"
+                    android:text="@string/lock_btn1"
                     android:textColor="@color/white"
                     android:textSize="12sp" />
             </LinearLayout>

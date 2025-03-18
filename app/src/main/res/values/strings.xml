@@ -138,5 +138,10 @@
     <string name="pip_not_supported_on_this_device">PiP not supported on this device</string>
     <string name="player_not_ready_for_pip">Player not ready for PiP</string>
     <string name="failed_to_entxer_pip_mode">Failed to entxer PiP mode</string>
+    <string name="lock_text">Lock</string>
+    <string name="lock_btn1">Lock</string>
+    <string name="favorite_btn1">Favorite</string>
+    <string name="pip_btn1">PiP</string>
+    <string name="mirroring_btn1">Mirroring</string>
 </resources>
 

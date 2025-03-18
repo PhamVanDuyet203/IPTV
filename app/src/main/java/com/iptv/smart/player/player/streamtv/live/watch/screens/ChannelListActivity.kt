@@ -88,7 +88,6 @@ class ChannelListActivity : BaseActivity() {
         vLine = findViewById(R.id.line)
         imgNotFound = findViewById(R.id.imgNotFound)
         txtNotFound = findViewById(R.id.txtNotFound)
-
         imgNotFound.visibility = View.GONE
         txtNotFound.visibility = View.GONE
         recyclerView.visibility = View.VISIBLE

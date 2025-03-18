@@ -43,6 +43,9 @@ class ChannelFragment : Fragment() {
     private lateinit var emptyStateLayout: View
     private lateinit var loadingPanel: RelativeLayout
     private lateinit var channelAdapter: ChannelsAdapter
+
+    private var isLoading = false
+
     private val channelsProvider: ChannelsProvider by viewModels()
     private val tabViews = mutableListOf<View>()
     private var selectedTabIndex = 0
@@ -106,8 +109,12 @@ class ChannelFragment : Fragment() {
     }
 
     private fun updateChannelList(tabPosition: Int) {
+        setTabsLoadingState(true)
         when (tabPosition) {
-            0 -> channelsProvider.channels.value?.let { updateUI(it) }
+            0 -> channelsProvider.channels.value?.let {
+                updateUI(it)
+                setTabsLoadingState(false)
+            }
             1 -> channelsProvider.filterChannels(requireContext(), "favorite")
             2 -> channelsProvider.filterChannels(requireContext(), "recent")
         }
@@ -122,10 +129,11 @@ class ChannelFragment : Fragment() {
 
     fun refreshData() {
         loadingPanel.visibility = View.VISIBLE
+        setTabsLoadingState(true)
         channelsProvider.fetchChannelsFromRoom()
-        channelsProvider.channels.observe(viewLifecycleOwner) { channels ->
-            updateChannelList(selectedTabIndex)
-        }
+//        channelsProvider.channels.observe(viewLifecycleOwner) { channels ->
+//            updateChannelList(selectedTabIndex)
+//        }
     }
 
     private fun setupNetworkMonitoring() {
@@ -138,8 +146,10 @@ class ChannelFragment : Fragment() {
                 requireActivity().runOnUiThread {
                     dismissNoInternetDialog()
                     loadingPanel.visibility = View.VISIBLE
+                    setTabsLoadingState(true)
                     channelsProvider.fetchChannelsFromRoom()
-                    updateChannelList(selectedTabIndex)
+//                    updateChannelList(selectedTabIndex)
+//                    setTabsLoadingState(false)
                 }
             }
 
@@ -166,7 +176,9 @@ class ChannelFragment : Fragment() {
         } else {
             dismissNoInternetDialog()
             loadingPanel.visibility = View.VISIBLE
+            setTabsLoadingState(true)
             channelsProvider.fetchChannelsFromRoom()
+//            setTabsLoadingState(false)
         }
     }
 
@@ -350,10 +362,33 @@ class ChannelFragment : Fragment() {
 
         selectedTabIndex = index
         channelsProvider.setTabPosition(index)
+
+        if (index == 0) {
+            loadingPanel.visibility = View.VISIBLE
+            recyclerView.visibility = View.GONE
+        }
+
         updateChannelList(index)
         recyclerView.scrollToPosition(0)
 
     }
+
+
+    private fun setTabsLoadingState(isLoading: Boolean) {
+        this.isLoading = isLoading
+        tabViews.forEachIndexed { index, tabView ->
+            if (isLoading) {
+                tabView.alpha = if (index == selectedTabIndex) 1f else 0.5f
+                tabView.isClickable = false
+                tabView.isEnabled = false
+            } else {
+                tabView.alpha = 1f
+                tabView.isClickable = true
+                tabView.isEnabled = true
+            }
+        }
+    }
+
 
 
     private fun updateUI(channels: List<Channel>) {
@@ -365,6 +400,11 @@ class ChannelFragment : Fragment() {
             emptyStateLayout.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
             channelAdapter.updateChannels(channels)
+
+            recyclerView.post {
+                channelAdapter.notifyDataSetChanged()
+            }
+
         }
     }
 
@@ -373,6 +413,7 @@ class ChannelFragment : Fragment() {
             loadingPanel.visibility = View.GONE
             if (selectedTabIndex == 0) {
                 updateUI(channels ?: emptyList())
+                setTabsLoadingState(false)
             }
         }
 
@@ -380,6 +421,7 @@ class ChannelFragment : Fragment() {
             loadingPanel.visibility = View.GONE
             if (selectedTabIndex != 0) {
                 updateUI(filteredChannels ?: emptyList())
+                setTabsLoadingState(false)
             }
         }
 
@@ -388,16 +430,19 @@ class ChannelFragment : Fragment() {
                 Toast.makeText(requireContext(), error, Toast.LENGTH_LONG).show()
                 loadingPanel.visibility = View.GONE
                 updateUI(emptyList())
+                setTabsLoadingState(false)
             }
         }
 
         channelsProvider.shouldRefresh.observe(viewLifecycleOwner) { shouldRefresh ->
             if (shouldRefresh == true && isInternetAvailable()) {
                 loadingPanel.visibility = View.VISIBLE
+                setTabsLoadingState(true)
                 channelsProvider.fetchChannelsFromRoom(true)
-                channelsProvider.channels.observe(viewLifecycleOwner) { channels ->
-                    updateChannelList(selectedTabIndex)
-                }
+//                channelsProvider.channels.observe(viewLifecycleOwner) { channels ->
+//                    updateChannelList(selectedTabIndex)
+//                    setTabsLoadingState(false)
+//                }
                 channelsProvider.resetRefresh()
             }
         }

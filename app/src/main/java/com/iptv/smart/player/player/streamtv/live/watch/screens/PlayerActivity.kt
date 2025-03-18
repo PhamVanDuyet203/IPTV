@@ -91,6 +91,7 @@ class PlayerActivity : BaseActivity() {
     private var playbackPosition = 0L
     private var isPlayerReady = false
     private var isFullScreen = false
+    private var isReturnFromPiPSetting = false
     private var isLock = false
     private var isInPictureInPictureMode = false
     private val handler = Handler(Looper.getMainLooper())
@@ -615,8 +616,16 @@ class PlayerActivity : BaseActivity() {
                 tvTitle.gone()
                 playerView.useController = false
                 playerView.hideController()
-                lockLayout.setBackgroundResource(android.R.color.transparent)
-                lockText.gone()
+                lockLayout.setBackgroundResource(R.drawable.bg_locked)
+                val lockLayoutParams = lockLayout?.layoutParams ?: LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                lockLayoutParams.width = LinearLayout.LayoutParams.WRAP_CONTENT
+                lockLayoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT
+                lockLayout?.layoutParams = lockLayoutParams
+                lockLayout?.requestLayout()
+                lockText.visible()
             }
 
         } else {
@@ -646,7 +655,7 @@ class PlayerActivity : BaseActivity() {
             lockIcon.setImageDrawable(
                 ContextCompat.getDrawable(applicationContext, R.drawable.ic_lock)
             )
-            lockText.text = "Lock"
+            lockText.text = getString(R.string.lock_text)
             if (!isFullScreen) {
                 lockLayout.setBackgroundResource(R.drawable.bg_menu_playcontrol)
                 lockText.setTextColor(Color.parseColor("#3F484A"))
@@ -695,6 +704,20 @@ class PlayerActivity : BaseActivity() {
         }
     }
 
+    private fun hideBottomTool() {
+        if (isFullScreen && !isInPictureInPictureMode) {
+            binding.controlButtonsTop1.gone()
+            btnBack.gone()
+            tvTitle.gone()
+        }
+        if (isInPictureInPictureMode) {
+            btnBack.gone()
+            tvTitle.gone()
+            playerView.hideController()
+        }
+    }
+
+
     private fun showBottomTool() {
         if (isFullScreen && !isInPictureInPictureMode) {
             binding.controlButtonsTop1.visible()
@@ -737,12 +760,24 @@ class PlayerActivity : BaseActivity() {
             playserView.setOnClickListener {
                 linearLayoutControlUp.visible()
                 linearLayoutControlBottom.visible()
-                showBottomTool()
+                if (binding.controlButtonsTop1.visibility != View.VISIBLE) {
+                    showBottomTool()
+                } else hideBottomTool()
+                Log.d("TAGadsafsdfsafd", "setFullScreen: playerClick")
             }
             mainCustomControl.setOnClickListener {
                 linearLayoutControlUp.gone()
                 linearLayoutControlBottom.gone()
-                showBottomTool()
+                // showBottomTool()
+                if (binding.controlButtonsTop1.visibility != View.VISIBLE) {
+                    showBottomTool()
+                    playerView.showController()
+                } else  {
+                    hideBottomTool()
+                    playerView.hideController()
+                }
+                Log.d("TAGadsafsdfsafd", "setFullScreen: mainClick")
+
             }
             if (isFullScreen) {
                 showBottomTool()
@@ -1031,11 +1066,11 @@ class PlayerActivity : BaseActivity() {
 
     private val pipPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            isReturnFromPiPSetting = true
             if (isPipPermissionGranted()) {
                 if (::player.isInitialized && wasPlayingBeforePause) {
                     player.playWhenReady = true
                 }
-                enterPictureInPictureModeIfAvailable()
             } else {
                 Toast.makeText(this, "PiP permission denied", Toast.LENGTH_SHORT).show()
                 if (::player.isInitialized && wasPlayingBeforePause) {
@@ -1089,10 +1124,10 @@ class PlayerActivity : BaseActivity() {
 
     private fun enterPictureInPictureModeIfAvailable() {
         if (Build.VERSION.SDK_INT < MIN_PIP_API) return
-        Log.d("dgdfgdfgfgfg", "enterPictureInPictureModeIfAvailable: ")
-        binding.btnBack.gone()
-        binding.btnBack.gone()
+//        binding.btnBack.gone()
+//        binding.tvTitle.gone()
         binding.controlButtonsTop1.gone()
+        binding.frHome.gone()
         playerView.hideController()
         if (!packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
             Toast.makeText(this,
@@ -1124,11 +1159,12 @@ class PlayerActivity : BaseActivity() {
                     player.playWhenReady = true
                 }
             } else {
+                player.playWhenReady = false
                 Toast.makeText(this,
                     getString(R.string.failed_to_entxer_pip_mode), Toast.LENGTH_SHORT).show()
             }
         }
-        AppOpenManager.getInstance().enableAppResumeWithActivity(PlayerActivity::class.java)
+        AppOpenManager.getInstance().disableAppResumeWithActivity(PlayerActivity::class.java)
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -1160,6 +1196,11 @@ class PlayerActivity : BaseActivity() {
             playerView.layoutParams = params
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         } else {
+
+            if (::player.isInitialized) {
+                    player.playWhenReady = false
+            }
+
             btnBack.visibility = View.VISIBLE
             tvTitle.visibility = View.VISIBLE
             btnBack.clearColorFilter()
@@ -1195,10 +1236,18 @@ class PlayerActivity : BaseActivity() {
             )
             isFullScreen = false
 
-            if (::player.isInitialized && wasPlayingBeforePause) {
-                player.playWhenReady = true
-            }
+//            if (::player.isInitialized && wasPlayingBeforePause && isPipPermissionGranted() && !isFinishing) {
+//                player.playWhenReady = true
+//            }
 
+        }
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        if (::player.isInitialized && !isInPictureInPictureMode) {
+            player.playWhenReady = false
+            Log.d(TAG, "User left app or closed PiP, pausing player")
         }
     }
 
@@ -1265,7 +1314,12 @@ class PlayerActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         checkInternetConnection()
-        AppOpenManager.getInstance().enableAppResumeWithActivity(PlayerActivity::class.java)
+        if (!isReturnFromPiPSetting) {
+            AppOpenManager.getInstance().enableAppResumeWithActivity(PlayerActivity::class.java)
+        } else {
+            AppOpenManager.getInstance().disableAppResumeWithActivity(PlayerActivity::class.java)
+            isReturnFromPiPSetting = false
+        }
         if (isLock) {
             Log.d(TAG, "onResume: ")
             binding.btnLock1.visible()
@@ -1276,6 +1330,10 @@ class PlayerActivity : BaseActivity() {
         } else {
             playerView.useController = true
             playerView.showController()
+        }
+
+        if (::player.isInitialized && !isInPictureInPictureMode && wasPlayingBeforePause && isPipPermissionGranted()) {
+            player.playWhenReady = true
         }
 
         updateFavoriteIcon()
