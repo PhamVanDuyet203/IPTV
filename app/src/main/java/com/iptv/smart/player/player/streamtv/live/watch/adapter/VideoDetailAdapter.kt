@@ -15,6 +15,7 @@ import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
+import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
 
 class VideoDetailAdapter(
     private val context: Context,
@@ -45,7 +46,7 @@ class VideoDetailAdapter(
             holder.thumbnail.setImageResource(R.drawable.ic_tv)
         }
 
-        updateFavoriteIcon(holder, videoItem.isFavorite)
+        updateFavoriteIcon(holder, videoItem)
 
         holder.itemView.setOnClickListener {
             onPlayClicked(videoItem)
@@ -54,7 +55,7 @@ class VideoDetailAdapter(
         holder.favButton.setOnClickListener {
             Log.d("TAGfffffffffffff", "onBindViewHolder: " + videoItem.isFavorite)
             onFavoriteClicked(videoItem)
-            updateFavoriteIcon(holder, videoItem.isFavorite)
+            updateFavoriteIcon(holder, videoItem)
             notifyItemChanged(position)
         }
 
@@ -69,12 +70,23 @@ class VideoDetailAdapter(
 
     override fun getItemCount() = videoList.size
 
-    private fun updateFavoriteIcon(holder: VideoViewHolder, isFavorite: Boolean) {
-        if (isFavorite) {
+    private fun updateFavoriteIcon(holder: VideoViewHolder, channel: Channel) {
+        val listFav: ArrayList<Channel> = ArrayList(Common.getChannels(context))
+
+        val normalizedChannel = channel.copy(
+            groupTitle = channel.groupTitle ?: "", isFavorite = false
+        )
+        val normalizedListFav = listFav.map {
+            it.copy(groupTitle = it.groupTitle ?: "", isFavorite = false)
+        }
+        if (normalizedListFav.contains(normalizedChannel)) {
             holder.favButton.setImageResource(R.drawable.fav_on_channel)
         } else {
             holder.favButton.setImageResource(R.drawable.fav_channel)
         }
+
+        Log.d("TAGlistFav", "updateFavoriteIcon: $listFav")
+        Log.d("TAGlistFav", "updateFavoriteIcon: $channel")
     }
 
 

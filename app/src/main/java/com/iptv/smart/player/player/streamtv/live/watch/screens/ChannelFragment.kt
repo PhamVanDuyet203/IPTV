@@ -2,10 +2,12 @@ package com.iptv.smart.player.player.streamtv.live.watch.screens
 
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.text.SpannableString
@@ -35,8 +37,10 @@ import com.iptv.smart.player.player.streamtv.live.watch.adapter.ChannelsAdapter
 import com.iptv.smart.player.player.streamtv.live.watch.dialog.ImportPlaylistDialog
 import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
 import com.iptv.smart.player.player.streamtv.live.watch.provider.ChannelsProvider
+import com.iptv.smart.player.player.streamtv.live.watch.utils.NetworkChangeReceiver
 
 class ChannelFragment : Fragment() {
+    lateinit var networkChangeReceiver: NetworkChangeReceiver
 
     private lateinit var tabContainer: LinearLayout
     private lateinit var recyclerView: RecyclerView
@@ -103,6 +107,30 @@ class ChannelFragment : Fragment() {
         refreshData()
 
         return view
+    }
+
+    override fun onStop() {
+        super.onStop()
+        requireActivity().unregisterReceiver(networkChangeReceiver)
+
+    }
+    override fun onStart() {
+        super.onStart()
+        networkChangeReceiver = NetworkChangeReceiver { isConnected ->
+            if (!isConnected) {
+                channelAdapter.notifyDataSetChanged()
+            } else {
+                channelAdapter.notifyDataSetChanged()
+            }
+        }
+
+        val intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+           requireActivity().registerReceiver(networkChangeReceiver, intentFilter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            requireActivity().registerReceiver(networkChangeReceiver, intentFilter)
+
+        }
     }
 
     private fun updateChannelList(tabPosition: Int) {

@@ -1,6 +1,9 @@
 package com.iptv.smart.player.player.streamtv.live.watch
 
 import android.content.Context
+import android.content.IntentFilter
+import android.net.ConnectivityManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -33,12 +36,14 @@ import com.iptv.smart.player.player.streamtv.live.watch.screens.PlayerActivity
 import com.iptv.smart.player.player.streamtv.live.watch.util.parseM3U
 import com.iptv.smart.player.player.streamtv.live.watch.util.parseM3UFromFile
 import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
+import com.iptv.smart.player.player.streamtv.live.watch.utils.NetworkChangeReceiver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ChannelDetailActivity : BaseActivity() {
+    lateinit var networkChangeReceiver: NetworkChangeReceiver
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ChannelsAdapter
@@ -126,6 +131,7 @@ class ChannelDetailActivity : BaseActivity() {
                     filterChannels(currentQuery)
                 }, 500)
             }
+
             override fun afterTextChanged(s: Editable?) {
 
             }
@@ -150,6 +156,11 @@ class ChannelDetailActivity : BaseActivity() {
 
     }
 
+    override fun onStop() {
+        super.onStop()
+        unregisterReceiver(networkChangeReceiver)
+
+    }
     private fun nextActivity(channel: Channel) {
         PlayerActivity.start(this, channel)
         channelsProvider.addToRecent(this,channel)
@@ -238,6 +249,21 @@ class ChannelDetailActivity : BaseActivity() {
         else {
             frNative.gone()
             vLine.gone()
+        }
+        networkChangeReceiver = NetworkChangeReceiver { isConnected ->
+            if (!isConnected) {
+                adapter.notifyDataSetChanged()
+            } else {
+                adapter.notifyDataSetChanged()
+            }
+        }
+
+        val intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(networkChangeReceiver, intentFilter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(networkChangeReceiver, intentFilter)
+
         }
     }
 

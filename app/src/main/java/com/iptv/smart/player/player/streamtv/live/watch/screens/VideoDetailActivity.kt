@@ -77,8 +77,8 @@ class VideoDetailActivity : BaseActivity() {
                 val channel = Channel(
                     name = videoItem.name,
                     streamUrl = videoItem.run { streamUrl },
-                    logoUrl = "assets/images/ic_tv.png",
-                    isFavorite = videoItem.isFavorite,
+                    logoUrl = videoItem.logoUrl,
+                    isFavorite = false,
                     groupTitle = videoItem.groupTitle ?: groupName
                 )
 
