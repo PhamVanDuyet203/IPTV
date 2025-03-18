@@ -1,5 +1,7 @@
 package com.iptv.smart.player.player.streamtv.live.watch.screens
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -8,19 +10,19 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.PopupWindow
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.adapter.VideoDetailAdapter
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
-import com.iptv.smart.player.player.streamtv.live.watch.db.AppDatabase
 import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
-import com.iptv.smart.player.player.streamtv.live.watch.model.VideoItem
+import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -35,12 +37,26 @@ class VideoDetailActivity : BaseActivity() {
     private lateinit var searchIcon: ImageView
     private lateinit var sortIcon: ImageView
     private lateinit var progressBar: ProgressBar
-    private val playlistDao by lazy { AppDatabase.getDatabase(this).playlistDao() }
-    private var videoListFull = mutableListOf<VideoItem>()
-    private var isSearchVisible = false
+    private var videoListFull = mutableListOf<Channel>()
     private var currentSortMode = "AZ"
-
     private var groupName: String = "Unknown"
+
+
+    // new
+    private val playerResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data
+            val refreshData = data?.getBooleanExtra("REFRESH_DATA", false) ?: false
+            val channelName = data?.getStringExtra("CHANNEL_NAME")
+            val isFavorite = data?.getBooleanExtra("IS_FAVORITE", false) ?: false
+
+            if (refreshData && channelName != null) {
+                val channel = videoListFull.find { it.name == channelName }
+                channel?.isFavorite = isFavorite
+                adapter.notifyDataSetChanged()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,9 +70,35 @@ class VideoDetailActivity : BaseActivity() {
         sortIcon = findViewById(R.id.pop_sort)
         progressBar = findViewById(R.id.progressBar)
 
+        adapter = VideoDetailAdapter(
+            context = this,
+            videoList = mutableListOf(),
+            onPlayClicked = { videoItem ->
+                val channel = Channel(
+                    name = videoItem.name,
+                    streamUrl = videoItem.run { streamUrl },
+                    logoUrl = "assets/images/ic_tv.png",
+                    isFavorite = videoItem.isFavorite,
+                    groupTitle = videoItem.groupTitle ?: groupName
+                )
+
+                // new
+                val intent = Intent(this, PlayerActivity::class.java).apply {
+                    putExtra("channel", channel)
+                }
+                playerResultLauncher.launch(intent)
+            },
+            onFavoriteClicked = { videoItem ->
+                toggleFavorite(this,videoItem)
+            },
+
+        )
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
+
         showLoading()
 
-        val groupName = intent.getStringExtra("GROUP_NAME") ?: "Unknown"
+        groupName = intent.getStringExtra("GROUP_NAME") ?: "Unknown"
         val sourcePath = intent.getStringExtra("SOURCE_PATH") ?: ""
         Log.d("VideoDetailActivity", "onCreate: GROUP_NAME=$groupName, SOURCE_PATH=$sourcePath")
 
@@ -81,54 +123,60 @@ class VideoDetailActivity : BaseActivity() {
 
         sortIcon.setOnClickListener { showSortPopup(it) }
     }
+    private fun toggleFavorite(context: Context, channel: Channel) {
 
+        channel.isFavorite = !channel.isFavorite
+        val checkChannel = Channel(
+            name = channel.name,
+            streamUrl = channel.streamUrl,
+            logoUrl = channel.logoUrl,
+            isFavorite = false,
+            groupTitle = ""
+        )
+
+        val listFav: ArrayList<Channel> = ArrayList(Common.getChannels(context))
+        if (listFav.contains(checkChannel)){
+            listFav.remove(checkChannel)
+        }else{
+            listFav.add(checkChannel)
+        }
+        Common.saveChannels(context, listFav)
+        adapter.notifyDataSetChanged()
+    }
     private suspend fun loadVideoData(sourcePath: String, groupName: String) {
+
+        val favoriteChannels = Common.getChannels(this)
+
         videoListFull = sourcePath.split(";")
             .filter { it.isNotEmpty() }
             .map { uriString ->
                 val uri = android.net.Uri.parse(uriString)
-                VideoItem(
-                    uri = uri,
-                    fileName = getFileName(uriString) ?: "Unnamed Video",
-                    groupTitle = groupName
+                val channel = Channel(
+                    name = getFileName(uriString) ?: "Unnamed Video",
+                    logoUrl = "logoUrl",
+                    streamUrl = uri.toString(),
+                    isFavorite = false
                 )
+                val isFavorite = favoriteChannels.any { it.streamUrl == channel.streamUrl && it.name == channel.name }
+                channel.isFavorite = isFavorite
+                channel
             }.toMutableList()
 
-        adapter = VideoDetailAdapter(
-            context = this,
-            videoList = videoListFull,
-            onPlayClicked = { videoItem ->
-                val channel = Channel(
-                    name = videoItem.fileName,
-                    streamUrl = videoItem.uri.toString(),
-                    logoUrl = "assets/images/ic_tv.png",
-                    isFavorite = videoItem.isFavorite,
-                    groupTitle = videoItem.groupTitle ?: groupName
-                )
-                PlayerActivity.start(this, channel)
-            },
-            onFavoriteClicked = { videoItem ->
-                Log.d("VideoDetailActivity", "Favorite toggled for: ${videoItem.fileName}")
-            },
-            onRenameVideo = { videoItem, newName ->
-                Log.d("VideoDetailActivity", "Renamed ${videoItem.fileName} to $newName")
-                updatePlaylistInDatabase(groupName, videoListFull)
-            },
-            onDeleteVideo = { videoItem ->
-                Log.d("VideoDetailActivity", "Deleted: ${videoItem.fileName}")
-                updatePlaylistInDatabase(groupName, videoListFull)
-            }
-        )
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = adapter
+        adapter.updateData(videoListFull)
     }
+
+
 
     private fun showLoading() {
         progressBar.visibility = View.VISIBLE
+        sortIcon.isEnabled = false
+        sortIcon.alpha = 0.5f
     }
 
     private fun hideLoading() {
         progressBar.visibility = View.GONE
+        sortIcon.isEnabled = true
+        sortIcon.alpha = 1f
     }
 
     private fun getFileName(uriString: String): String? {
@@ -141,7 +189,6 @@ class VideoDetailActivity : BaseActivity() {
                     return if (nameIndex != -1) it.getString(nameIndex) else null
                 }
             }
-            Log.w("VideoDetailActivity", "getFileName: Failed to retrieve name for URI: $uriString")
             null
         } catch (e: Exception) {
             Log.e("VideoDetailActivity", "getFileName: Error accessing URI: $uriString, ${e.message}")
@@ -149,58 +196,23 @@ class VideoDetailActivity : BaseActivity() {
         }
     }
 
-    private fun updatePlaylistInDatabase(groupName: String, updatedVideoList: List<VideoItem>) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val playlist = playlistDao.getPlaylistByName(groupName)
-            if (playlist != null) {
-                val updatedSourcePath = updatedVideoList.joinToString(";") { it.uri.toString() }
-                val updatedPlaylist = playlist.copy(
-                    sourcePath = updatedSourcePath,
-                    channelCount = updatedVideoList.size
-                )
-                playlistDao.updatePlaylist(updatedPlaylist)
-                Log.d("VideoDetailActivity", "Updated playlist in DB: $updatedSourcePath")
-            }
-        }
-    }
 
     private fun toggleSearchBar() {
     }
 
     private fun filterVideos(query: String) {
         showLoading()
-        val filteredList = videoListFull.filter { it.fileName.contains(query, ignoreCase = true) }
+        val filteredList = if (query.isEmpty()) {
+            videoListFull
+        } else {
+            videoListFull.filter { it.name.contains(query, ignoreCase = true) }
+        }
         val sortedList = when (currentSortMode) {
-            "AZ" -> filteredList.sortedBy { it.fileName }
-            "ZA" -> filteredList.sortedByDescending { it.fileName }
+            "AZ" -> filteredList.sortedBy { it.name }
+            "ZA" -> filteredList.sortedByDescending { it.name }
             else -> filteredList
         }
-        adapter = VideoDetailAdapter(
-            context = this,
-            videoList = sortedList.toMutableList(),
-            onPlayClicked = { videoItem ->
-                val channel = Channel(
-                    name = videoItem.fileName,
-                    streamUrl = videoItem.uri.toString(),
-                    logoUrl = "assets/images/ic_tv.png",
-                    isFavorite = videoItem.isFavorite,
-                    groupTitle = videoItem.groupTitle ?: sortedList.firstOrNull()?.groupTitle ?: "Unknown"
-                )
-                PlayerActivity.start(this, channel)
-            },
-            onFavoriteClicked = { videoItem ->
-                Log.d("VideoDetailActivity", "Favorite toggled for: ${videoItem.fileName}")
-            },
-            onRenameVideo = { videoItem, newName ->
-                Log.d("VideoDetailActivity", "Renamed ${videoItem.fileName} to $newName")
-                updatePlaylistInDatabase(groupName, videoListFull)
-            },
-            onDeleteVideo = { videoItem ->
-                Log.d("VideoDetailActivity", "Deleted: ${videoItem.fileName}")
-                updatePlaylistInDatabase(groupName, videoListFull)
-            }
-        )
-        recyclerView.adapter = adapter
+        adapter.updateData(sortedList.toMutableList())
         hideLoading()
     }
 

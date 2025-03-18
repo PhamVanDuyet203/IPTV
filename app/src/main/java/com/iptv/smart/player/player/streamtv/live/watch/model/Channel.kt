@@ -1,19 +1,24 @@
 package com.iptv.smart.player.player.streamtv.live.watch.model
 
+import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.annotation.RequiresApi
 
 data class Channel(
     var name: String,
     val logoUrl: String,
     val streamUrl: String,
+    val isVideo:String = "false",
     var isFavorite: Boolean = false,
-    val groupTitle: String? = null // Thêm groupTitle
+    var groupTitle: String? = null
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString() ?: "",
         parcel.readString() ?: "",
-        parcel.readString() ?: ""
+        parcel.readString() ?: "",
+        groupTitle = parcel.readString() ?: "",
+        isVideo = parcel.readString() ?: "",
     ) {
         // Read other fields if needed
     }
@@ -22,6 +27,8 @@ data class Channel(
         parcel.writeString(name)
         parcel.writeString(logoUrl)
         parcel.writeString(streamUrl)
+        parcel.writeString(groupTitle)
+        parcel.writeString(isVideo)
     }
 
     override fun describeContents(): Int {

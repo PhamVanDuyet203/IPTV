@@ -40,6 +40,7 @@ object AdsManager {
     var isDebug = true
     var isShow = true
     var isTestDevice = false
+    var isShowRate = false
 
     var AOA_SPLASH = ""
 
@@ -131,14 +132,16 @@ object AdsManager {
                 }
 
                 override fun onLoadedAndGetNativeAd(ad: NativeAd?) {
-                  //  checkAdsTest(ad)
+                    //  checkAdsTest(ad)
                     IntroActivity.isIntroFullFail1 = false
                 }
 
                 override fun onNativeAdLoaded() {
                 }
             })
-    }    fun loadAndShowAdsNative(activity: Activity, viewGroup: ViewGroup, holder: NativeHolderAdmob) {
+    }
+
+    fun loadAndShowAdsNative(activity: Activity, viewGroup: ViewGroup, holder: NativeHolderAdmob) {
         if (!AdmobUtils.isNetworkConnected(activity)) {
             viewGroup.visibility = View.GONE
             return
@@ -172,7 +175,8 @@ object AdsManager {
 
             })
     }
-var isShowRate = false
+
+
     fun showRate(context: Context) {
         if (isShowRate || getRate(context)) {
             return
@@ -180,28 +184,22 @@ var isShowRate = false
         isShowRate = true
         try {
             AppOpenManager.getInstance().disableAppResumeWithActivity(context.javaClass)
-            val ratingDialog: RatingDialog = RatingDialog.Builder(context as Activity)
-                .session(1)
-                .date(1)
-                .setNameApp(context.getString(R.string.app_name))
-                .setIcon(R.mipmap.ic_launcher)
-                .setEmail("nguyenhuuchinh.031019931@gmail.com")
-            .setOnlickRate { rate ->
-                AppOpenManager.getInstance().disableAppResumeWithActivity(context.javaClass)
-                if (rate>=4){
-                    setRate(context,true)
-                }
-            }
-                .setDeviceInfo(BuildConfig.VERSION_NAME, Build.VERSION.SDK_INT.toString(), Build.MANUFACTURER + "_" + Build.MODEL)
-                .ignoreRated(false)
-                .isShowButtonLater(true)
-                .isClickLaterDismiss(true)
-                .setTextButtonLater("Maybe Later")
-                .setOnlickMaybeLate(MaybeLaterCallback {
+            val ratingDialog: RatingDialog =
+                RatingDialog.Builder(context as Activity).session(1).date(1)
+                    .setNameApp(context.getString(R.string.app_name)).setIcon(R.mipmap.ic_launcher)
+                    .setEmail("mailto:novosyxco@novosyx.com").setOnlickRate { rate ->
+                        AppOpenManager.getInstance().disableAppResumeWithActivity(context.javaClass)
+                        if (rate >= 4) {
+                            setRate(context, true)
+                        }
+                    }.setDeviceInfo(
+                        BuildConfig.VERSION_NAME,
+                        Build.VERSION.SDK_INT.toString(),
+                        Build.MANUFACTURER + "_" + Build.MODEL
+                    ).ignoreRated(false).isShowButtonLater(true).isClickLaterDismiss(true)
+                    .setTextButtonLater("Maybe Later").setOnlickMaybeLate(MaybeLaterCallback {
 
-                })
-                .ratingButtonColor(R.color.red)
-                .build()
+                    }).ratingButtonColor(R.color.red).build()
             ratingDialog.setCanceledOnTouchOutside(false)
             ratingDialog.show()
         } catch (_: Exception) {
@@ -248,11 +246,7 @@ var isShowRate = false
     }
 
     fun showAdsBannerSplash(
-        activity: Activity,
-        adsEnum: String,
-        view: ViewGroup,
-        line: View,
-        onDelay: onDelay
+        activity: Activity, adsEnum: String, view: ViewGroup, line: View, onDelay: onDelay
     ) {
         if (AdmobUtils.isNetworkConnected(activity)) {
             AdmobUtils.loadAdBanner(activity, adsEnum, view, object : AdmobUtils.BannerCallBack {
@@ -458,7 +452,7 @@ var isShowRate = false
                 }
 
                 override fun onLoaded(nativeAd: NativeAd) {
-                  //  checkAdsTest(ad = nativeAd)
+                    //  checkAdsTest(ad = nativeAd)
                 }
             })
     }
@@ -466,7 +460,6 @@ var isShowRate = false
     interface onLoading {
         fun onLoading()
     }
-
 
 
     fun showAdsBanner(activity: Activity, adsEnum: String, view: ViewGroup, line: View) {
@@ -817,55 +810,56 @@ var isShowRate = false
     private var isClick = true
 
     fun loadAndShowInter(
-        activity: Activity,
-        interHolder: InterHolderAdmob, onClose: () -> Unit
+        activity: Activity, interHolder: InterHolderAdmob, onClose: () -> Unit
     ) {
-        if(!AdmobUtils.isNetworkConnected(activity)){
+        if (!AdmobUtils.isNetworkConnected(activity)) {
             onClose.invoke()
-            isClick =true
+            isClick = true
             return
         }
-        isClick =false
-        AdmobUtils.loadAndShowAdInterstitial(activity as AppCompatActivity, interHolder, object : AdsInterCallBack{
-            override fun onStartAction() {
+        isClick = false
+        AdmobUtils.loadAndShowAdInterstitial(
+            activity as AppCompatActivity, interHolder, object : AdsInterCallBack {
+                override fun onStartAction() {
 
-            }
-
-            override fun onEventClickAdClosed() {
-                onClose.invoke()
-                isClick =true
-            }
-
-            override fun onAdShowed() {
-                AppOpenManager.getInstance().isAppResumeEnabled = false
-                Handler().postDelayed({
-                    try {
-                        AdmobUtils.dismissAdDialog()
-                    } catch (e: Exception) {
-
-                    }
-                }, 800)
-            }
-
-            override fun onAdLoaded() {
-
-            }
-
-            override fun onAdFail(error: String?) {
-                onClose.invoke()
-                isClick =true
-            }
-
-            override fun onClickAds() {
-                TODO("Not yet implemented")
-            }
-
-            override fun onPaid(adValue: AdValue?, adsId: String?) {
-                if (adValue != null) {
-                    postRevenueAdjust(adValue, adsId)
                 }
-            }
-        }, true)
+
+                override fun onEventClickAdClosed() {
+                    onClose.invoke()
+                    isClick = true
+                }
+
+                override fun onAdShowed() {
+                    AppOpenManager.getInstance().isAppResumeEnabled = false
+                    Handler().postDelayed({
+                        try {
+                            AdmobUtils.dismissAdDialog()
+                        } catch (e: Exception) {
+
+                        }
+                    }, 800)
+                }
+
+                override fun onAdLoaded() {
+
+                }
+
+                override fun onAdFail(error: String?) {
+                    onClose.invoke()
+                    isClick = true
+                }
+
+                override fun onClickAds() {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onPaid(adValue: AdValue?, adsId: String?) {
+                    if (adValue != null) {
+                        postRevenueAdjust(adValue, adsId)
+                    }
+                }
+            }, true
+        )
 
     }
 

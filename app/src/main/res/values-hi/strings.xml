@@ -6,10 +6,8 @@
     <string name="content_onboard_1">हजारों फिल्मों, टीवी शो और बहुत कुछ के साथ असीमित मनोरंजन का आनंद लें।</string>
     <string name="title_onboard_2">अंतहीन मनोरंजन की खोज करें</string>
     <string name="content_onboard_2">अपने पसंदीदा शो और फिल्में कभी भी, कहीं भी देखें।</string>
-
     <string name="title_onboard_3">प्रयोग करने में आसान</string>
     <string name="content_onboard_3">आसान गाइड-खोज, दुनिया भर के चैनलों से सुरक्षित कनेक्शन, लाइव टीवी, स्मार्ट टीवी प्लेयर</string>
-
     <string name="title_onboard_4">नए शो खोजें</string>
     <string name="content_onboard_4">केवल आपके लिए तैयार की गई विविध प्रकार की सामग्री का अन्वेषण करें।</string>
     <string name="iptv">आईपीटीवी</string>
@@ -78,8 +76,8 @@
     <string name="recent_channel">हाल ही का</string>
     <string name="do_you_want_to_delete_channel">क्या आप %1$s चैनल हटाना चाहते हैं?</string>
     <string name="do_you_want_to_delete_playlist">क्या आप हटाना चाहते हैं %s</string>
-    <string name="search_channel">चैनल खोजें...</string>
-    <string name="search_channel_detail">चैनल खोजें...</string>
+    <string name="search_channel">चैनल खोजें…</string>
+    <string name="search_channel_detail">चैनल खोजें…</string>
     <string name="english">English</string>
     <string name="korean">Korean</string>
     <string name="spanish">Spanish</string>
@@ -102,10 +100,44 @@
     <string name="favorite_txt">पसंदीदा</string>
     <string name="lock_txt">ताला</string>
     <string name="all_tab">सभी</string>
-    <string name="please_enter_a_name_and_select_at_least_one_video">कृपया एक नाम दर्ज करें और कम से कम एक वीडियो चुनें</string>
     <string name="cannot_retain_file_access_permission_please_try_again">फ़ाइल पहुँच अनुमति बरकरार नहीं रख सकते. कृपया पुन: प्रयास करें।</string>
-    <string name="please_enter_a_name_and_select_a_file">कृपया एक नाम दर्ज करें और एक फ़ाइल चुनें</string>
     <string name="error_saving_playlist">प्लेलिस्ट सहेजने में त्रुटि: %1$s</string>
     <string name="add_button">जोड़ें बटन</string>
     <string name="screen_lock_long_press_to_unlock">स्क्रीन लॉक है। अनलॉक करने के लिए देर तक दबाएं</string>
+
+    <string name="facebook_id">" "</string>
+
+    <string name="please_select_at_least_one_video">कृपया कम से कम एक वीडियो चुनें</string>
+    <string name="please_enter_a_name">कृपया एक नाम दर्ज करें</string>
+    <string name="please_select_a_file">कृपया एक फ़ाइल चुनें</string>
+    <string name="this_action_can_contain_ads">इस क्रिया में विज्ञापन शामिल हो सकते हैं…</string>
+    <string name="not_found">%1$s के लिए परिणाम नहीं</string>
+    <string name="no_wi_fi_detected">कोई वाई-फ़ाई नहीं मिला</string>
+    <string name="opps_just_lost_internet_connection_please_reconnect">उफ़! अभी इंटरनेट कनेक्शन टूट गया है, कृपया पुनः कनेक्ट करें।</string>
+    <string name="connect">जोड़ना</string>
+    <string name="error_file_size">30 एमबी से बड़ी फ़ाइलें नहीं पढ़ सकते</string>
+    <string name="please_enter_a_name_imprt">कृपया एक नाम दर्ज करें</string>
+    <string name="please_select_a_video">कृपया एक वीडियो चुनें</string>
+    <string name="please_enter_a_name_import">कृपया एक नाम दर्ज करें</string>
+    <string name="please_select_a_file_import">कृपया एक फ़ाइल चुनें</string>
+    <string name="please_enter_a_name_url">कृपया एक नाम दर्ज करें</string>
+    <string name="please_fill_in_a_link">कृपया एक लिंक भरें</string>
+    <string name="invalid_url_or_no_channels_found">अमान्य यूआरएल या कोई चैनल नहीं मिला</string>
+    <string name="playlist_name_already_exists">प्लेलिस्ट का नाम पहले से मौजूद है</string>
+    <string name="playlist_name_already_exists_file">प्लेलिस्ट का नाम पहले से मौजूद है</string>
+    <string name="playlist_name_already_exists_video">प्लेलिस्ट का नाम पहले से मौजूद है</string>
+    <string name="error_saving_playlist_video">प्लेलिस्ट सहेजने में त्रुटि</string>
+    <string name="cannot_open_the_file">फ़ाइल नहीं खुल सकती.</string>
+    <string name="no_file_access_permission_please_select_again">फ़ाइल पहुंच की अनुमति नहीं. कृपया पुनः चयन करें.</string>
+    <string name="there_are_no_channels_in_the_group">समूह %1$s में कोई चैनल नहीं है</string>
+    <string name="error_loading_data">डेटा लोड करने में त्रुटि: %1$s</string>
+    <string name="failed_to_open_input_stream_for_uri">यूआरआई के लिए इनपुट स्ट्रीम खोलने में विफल: %1$s</string>
+    <string name="please_select_a_language_first">कृपया पहले एक भाषा चुनें!</string>
+    <string name="device_not_supported">उपकरण समर्थित नहीं</string>
+    <string name="please_enable_picture_in_picture_for_this_app">कृपया इस ऐप के लिए पिक्चर-इन-पिक्चर सक्षम करें</string>
+    <string name="go_to_picture_in_picture_settings_and_enable_it_for">पिक्चर-इन-पिक्चर सेटिंग्स पर जाएं और इसे %1$s के लिए सक्षम करें</string>
+    <string name="go_to_apps_picture_in_picture_and_enable_it"><![CDATA[Go to Apps > %1$s > Picture-in-Picture and enable it]]></string>
+    <string name="pip_not_supported_on_this_device">इस डिवाइस पर PiP समर्थित नहीं है</string>
+    <string name="player_not_ready_for_pip">खिलाड़ी PiP के लिए तैयार नहीं है</string>
+    <string name="failed_to_entxer_pip_mode">PiP मोड में प्रवेश करने में विफल</string>
 </resources>

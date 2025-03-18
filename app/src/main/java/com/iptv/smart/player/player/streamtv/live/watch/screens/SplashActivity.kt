@@ -23,6 +23,7 @@ import com.google.android.gms.ads.AdValue
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
+import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.isShowRate
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.visible
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.ActivitySplashBinding
@@ -41,24 +42,22 @@ class SplashActivity : BaseActivity() {
 
         val loaderGif = findViewById<ImageView>(R.id.loader_gif)
 
-        Glide.with(this)
-            .asGif()
-            .load(R.drawable.loader)
-            .into(loaderGif)
+        Glide.with(this).asGif().load(R.drawable.loader).into(loaderGif)
 
-        Common.countInterAdd=0
-        Common.countInterSelect=0
-        Common.countInterBackPLay=0
-        Common.countInterItemPlaylist=0
-        Common.countInterAddOption=0
+        Common.countInterAdd = 0
+        Common.countInterSelect = 0
+        Common.countInterBackPLay = 0
+        Common.countInterItemPlaylist = 0
+        Common.countInterAddOption = 0
+        isShowRate = false
         RemoteConfig.setReload(this, false)
 
-        if (AdmobUtils.isNetworkConnected(this)){
+        if (AdmobUtils.isNetworkConnected(this)) {
             getKeyRemoteConfig()
-        }else{
+        } else {
             Handler(Looper.getMainLooper()).postDelayed({
                 nextActivity()
-            },2000)
+            }, 2000)
         }
     }
 
@@ -102,11 +101,14 @@ class SplashActivity : BaseActivity() {
                     RemoteConfig.getValueAbTest("BANNER_DETAIL_PLAYLIST_CHANNEL_050325")
                 RemoteConfig.INTER_BACK_PLAY_TO_LIST_050325 =
                     RemoteConfig.getValueAbTest("INTER_BACK_PLAY_TO_LIST_050325")
-//                RemoteConfig.ADS_PLAY_CONTROL_050325 =
-//                    RemoteConfig.getValueAbTest("ADS_PLAY_CONTROL_050325")
+                RemoteConfig.ADS_PLAY_CONTROL_050325 =
+                    RemoteConfig.getValueAbTest("ADS_PLAY_CONTROL_050325")
                 RemoteConfig.ONRESUME_050325 = RemoteConfig.getValueAbTest("ONRESUME_050325")
                 setupCMP()
-                Log.d("TAG121212121", "onComplete: "+RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325)
+                Log.d(
+                    "TAG121212121",
+                    "onComplete: " + RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325
+                )
             }
         })
     }
@@ -173,13 +175,15 @@ class SplashActivity : BaseActivity() {
             "1" -> {
                 binding.textView.visible()
 
-                val aoaManager = AOAManager(this,
+                val aoaManager = AOAManager(
+                    this,
                     AdsManager.AOA_SPLASH,
                     20000,
                     object : AOAManager.AppOpenAdsListener {
                         override fun onAdsLoaded() {
                             handler.removeCallbacksAndMessages(null)
                         }
+
                         override fun onAdsFailed(s: String) {
                             handler.removeCallbacksAndMessages(null)
                             nextActivity()
@@ -197,7 +201,7 @@ class SplashActivity : BaseActivity() {
 
                 handler.postDelayed({
                     nextActivity()
-                },timeoutDuration)
+                }, timeoutDuration)
 
                 aoaManager.loadAoA()
             }
@@ -205,7 +209,8 @@ class SplashActivity : BaseActivity() {
             "2" -> {
                 binding.textView.visible()
 
-                AdsManager.loadAndShowInterSplash(this,
+                AdsManager.loadAndShowInterSplash(
+                    this,
                     AdsManager.INTER_SPLASH,
                     object : AdsManager.AdListener {
                         override fun onAdClosed() {
@@ -217,7 +222,7 @@ class SplashActivity : BaseActivity() {
                 )
                 handler.postDelayed({
                     nextActivity()
-                },timeoutDuration)
+                }, timeoutDuration)
 
             }
 

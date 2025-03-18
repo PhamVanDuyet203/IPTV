@@ -75,7 +75,6 @@ class GroupAdapter(private var groups: List<PlaylistEntity>) :
                 if (items[position] is PlaylistEntity) {
                     val group = items[position] as PlaylistEntity
                     holder.bind(group)
-                } else {
                 }
             }
             is NativeAdViewHolder -> {
@@ -113,7 +112,6 @@ class GroupAdapter(private var groups: List<PlaylistEntity>) :
                     override fun onAdFailedToLoad(error: LoadAdError) {
                     }
                     override fun onAdLoaded() {
-                        Log.d("GroupAdapter", "Ad loaded successfully")
                     }
                 })
                 .build()

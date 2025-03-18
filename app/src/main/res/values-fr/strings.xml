@@ -76,8 +76,8 @@
     <string name="recent_channel">Récent</string>
     <string name="do_you_want_to_delete_channel">Voulez-vous supprimer la chaîne %1$s ?</string>
     <string name="do_you_want_to_delete_playlist">Voulez-vous supprimer %s</string>
-    <string name="search_channel">Rechercher une chaîne...</string>
-    <string name="search_channel_detail">Rechercher une chaîne...</string>
+    <string name="search_channel">Rechercher une chaîne…</string>
+    <string name="search_channel_detail">Rechercher une chaîne…</string>
     <string name="english">English</string>
     <string name="korean">Korean</string>
     <string name="spanish">Spanish</string>
@@ -100,11 +100,43 @@
     <string name="favorite_txt">Préféré</string>
     <string name="lock_txt">Verrouillage</string>
     <string name="all_tab">tous</string>
-    <string name="please_enter_a_name_and_select_at_least_one_video">Veuillez saisir un nom et sélectionner au moins une vidéo</string>
     <string name="cannot_retain_file_access_permission_please_try_again">Impossible de conserver l\'autorisation d\'accès au fichier. Veuillez réessayer.</string>
-    <string name="please_enter_a_name_and_select_a_file">Veuillez entrer un nom et sélectionner un fichier</string>
     <string name="error_saving_playlist">Erreur lors de l\'enregistrement de la playlist : %1$s</string>
     <string name="add_button">bouton Ajouter</string>
-
     <string name="screen_lock_long_press_to_unlock">Verrouillage de l\'écran. Appuyez longuement pour déverrouiller</string>
+
+    <string name="facebook_id">" "</string>
+    <string name="please_select_at_least_one_video">Veuillez sélectionner au moins une vidéo</string>
+    <string name="please_enter_a_name">Veuillez entrer un nom</string>
+    <string name="please_select_a_file">Veuillez sélectionner un fichier</string>
+    <string name="this_action_can_contain_ads">Cette action peut contenir des publicités…</string>
+    <string name="not_found">Aucun résultat pour %1$s</string>
+    <string name="no_wi_fi_detected">Aucun Wi-Fi détecté</string>
+    <string name="opps_just_lost_internet_connection_please_reconnect">Oups! Je viens de perdre la connexion Internet, veuillez vous reconnecter.</string>
+    <string name="connect">Connecter</string>
+    <string name="error_file_size">Impossible de lire des fichiers de plus de 30 Mo</string>
+    <string name="please_enter_a_name_imprt">Veuillez entrer un nom</string>
+    <string name="please_select_a_video">Veuillez sélectionner une vidéo</string>
+    <string name="please_enter_a_name_import">Veuillez entrer un nom</string>
+    <string name="please_select_a_file_import">Veuillez sélectionner un fichier</string>
+    <string name="please_enter_a_name_url">Veuillez entrer un nom</string>
+    <string name="please_fill_in_a_link">Veuillez remplir un lien</string>
+    <string name="invalid_url_or_no_channels_found">URL invalide ou aucune chaîne trouvée</string>
+    <string name="playlist_name_already_exists">Le nom de la playlist existe déjà</string>
+    <string name="playlist_name_already_exists_file">Le nom de la playlist existe déjà</string>
+    <string name="playlist_name_already_exists_video">Le nom de la playlist existe déjà</string>
+    <string name="error_saving_playlist_video">Erreur lors de l\'enregistrement de la liste de lecture</string>
+    <string name="cannot_open_the_file">Impossible d\'ouvrir le fichier.</string>
+    <string name="no_file_access_permission_please_select_again">Aucune autorisation d\'accès au fichier. Veuillez sélectionner à nouveau.</string>
+    <string name="there_are_no_channels_in_the_group">Il n\'y a aucune chaîne dans le groupe %1$s</string>
+    <string name="error_loading_data">Erreur de chargement des données: %1$s</string>
+    <string name="failed_to_open_input_stream_for_uri">Échec de l\'ouverture du flux d\'entrée pour l\'URI: %1$s</string>
+    <string name="please_select_a_language_first">Veuillez d\'abord sélectionner une langue!</string>
+    <string name="device_not_supported">Appareil non pris en charge</string>
+    <string name="please_enable_picture_in_picture_for_this_app">Veuillez activer Picture-in-Picture pour cette application</string>
+    <string name="go_to_picture_in_picture_settings_and_enable_it_for">Accédez aux paramètres Picture-in-Picture et activez-le pour %1$s</string>
+    <string name="go_to_apps_picture_in_picture_and_enable_it"><![CDATA[Go to Apps > %1$s > Picture-in-Picture and enable it]]></string>
+    <string name="pip_not_supported_on_this_device">PiP n\'est pas pris en charge sur cet appareil</string>
+    <string name="player_not_ready_for_pip">Le joueur n\'est pas prêt pour PiP</string>
+    <string name="failed_to_entxer_pip_mode">Échec de l\'entrée en mode PiP</string>
 </resources>

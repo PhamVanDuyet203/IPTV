@@ -2,15 +2,19 @@ package com.iptv.smart.player.player.streamtv.live.watch.screens
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.LinearLayout
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.admob.max.dktlibrary.AppOpenManager
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.ActivityHomepageBinding
 import com.iptv.smart.player.player.streamtv.live.watch.dialog.ImportPlaylistDialog
+import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
 import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
 
 class HomePageActivity : BaseActivity() {
@@ -63,6 +67,34 @@ class HomePageActivity : BaseActivity() {
         startActivity(intent)
     }
 
+    fun startPlayerActivity(channel: Channel) {
+        val intent = Intent(this, PlayerActivity::class.java).apply {
+            putExtra("channel", channel)
+        }
+        playerActivityResultLauncher.launch(intent)
+    }
+
+    private val playerActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data
+            val shouldRefresh = data?.getBooleanExtra("REFRESH_DATA", false) ?: false
+            val channelName = data?.getStringExtra("CHANNEL_NAME") ?: "Unknown"
+            val isFavorite = data?.getBooleanExtra("IS_FAVORITE", false) ?: false
+            if (shouldRefresh) {
+                refreshCurrentFragment()
+            }
+        } else {
+            Log.d("HomePageActivity", "Received result from PlayerActivity with resultCode: ${result.resultCode}")
+        }
+    }
+
+    private fun refreshCurrentFragment() {
+        val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+        if (currentFragment is ChannelFragment) {
+                currentFragment.refreshData()
+        }
+    }
+
     private fun replaceFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
@@ -106,6 +138,8 @@ class HomePageActivity : BaseActivity() {
         binding.channelText.setTextColor(defaultTextColor)
         binding.channelIcon.setColorFilter(defaultIconColor)
     }
+
+
 
     private fun updateLanguageIcon(languageCode: String) {
         val iconResId = when (languageCode) {

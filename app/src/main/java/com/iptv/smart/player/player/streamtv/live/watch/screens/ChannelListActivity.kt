@@ -17,6 +17,8 @@ import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -32,6 +34,8 @@ import com.iptv.smart.player.player.streamtv.live.watch.adapter.GroupAdapter
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.INTER_SELECT_CATEG_OR_CHANNEL
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
+import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.showRate
+import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.visible
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.ActivityPlaylistDetailBinding
 import com.iptv.smart.player.player.streamtv.live.watch.db.PlaylistEntity
@@ -97,11 +101,17 @@ class ChannelListActivity : BaseActivity() {
         val playlistName = intent.getStringExtra("GROUP_NAME") ?: "Unknown Playlist"
         sourcePath = intent.getStringExtra("SOURCE_PATH") ?: ""
 
-        Log.d("ChannelListActivity", "Received source file path: $sourcePath")
-        Log.d("ChannelListActivity", "Playlist name: $playlistName")
-
         tvTitle.text = playlistName
         tvTitle.isSelected = true
+
+
+        var isFirstTime = true
+
+        if (isFirstTime) {
+            isFirstTime = false
+            showRate(this)
+
+        }
 
         btnBack.setOnClickListener { finish() }
 
@@ -119,10 +129,20 @@ class ChannelListActivity : BaseActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
+        searchEditText.setOnEditorActionListener { v, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(v.windowToken, 0)
+                true
+            } else {
+                false
+            }
+        }
+
+
+
         sortIcon.setOnClickListener {
-
                 showSortPopup(it)
-
         }
 
         setupNetworkMonitoring()
@@ -136,7 +156,6 @@ class ChannelListActivity : BaseActivity() {
             @RequiresApi(Build.VERSION_CODES.M)
             override fun onAvailable(network: Network) {
                 runOnUiThread {
-                    Log.d("ChannelListActivity", "Network available")
                     dismissNoInternetDialog()
                     loadGroupedChannels(sourcePath)
                 }
@@ -144,7 +163,6 @@ class ChannelListActivity : BaseActivity() {
 
             override fun onLost(network: Network) {
                 runOnUiThread {
-                    Log.d("ChannelListActivity", "Network lost")
                     showNoInternetDialog()
                 }
             }
@@ -223,38 +241,37 @@ class ChannelListActivity : BaseActivity() {
             return
         }
 
-        Log.d("ChannelListActivity", "Loading channels from sourcePath: $sourcePath")
         CoroutineScope(Dispatchers.Main).launch {
             try {
+                sortIcon.isEnabled = false
+                sortIcon.alpha = 0.5f
                 progressBar.visibility = View.VISIBLE
                 val channels = if (sourcePath.startsWith("http://") || sourcePath.startsWith("https://")) {
-                    Log.d("ChannelListActivity", "Parsing M3U from URL: $sourcePath")
                     parseM3U(sourcePath)
                 } else {
                     val uri = android.net.Uri.parse(sourcePath)
-                    Log.d("ChannelListActivity", "Parsed URI from sourcePath: $uri")
 
                     val hasPermission = contentResolver.persistedUriPermissions.any {
                         it.uri == uri && it.isReadPermission
                     }
-                    Log.d("ChannelListActivity", "Checking permissions for URI: $uri")
-                    Log.d("ChannelListActivity", "Persisted permissions: ${contentResolver.persistedUriPermissions}")
-                    Log.d("ChannelListActivity", "Has read permission: $hasPermission")
+
 
                     if (!hasPermission) {
-                        Log.w("ChannelListActivity", "No read permission for URI: $uri")
-                        Toast.makeText(this@ChannelListActivity, "Quyền truy cập tệp đã bị thu hồi. Vui lòng chọn lại tệp.", Toast.LENGTH_LONG).show()
+//                        Toast.makeText(this@ChannelListActivity, "Quyền truy cập tệp đã bị thu hồi. Vui lòng chọn lại tệp.", Toast.LENGTH_LONG).show()
                         finish()
                         return@launch
                     }
 
                     val inputStream = try {
                         contentResolver.openInputStream(uri)
-                            ?: throw Exception("Failed to open input stream for URI: $uri")
+                            ?: throw Exception(
+                                getString(
+                                    R.string.failed_to_open_input_stream_for_uri,
+                                    uri
+                                ))
                     } catch (e: SecurityException) {
                         throw Exception("Permission denied for URI: $uri. Please select the file again.")
                     }
-                    Log.d("ChannelListActivity", "Successfully opened input stream for URI: $uri")
                     inputStream.use { parseM3UFromFile(it) }
                 }
                 val groupedChannels = channels.groupBy { it.groupTitle ?: "Unknown" }
@@ -270,12 +287,15 @@ class ChannelListActivity : BaseActivity() {
 
                 fullGroupList = playlistEntities
                 adapter.updateData(playlistEntities)
-                Log.d("ChannelListActivity", "Loaded ${playlistEntities.size} playlist entities from source file")
                 progressBar.visibility = View.GONE
+                sortIcon.isEnabled = true
+                sortIcon.alpha = 1f
+
             } catch (e: Exception) {
-                Toast.makeText(this@ChannelListActivity, "Lỗi khi tải dữ liệu: ${e.message}", Toast.LENGTH_LONG).show()
-                Log.e("ChannelListActivity", "Error loading channels: ${e.message}", e)
+//                Toast.makeText(this@ChannelListActivity, "Lỗi khi tải dữ liệu: ${e.message}", Toast.LENGTH_LONG).show()
                 progressBar.visibility = View.GONE
+                sortIcon.isEnabled = true
+                sortIcon.alpha = 1f
             }
         }
     }

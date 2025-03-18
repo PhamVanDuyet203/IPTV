@@ -76,7 +76,6 @@
                 android:textColor="#171D1D"
                 android:background="@drawable/custom_edittext_search_background"
                 android:imeOptions="actionSearch"
-
                 />
 
             <ImageView
@@ -96,7 +95,6 @@
             android:padding="10dp"
             android:layout_marginStart="10dp"
             android:src="@drawable/ic_sort"
-
             />
     </LinearLayout>
 

@@ -119,11 +119,6 @@ class ActivityImportPlaylistM3U : BaseActivity() {
                         ).show()
                     }
                 }
-            } else {
-                Log.w(
-                    "M3UFile",
-                    "File selection canceled or failed with result code: ${result.resultCode}"
-                )
             }
         }
 
@@ -181,7 +176,8 @@ class ActivityImportPlaylistM3U : BaseActivity() {
                     if (existingPlaylist != null) {
                         withContext(Dispatchers.Main) {
                             binding.progressBar.gone()
-                            etPlaylistName.error = "Playlist name already exists"
+                            etPlaylistName.error =
+                                getString(R.string.playlist_name_already_exists_file)
                             binding.btnAddPlaylist.isEnabled = true
                             isSaving = false
                         }

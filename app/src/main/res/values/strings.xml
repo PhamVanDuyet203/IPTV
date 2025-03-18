@@ -12,7 +12,6 @@
     <string name="content_onboard_4">Explore a wide variety of content tailored just for you.</string>
     <string name="iptv">IPTV</string>
     <string name="don_t_have_any_playlists_yet">Don\'t have any playlists yet</string>
-
     <string name="home">Home</string>
     <string name="channel">Channel</string>
     <string name="how_to_add_a_playlist">How to Add a Playlist</string>
@@ -64,7 +63,6 @@
     <string name="don_t_have_an_m3u_file_to_stream">Don\'t have an M3U file to stream?</string>
     <string name="next">NEXT</string>
     <string name="don_t_have_any_channels_yet">Don\'t have any channels yet</string>
-
     <string name="all">All</string>
     <string name="url">URL</string>
     <string name="file">File</string>
@@ -76,8 +74,8 @@
     <string name="recent_channel">Recent</string>
     <string name="do_you_want_to_delete_channel">Do you want to delete %1$s channel?</string>
     <string name="do_you_want_to_delete_playlist">Do you want to delete <b>%1$s</b> playlist?</string>
-    <string name="search_channel">Search channel...</string>
-    <string name="search_channel_detail">Search channel...</string>
+    <string name="search_channel">Search channel…</string>
+    <string name="search_channel_detail">Search channel…</string>
     <string name="english">English</string>
     <string name="korean">Korean</string>
     <string name="spanish">Spanish</string>
@@ -91,7 +89,6 @@
     <string name="italian">Italian</string>
     <string name="german">German</string>
     <string name="don_t_have_any_playlists_yet_ft_home">Don\'t have any playlists yet</string>
-
     <string name="channel_unavailable">Channel Unavailable</string>
     <string name="ok">OK</string>
     <string name="this_channel_is_currently_unavailable_please_try_again_later">This channel is currently unavailable. Please try again later.</string>
@@ -100,23 +97,46 @@
     <string name="favorite_txt">Favorite</string>
     <string name="lock_txt">Lock</string>
     <string name="all_tab">all</string>
-    <string name="please_select_at_least_one_video">Please select at least one video</string>
     <string name="cannot_retain_file_access_permission_please_try_again">Cannot retain file access permission. Please try again.</string>
-    <string name="please_enter_a_name">Please enter a name</string>
-    <string name="please_select_a_file">Please select a file</string>
-
     <string name="error_saving_playlist">Error saving playlist: %1$s</string>
     <string name="add_button">Add button</string>
     <string name="press_the_add_button_to_create_one_fr_home">Press the Add button to create one</string>
     <string name="press_the_add_button_to_create_one_channel">Press the Add button to create one</string>
     <string name="press_the_add_button_to_create_one">Press the Add button to create one</string>
     <string name="screen_lock_long_press_to_unlock">Screen lock. Long press to unlock</string>
+    <string name="please_select_at_least_one_video">Please select at least one video</string>
+    <string name="please_enter_a_name">Please enter a name</string>
+    <string name="please_select_a_file">Please select a file</string>
     <string name="facebook_id">" "</string>
-    <string name="this_action_can_contain_ads">This action can contain ads...</string>
+    <string name="this_action_can_contain_ads">This action can contain ads…</string>
     <string name="not_found">Not result for %1$s</string>
     <string name="no_wi_fi_detected">No Wi-Fi Detected</string>
     <string name="opps_just_lost_internet_connection_please_reconnect">Opps! Just lost internet connection, please reconnect.</string>
     <string name="connect">Connect</string>
     <string name="error_file_size">Cannot read files larger than 30 MB</string>
+    <string name="please_enter_a_name_imprt">Please enter a name</string>
+    <string name="please_select_a_video">Please select a video</string>
+    <string name="please_enter_a_name_import">Please enter a name</string>
+    <string name="please_select_a_file_import">Please select a file</string>
+    <string name="please_enter_a_name_url">Please enter a name</string>
+    <string name="please_fill_in_a_link">Please fill in a link</string>
+    <string name="invalid_url_or_no_channels_found">Invalid URL or no channels found</string>
+    <string name="playlist_name_already_exists">Playlist name already exists</string>
+    <string name="playlist_name_already_exists_file">Playlist name already exists</string>
+    <string name="playlist_name_already_exists_video">Playlist name already exists</string>
+    <string name="error_saving_playlist_video">Error saving playlist</string>
+    <string name="cannot_open_the_file">Cannot open the file.</string>
+    <string name="no_file_access_permission_please_select_again">No file access permission. Please select again.</string>
+    <string name="there_are_no_channels_in_the_group">There are no channels in the group %1$s</string>
+    <string name="error_loading_data">Error loading data: %1$s</string>
+    <string name="failed_to_open_input_stream_for_uri">Failed to open input stream for URI: %1$s</string>
+    <string name="please_select_a_language_first">Please select a language first!</string>
+    <string name="device_not_supported">Device not supported</string>
+    <string name="please_enable_picture_in_picture_for_this_app">Please enable Picture-in-Picture for this app</string>
+    <string name="go_to_picture_in_picture_settings_and_enable_it_for">Go to Picture-in-Picture settings and enable it for %1$s</string>
+    <string name="go_to_apps_picture_in_picture_and_enable_it"><![CDATA[Go to Apps > %1$s > Picture-in-Picture and enable it]]></string>
+    <string name="pip_not_supported_on_this_device">PiP not supported on this device</string>
+    <string name="player_not_ready_for_pip">Player not ready for PiP</string>
+    <string name="failed_to_entxer_pip_mode">Failed to entxer PiP mode</string>
 </resources>
 

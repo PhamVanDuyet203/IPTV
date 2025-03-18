@@ -10,14 +10,15 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import com.iptv.smart.player.player.streamtv.live.watch.R
-import com.iptv.smart.player.player.streamtv.live.watch.model.VideoItem
+import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
 
 class VideoAdapter(
     private val context: Context,
-    private val videoList: MutableList<VideoItem>,
-    private val onDelete: (VideoItem) -> Unit
+    private val videoList: MutableList<Channel>,
+    private val onDelete: (Channel) -> Unit
 ) : RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
     inner class VideoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -34,9 +35,9 @@ class VideoAdapter(
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         val videoItem = videoList[position]
 
-        holder.title.text = videoItem.fileName
+        holder.title.text = videoItem.name
 
-        holder.thumbnail.setImageBitmap(getVideoThumbnail(videoItem.uri))
+        holder.thumbnail.setImageBitmap(getVideoThumbnail(videoItem.streamUrl.toUri()))
 
         holder.btnDelete.setOnClickListener {
             onDelete(videoItem)

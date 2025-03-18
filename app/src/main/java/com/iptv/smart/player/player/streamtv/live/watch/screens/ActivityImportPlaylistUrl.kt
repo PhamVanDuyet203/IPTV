@@ -106,7 +106,7 @@ class ActivityImportPlaylistUrl : BaseActivity() {
                     if (existingPlaylist != null) {
                         withContext(Dispatchers.Main) {
                             hideOverlay()
-                            etPlaylistName.error = "Playlist name already exists"
+                            etPlaylistName.error = getString(R.string.playlist_name_already_exists)
                             binding.btnAddPlaylist.isEnabled = true
                             isSaving = false
                         }
@@ -116,7 +116,8 @@ class ActivityImportPlaylistUrl : BaseActivity() {
                     if (channelCount == 0) {
                         withContext(Dispatchers.Main) {
                             hideOverlay()
-                            etPlaylistUrl.error = "Invalid URL or no channels found"
+                            etPlaylistUrl.error =
+                                getString(R.string.invalid_url_or_no_channels_found)
                         }
                         return@launch
                     }

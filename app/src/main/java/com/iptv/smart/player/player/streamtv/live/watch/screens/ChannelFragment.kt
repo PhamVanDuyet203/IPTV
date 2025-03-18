@@ -6,7 +6,6 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.text.SpannableString
@@ -25,7 +24,6 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
@@ -59,16 +57,15 @@ class ChannelFragment : Fragment() {
     private var connectivityManager: ConnectivityManager? = null
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
-    private val addPlaylistLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == android.app.Activity.RESULT_OK) {
-            Log.d("ChannelFragment", "Playlist added, forcing refresh")
-            loadingPanel.visibility = View.VISIBLE
-            channelsProvider.fetchChannelsFromRoom()
-            updateChannelList(selectedTabIndex)
+    private val addPlaylistLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == android.app.Activity.RESULT_OK) {
+                loadingPanel.visibility = View.VISIBLE
+                channelsProvider.fetchChannelsFromRoom()
+                updateChannelList(selectedTabIndex)
+            }
         }
-    }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -80,6 +77,7 @@ class ChannelFragment : Fragment() {
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         channelAdapter = ChannelsAdapter(
+            requireActivity(),
             channels = mutableListOf(),
             onChannelClicked = { channel -> nextActivity(channel) },
             onFavoriteClicked = { channel -> toggleFavorite(channel) },
@@ -102,18 +100,42 @@ class ChannelFragment : Fragment() {
 
         setupNetworkMonitoring()
         checkInternetConnection()
+        refreshData()
 
         return view
     }
 
+    private fun updateChannelList(tabPosition: Int) {
+        when (tabPosition) {
+            0 -> channelsProvider.channels.value?.let { updateUI(it) }
+            1 -> channelsProvider.filterChannels(requireContext(), "favorite")
+            2 -> channelsProvider.filterChannels(requireContext(), "recent")
+        }
+    }
+
+    private fun toggleFavorite(channel: Channel) {
+        channelsProvider.toggleFavorite(requireContext(), channel)
+        if (selectedTabIndex == 1) {
+            channelsProvider.filterChannels(requireContext(), "favorite")
+        }
+    }
+
+    fun refreshData() {
+        loadingPanel.visibility = View.VISIBLE
+        channelsProvider.fetchChannelsFromRoom()
+        channelsProvider.channels.observe(viewLifecycleOwner) { channels ->
+            updateChannelList(selectedTabIndex)
+        }
+    }
+
     private fun setupNetworkMonitoring() {
         val context = context ?: return
-        connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
         networkCallback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 requireActivity().runOnUiThread {
-                    Log.d("ChannelFragment", "Network available")
                     dismissNoInternetDialog()
                     loadingPanel.visibility = View.VISIBLE
                     channelsProvider.fetchChannelsFromRoom()
@@ -123,7 +145,6 @@ class ChannelFragment : Fragment() {
 
             override fun onLost(network: Network) {
                 requireActivity().runOnUiThread {
-                    Log.d("ChannelFragment", "Network lost")
                     showNoInternetDialog()
                 }
             }
@@ -139,7 +160,6 @@ class ChannelFragment : Fragment() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun checkInternetConnection() {
         if (!isInternetAvailable()) {
             showNoInternetDialog()
@@ -150,12 +170,13 @@ class ChannelFragment : Fragment() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun isInternetAvailable(): Boolean {
         val context = context ?: return false
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = connectivityManager.activeNetwork ?: return false
-        val networkCapabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        val networkCapabilities =
+            connectivityManager.getNetworkCapabilities(network) ?: return false
 
         return networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
                 networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
@@ -189,31 +210,26 @@ class ChannelFragment : Fragment() {
         noInternetDialog?.takeIf { it.isShowing }?.dismiss()
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun nextActivity(channel: Channel) {
         if (isInternetAvailable()) {
-            val intent = Intent(requireContext(), PlayerActivity::class.java).apply {
-                putExtra("channel", channel)
-            }
-            startActivityForResult(intent, 1000)
+            (requireActivity() as HomePageActivity).startPlayerActivity(channel)
         } else {
             showNoInternetDialog()
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1000) {
-            Log.d("TAGLOADATAAAAA", "onActivityResult: Reloading data after PlayerActivity")
             checkInternetConnection()
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onResume() {
         super.onResume()
         checkInternetConnection()
+        refreshData()
+        channelAdapter.notifyDataSetChanged()
     }
 
     override fun onDestroyView() {
@@ -252,11 +268,13 @@ class ChannelFragment : Fragment() {
             )
             spannableString.setSpan(
                 object : ClickableSpan() {
-                    @RequiresApi(Build.VERSION_CODES.M)
                     override fun onClick(widget: View) {
                         if (isInternetAvailable()) {
                             widget.setBackgroundColor(android.graphics.Color.WHITE)
-                            ImportPlaylistDialog().show(parentFragmentManager, "ImportPlaylistDialog")
+                            ImportPlaylistDialog().show(
+                                parentFragmentManager,
+                                "ImportPlaylistDialog"
+                            )
                             widget.postDelayed({
                                 widget.setBackgroundColor(android.graphics.Color.TRANSPARENT)
                             }, 200)
@@ -281,7 +299,6 @@ class ChannelFragment : Fragment() {
         textView2.highlightColor = android.graphics.Color.TRANSPARENT
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun setupTabs() {
         tabTitles.forEachIndexed { index, title ->
             val tabView = LayoutInflater.from(requireContext())
@@ -338,13 +355,6 @@ class ChannelFragment : Fragment() {
 
     }
 
-    private fun updateChannelList(tabPosition: Int) {
-        when (tabPosition) {
-            0 -> channelsProvider.channels.value?.let { updateUI(it) }
-            1 -> channelsProvider.filterChannels("favorite")
-            2 -> channelsProvider.filterChannels("recent")
-        }
-    }
 
     private fun updateUI(channels: List<Channel>) {
         loadingPanel.visibility = View.GONE
@@ -358,7 +368,6 @@ class ChannelFragment : Fragment() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun observeChannels() {
         channelsProvider.channels.observe(viewLifecycleOwner) { channels ->
             loadingPanel.visibility = View.GONE
@@ -384,7 +393,6 @@ class ChannelFragment : Fragment() {
 
         channelsProvider.shouldRefresh.observe(viewLifecycleOwner) { shouldRefresh ->
             if (shouldRefresh == true && isInternetAvailable()) {
-                Log.d("ChannelFragment", "Refresh requested, forcing reload of channels")
                 loadingPanel.visibility = View.VISIBLE
                 channelsProvider.fetchChannelsFromRoom(true)
                 channelsProvider.channels.observe(viewLifecycleOwner) { channels ->
@@ -395,11 +403,7 @@ class ChannelFragment : Fragment() {
         }
     }
 
-    private fun toggleFavorite(channel: Channel) {
-        channelsProvider.toggleFavorite(channel, true)
-    }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     fun openAddPlaylistActivity(type: String) {
         if (isInternetAvailable()) {
             val intent = when (type) {

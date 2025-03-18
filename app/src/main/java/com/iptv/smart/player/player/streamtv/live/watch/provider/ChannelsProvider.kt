@@ -28,9 +28,10 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import androidx.core.content.edit
+import com.iptv.smart.player.player.streamtv.live.watch.R
+import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
 
 
-// Data class để lưu thông tin recent channel
 @Serializable
 data class RecentChannel(
     val streamUrl: String,
@@ -109,7 +110,7 @@ class ChannelsProvider : ViewModel() {
 
             val updatedChannels = applyFavoriteStatus(allChannels)
             withContext(Dispatchers.Main) {
-                cachedChannels = updatedChannels // Cập nhật cache
+                cachedChannels = updatedChannels
                 _channels.value = updatedChannels
             }
         } catch (e: Exception) {
@@ -121,15 +122,18 @@ class ChannelsProvider : ViewModel() {
         }
     }
 
+
     fun addChannelsFromM3U(channels: List<Channel>) {
         viewModelScope.launch(Dispatchers.Main) {
             val currentList = _channels.value?.toMutableList() ?: mutableListOf()
             val newChannels = channels.map { channel ->
+                Log.d("sdfsdf", "addChannelsFromM3U: "+channel.groupTitle)
                 channel.copy(
                     isFavorite = isFavorite(channel.streamUrl),
-                    groupTitle = channel.groupTitle // Giữ groupTitle từ parseM3U
+                    groupTitle = channel.groupTitle
                 )
             }
+
             currentList.addAll(newChannels.filter { newChannel ->
                 currentList.none { it.streamUrl == newChannel.streamUrl }
             })
@@ -219,59 +223,51 @@ class ChannelsProvider : ViewModel() {
 
     private fun isValidUrl(url: String): Boolean = url.startsWith("https") || url.startsWith("http")
 
-    fun filterChannels(type: String) {
-            _channels.value?.let { channelList ->
-                val filtered = when (type) {
-                    "favorite" -> channelList.filter { it.isFavorite }
-                    "recent" -> {
-                        val recentChannels = getRecentChannels()
-                        val sortedRecent = recentChannels
-                            .mapNotNull { recent -> channelList.find { it.streamUrl == recent.streamUrl } }
-                        sortedRecent
-                    }
-
-                    else -> channelList
+    fun filterChannels(context: Context,type: String) {
+        _channels.value?.let { channelList ->
+            val filtered = when (type) {
+                "favorite" -> {
+                    Log.d("rthtrhrhrhth", "filterChannels: "+ Common.getChannels(context))
+                    Common.getChannels(context)
                 }
-                _filteredChannels.value = filtered
-            } ?: run {
-                _filteredChannels.value = emptyList()
+                "recent" -> {
+                    val recentChannels = getRecentChannels()
+                    val sortedRecent = recentChannels
+                        .mapNotNull { recent -> channelList.find { it.streamUrl == recent.streamUrl } }
+                    sortedRecent
+                }
+
+                else -> channelList
             }
+            _filteredChannels.value = filtered
+        } ?: run {
+            _filteredChannels.value = emptyList()
+        }
     }
 
     private fun getRecentChannels(): List<RecentChannel> {
         val recentJson = sharedPreferences.getString("recent_channels_json", "[]") ?: "[]"
         return try {
             Json.decodeFromString<List<RecentChannel>>(recentJson)
-                .sortedByDescending { it.timestamp } // Sắp xếp theo thời gian giảm dần
+                .sortedByDescending { it.timestamp }
         } catch (e: Exception) {
             Log.e("ChannelsProvider", "Error parsing recent channels: ${e.message}")
             emptyList()
         }
     }
 
-    fun toggleFavorite(channel: Channel, isCheckGroupFavorite: Boolean) {
-        Log.d("ChannelsProvider", "Toggling favorite for channel: ${channel.name}")
-
-        _channels.value?.let { currentList ->
-            val updatedList = currentList.map {
-                if (it.streamUrl == channel.streamUrl) {
-                    val newFavStatus = !it.isFavorite
-                    sharedPreferences.edit().putBoolean(it.streamUrl, newFavStatus).apply()
-                    Log.d("ChannelsProvider", "Updated favorite status for channel: ${it.streamUrl}, isFavorite: $newFavStatus")
-                    it.copy(isFavorite = newFavStatus)
-                } else {
-                    it.copy(isFavorite = sharedPreferences.getBoolean(it.streamUrl, it.isFavorite))
-                }
-            }.toMutableList()
-
-            _channels.value = updatedList
-
-            if (isCheckGroupFavorite && tabLayoutSelectedPosition() == 1) {
-                val favoriteChannels = updatedList.filter { it.isFavorite }
-                _filteredChannels.value = favoriteChannels
-                Log.d("ChannelsProvider", "Updated favorite list: ${favoriteChannels.map { it.name }}")
-            }
+    fun toggleFavorite(context: Context,channel: Channel) {
+        val listFav :ArrayList<Channel> = ArrayList()
+        listFav.addAll(Common.getChannels(context))
+        val newChannel = channel
+        newChannel.isFavorite = false
+        newChannel.groupTitle = ""
+        if (listFav.contains(newChannel)){
+            listFav.remove(newChannel)
+        }else{
+            listFav.add(newChannel)
         }
+        Common.saveChannels(context,listFav)
     }
 
 
@@ -339,7 +335,7 @@ class ChannelsProvider : ViewModel() {
     }
 
     // Hàm để thêm kênh vào recent với timestamp
-    fun addToRecent(channel: Channel) {
+    fun addToRecent(context: Context,channel: Channel) {
         viewModelScope.launch(Dispatchers.IO) {
             val recentChannels = getRecentChannels().toMutableList()
             // Xóa nếu kênh đã tồn tại để cập nhật timestamp mới
@@ -358,7 +354,7 @@ class ChannelsProvider : ViewModel() {
             // Cập nhật filteredChannels nếu đang ở tab "recent"
             withContext(Dispatchers.Main) {
                 if (tabLayoutSelectedPosition() == 2) {
-                    filterChannels("recent")
+                    filterChannels(context,"recent")
                 }
             }
         }

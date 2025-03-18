@@ -13,7 +13,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,7 +20,6 @@ import com.admob.max.dktlibrary.AppOpenManager
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.adapter.VideoAdapter
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
-import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.INTER_ADD
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.INTER_SAVE_ADD
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.visible
@@ -29,16 +27,13 @@ import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.ImportPlaylistDeviceBinding
 import com.iptv.smart.player.player.streamtv.live.watch.db.AppDatabase
 import com.iptv.smart.player.player.streamtv.live.watch.db.PlaylistEntity
-import com.iptv.smart.player.player.streamtv.live.watch.dialog.ImportPlaylistDialog
-import com.iptv.smart.player.player.streamtv.live.watch.model.VideoItem
-import com.iptv.smart.player.player.streamtv.live.watch.provider.ChannelsProvider
+import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
 import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
 import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 
 class ActivityAddPlaylistFromDevice : BaseActivity() {
     private lateinit var btnBack: ImageView
@@ -47,7 +42,7 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
     private lateinit var rvVideo: RecyclerView
     private lateinit var btnAddPlaylist: TextView
     private lateinit var videoAdapter: VideoAdapter
-    private val videoList = mutableListOf<VideoItem>()
+    private val videoList = mutableListOf<Channel>()
     private lateinit var tvTitle: TextView
     private val playlistDao by lazy { AppDatabase.getDatabase(this).playlistDao() }
 
@@ -112,7 +107,7 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
                     val fileSize = getFileSizeFromFileUri(uri) ?: return@let
                     val maxSize = 30 * 1024 * 1024 // 30MB
                     if (fileName != null && fileSize <= maxSize) {
-                        videoList.add(VideoItem(uri, fileName))
+                        videoList.add(Channel(fileName,"",uri.toString(), ))
                         videoAdapter.notifyDataSetChanged()
                     } else {
                         Toast.makeText(
@@ -152,7 +147,7 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
         AppOpenManager.getInstance().disableAppResumeWithActivity(ActivityAddPlaylistFromDevice::class.java)
     }
 
-    private fun removeVideo(videoItem: VideoItem) {
+    private fun removeVideo(videoItem: Channel) {
         videoList.remove(videoItem)
         videoAdapter.notifyDataSetChanged()
     }
@@ -190,7 +185,8 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
                     if (existingPlaylist != null) {
                         withContext(Dispatchers.Main) {
                             binding.progressBar.gone()
-                            etPlaylistName.error = "Playlist name already exists"
+                            etPlaylistName.error =
+                                getString(R.string.playlist_name_already_exists_video)
                             binding.btnAddPlaylist.isEnabled = true
                             isSaving = false
                         }
@@ -200,7 +196,7 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
                         name = name,
                         channelCount = videoList.size,
                         sourceType = "DEVICE",
-                        sourcePath = videoList.joinToString(";") { it.uri.toString() }
+                        sourcePath = videoList.joinToString(";") { it.streamUrl.toString() }
                     )
                     playlistDao.insertPlaylist(playlist)
 
@@ -208,9 +204,9 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
                         startAds()
                     }
                 } catch (e: Exception) {
-                    android.util.Log.e("SavePlaylist", "Error saving playlist: ${e.message}")
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(this@ActivityAddPlaylistFromDevice, "Error saving playlist", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ActivityAddPlaylistFromDevice,
+                            getString(R.string.error_saving_playlist_video), Toast.LENGTH_SHORT).show()
                     }
                 } finally {
                     isSaving = false

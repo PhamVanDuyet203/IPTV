@@ -94,7 +94,8 @@ class LanguageSelectionActivity : BaseActivity() {
             if (fromSplash) {
                 val selectedLanguage = adapter.getSelectedLanguage()
                 if (selectedLanguage == null){
-                    Toast.makeText(this@LanguageSelectionActivity, "Please select a language first!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@LanguageSelectionActivity,
+                        getString(R.string.please_select_a_language_first), Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
                 if (RemoteConfig.INTER_LANGUAGE_050325 == "1") {
@@ -139,7 +140,7 @@ class LanguageSelectionActivity : BaseActivity() {
         }
 
         if (RemoteConfig.NATIVE_FULL_SCREEN_INTRO_050325.contains("1") || RemoteConfig.NATIVE_FULL_SCREEN_INTRO_050325.contains("2")
-            || RemoteConfig.NATIVE_FULL_SCREEN_INTRO_050325.contains("3") || RemoteConfig.NATIVE_FULL_SCREEN_INTRO_050325.contains("4")) {
+            || RemoteConfig.NATIVE_FULL_SCREEN_INTRO_050325.contains("3") ) {
             AdsManager.loadNativeFullScreen(this, AdsManager.NATIVE_FULL_SCREEN_INTRO)
         }
 

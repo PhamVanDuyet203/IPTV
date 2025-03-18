@@ -23,9 +23,6 @@ class ChannelViewModel(application: Application) : AndroidViewModel(application)
 
     private var currentTabPosition: Int = 0
 
-    init {
-        // Không cần gọi loadAllChannels vì _channels đã là LiveData từ DAO
-    }
 
     fun setTabPosition(position: Int) {
         currentTabPosition = position

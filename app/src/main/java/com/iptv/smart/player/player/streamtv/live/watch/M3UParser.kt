@@ -39,8 +39,10 @@ private fun parseM3UContent(reader: BufferedReader, channels: MutableList<Channe
                 currentName = nameMatch ?: line.substringAfter(",").trim()
                 currentGroup = groupMatch ?: "Unknown"
                 currentLogoUrl = logoMatch ?: "assets/images/ic_tv.png"
+                Log.d("sdfsdfsdfdsfd", "parseM3UContent: "+groupMatch)
             } else if (line.isNotBlank() && !line.startsWith("#")) {
                 currentUrl = line.trim()
+                Log.d("sdfsdfsdfdsfd", "parseM3UContent: "+currentGroup)
                 channels.add(
                     Channel(
                         name = currentName,

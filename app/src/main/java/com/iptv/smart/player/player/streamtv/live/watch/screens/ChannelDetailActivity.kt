@@ -1,14 +1,16 @@
 package com.iptv.smart.player.player.streamtv.live.watch
 
+import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -57,10 +59,11 @@ class ChannelDetailActivity : BaseActivity() {
     private var currentQuery: String = ""
     private lateinit var imgNotFound: ImageView
     private lateinit var txtNotFound: TextView
+    private var initialChannels: List<Channel> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_playlist_detail_item)
+        setContentView(R.layout.activity_playlist_detail)
 
         recyclerView = findViewById(R.id.recyclerView)
         tvTitle = findViewById(R.id.tvTitle)
@@ -84,6 +87,7 @@ class ChannelDetailActivity : BaseActivity() {
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = ChannelsAdapter(
+            this,
             channels = mutableListOf(),
             onChannelClicked = { channel ->
                 startAds(channel)
@@ -101,12 +105,9 @@ class ChannelDetailActivity : BaseActivity() {
         recyclerView.adapter = adapter
 
 
-
-
         groupName = intent.getStringExtra("GROUP_NAME") ?: "Unknown"
         val sourcePath = intent.getStringExtra("SOURCE_PATH") ?: ""
 
-        Log.d("ChannelDetailActivity", "Received groupName: $groupName, sourcePath: $sourcePath")
 
         tvTitle.text = groupName
         tvTitle.isSelected = true
@@ -125,8 +126,21 @@ class ChannelDetailActivity : BaseActivity() {
                     filterChannels(currentQuery)
                 }, 500)
             }
-            override fun afterTextChanged(s: Editable?) {}
+            override fun afterTextChanged(s: Editable?) {
+
+            }
         })
+
+
+        searchEditText.setOnEditorActionListener { v, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(v.windowToken, 0)
+                true
+            } else {
+                false
+            }
+        }
 
         sortIcon.setOnClickListener { showSortPopup(it) }
 
@@ -138,7 +152,13 @@ class ChannelDetailActivity : BaseActivity() {
 
     private fun nextActivity(channel: Channel) {
         PlayerActivity.start(this, channel)
-        channelsProvider.addToRecent(channel)
+        channelsProvider.addToRecent(this,channel)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        adapter.notifyDataSetChanged()
     }
 
     private fun startAds(channel: Channel) {
@@ -162,23 +182,23 @@ class ChannelDetailActivity : BaseActivity() {
 
     private fun loadChannels(sourcePath: String) {
         CoroutineScope(Dispatchers.Main).launch {
-            progressBar.visibility = View.VISIBLE
             try {
+                progressBar.visibility = View.VISIBLE
+                sortIcon.isEnabled = false
+                sortIcon.alpha = 0.5f
                 val channels = withContext(Dispatchers.IO) {
                     if (sourcePath.startsWith("http://") || sourcePath.startsWith("https://")) {
-                        Log.d("ChannelDetailActivity", "Loading from URL: $sourcePath")
                         parseM3U(sourcePath)
                     } else {
-                        Log.d("ChannelDetailActivity", "Loading from file: $sourcePath")
                         val uri = android.net.Uri.parse(sourcePath)
                         val hasPermission = contentResolver.persistedUriPermissions.any {
                             it.uri == uri && it.isReadPermission
                         }
                         if (!hasPermission) {
-                            throw Exception("Không có quyền truy cập tệp. Vui lòng chọn lại.")
+                            throw Exception(getString(R.string.no_file_access_permission_please_select_again))
                         }
                         val inputStream = contentResolver.openInputStream(uri)
-                        inputStream?.use { parseM3UFromFile(it) } ?: throw Exception("Không thể mở tệp")
+                        inputStream?.use { parseM3UFromFile(it) } ?: throw Exception(getString(R.string.cannot_open_the_file))
                     }
                 }
 
@@ -193,17 +213,19 @@ class ChannelDetailActivity : BaseActivity() {
                         )
                     }
 
-                Log.d("ChannelDetailActivity", "Loaded ${channels.size} channels, filtered to ${filteredChannels.size} for group $groupName")
-
+                initialChannels = filteredChannels
                 channelsProvider.addChannelsFromM3U(filteredChannels)
                 if (filteredChannels.isEmpty()) {
-                    Toast.makeText(this@ChannelDetailActivity, "Không có kênh nào trong nhóm $groupName", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ChannelDetailActivity,
+                        getString(R.string.there_are_no_channels_in_the_group, groupName), Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                Toast.makeText(this@ChannelDetailActivity, "Lỗi khi tải dữ liệu: ${e.message}", Toast.LENGTH_LONG).show()
-                Log.e("ChannelDetailActivity", "Error loading channels: ${e.message}", e)
+                Toast.makeText(this@ChannelDetailActivity,
+                    getString(R.string.error_loading_data, e.message), Toast.LENGTH_LONG).show()
             } finally {
-                progressBar.visibility = View.GONE // Ẩn ProgressBar trong mọi trường hợp (thành công hoặc lỗi)
+                progressBar.visibility = View.GONE
+                sortIcon.isEnabled = true
+                sortIcon.alpha = 1f
             }
         }
     }
@@ -222,8 +244,7 @@ class ChannelDetailActivity : BaseActivity() {
 
     private fun filterChannels(query: String) {
         CoroutineScope(Dispatchers.IO).launch{
-            val allChannels = channelsProvider.channels.value ?: emptyList()
-            val filteredList = allChannels.filter { it.groupTitle == groupName }
+            val filteredList = initialChannels
                 .let { list ->
                     if (query.isEmpty()) list
                     else list.filter { it.name.contains(query, ignoreCase = true) }
@@ -235,7 +256,6 @@ class ChannelDetailActivity : BaseActivity() {
                 else -> filteredList
             }
 
-            Log.d("ChannelDetailActivity", "Filtered ${sortedList.size} channels with query: $query")
 
             withContext(Dispatchers.Main){
                 adapter.updateChannels(sortedList)
@@ -299,31 +319,15 @@ class ChannelDetailActivity : BaseActivity() {
 
 
     private fun toggleFavorite(channel: Channel) {
-        val updatedChannel = channel.copy(isFavorite = !channel.isFavorite)
-        channelsProvider.toggleFavorite(updatedChannel,false )
+        channelsProvider.toggleFavorite(this,channel )
+        initialChannels = initialChannels.map {
+            if (it.streamUrl == channel.streamUrl) it.copy(isFavorite = channelsProvider.isFavorite(it.streamUrl)) else it
+        }
     }
 
     private fun observeChannels() {
         channelsProvider.channels.observe(this) { channels ->
-            val filteredList = channels.filter { it.groupTitle == groupName }
-            val sortedList = when (currentSortMode) {
-                "AZ" -> filteredList.sortedBy { it.name }
-                "ZA" -> filteredList.sortedByDescending { it.name }
-                else -> filteredList
-            }
-            Log.d("ChannelDetailActivity", "Displaying ${sortedList.size} channels for group $groupName")
-            adapter.updateChannels(sortedList)
-
-            if (sortedList.isEmpty()) {
-                imgNotFound.visibility = View.VISIBLE
-                txtNotFound.visibility = View.VISIBLE
-                recyclerView.visibility = View.GONE
-            } else {
-                imgNotFound.visibility = View.GONE
-                txtNotFound.visibility = View.GONE
-                recyclerView.visibility = View.VISIBLE
-                recyclerView.scrollToPosition(0)
-            }
+            filterChannels(currentQuery)
         }
     }
 }

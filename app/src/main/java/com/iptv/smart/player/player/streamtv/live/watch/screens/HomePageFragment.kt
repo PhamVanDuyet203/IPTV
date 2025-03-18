@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.admob.max.dktlibrary.AppOpenManager
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.adapter.PlaylistAdapter
 import com.iptv.smart.player.player.streamtv.live.watch.dialog.ImportPlaylistDialog
@@ -48,7 +49,6 @@ class HomePageFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        Log.d("HomePageFragment", "onCreateView called")
         val view = inflater.inflate(R.layout.fragment_homepage, container, false)
         tabContainer = view.findViewById(R.id.tabContainer)
         recyclerView = view.findViewById(R.id.rvPlaylist)
@@ -71,7 +71,6 @@ class HomePageFragment : Fragment() {
         setupAddButton(view)
 
         playlistViewModel.filteredPlaylists.observe(viewLifecycleOwner) { playlists ->
-            Log.d("HomePageFragment", "Playlists observed: ${playlists.size}")
             if (playlists.isEmpty()) {
                 emptyStateLayout.visibility = View.VISIBLE
                 recyclerView.visibility = View.GONE
@@ -84,14 +83,17 @@ class HomePageFragment : Fragment() {
 
         setupTabs()
 
+
+
         return view
     }
 
     override fun onResume() {
         super.onResume()
-        Log.d("HomePageFragment", "onResume called")
-        playlistViewModel.filterPlaylists(sourceTypes[selectedTabIndex]) // Làm mới dựa trên tab hiện tại
+        playlistViewModel.filterPlaylists(sourceTypes[selectedTabIndex])
     }
+
+
 
     private fun setupAddButton(view: View) {
         val textView2 = view.findViewById<TextView>(R.id.textView2)
@@ -142,7 +144,6 @@ class HomePageFragment : Fragment() {
     }
 
     private fun setupTabs() {
-        Log.d("HomePageFragment", "Setting up tabs")
 
         tabTitles.forEachIndexed { index, title ->
             val tabView = LayoutInflater.from(requireContext())
@@ -192,6 +193,8 @@ class HomePageFragment : Fragment() {
         selectedTabIndex = index
         playlistViewModel.filterPlaylists(sourceTypes[index])
     }
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()

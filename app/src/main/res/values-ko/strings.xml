@@ -2,15 +2,12 @@
 <resources>
     <string name="app_name">IPTV Smart Player: Stream TV</string>
     <string name="title_language">Language</string>
-
     <string name="title_onboard_1">좋아하는 프로그램을 스트리밍하세요</string>
     <string name="content_onboard_1">수천 편의 영화, TV 프로그램 등을 통해 무제한 엔터테인먼트를 즐겨보세요.</string>
     <string name="title_onboard_2">끝없는 엔터테인먼트를 만나보세요</string>
     <string name="content_onboard_2">언제 어디서나 좋아하는 프로그램과 영화를 감상하세요.</string>
-
     <string name="title_onboard_3">사용하기 쉬운</string>
     <string name="content_onboard_3">손쉬운 가이드 검색, 전 세계 채널과의 안전한 연결, Live TV, Smart TV Player</string>
-
     <string name="title_onboard_4">새로운 프로그램을 찾아보세요</string>
     <string name="content_onboard_4">당신에게 꼭 맞는 다양한 콘텐츠를 살펴보세요.</string>
     <string name="iptv">IPTV</string>
@@ -79,8 +76,8 @@
     <string name="recent_channel">최근의</string>
     <string name="do_you_want_to_delete_channel">%1$s 채널을 삭제하시겠습니까?</string>
     <string name="do_you_want_to_delete_playlist">삭제하시겠습니까? %s</string>
-    <string name="search_channel">채널 검색...</string>
-    <string name="search_channel_detail">채널 검색...</string>
+    <string name="search_channel">채널 검색…</string>
+    <string name="search_channel_detail">채널 검색…</string>
     <string name="english">English</string>
     <string name="korean">Korean</string>
     <string name="spanish">Spanish</string>
@@ -103,10 +100,44 @@
     <string name="favorite_txt">가장 좋아하는</string>
     <string name="lock_txt">잠그다</string>
     <string name="all_tab">모두</string>
-    <string name="please_enter_a_name_and_select_at_least_one_video">이름을 입력하고 동영상을 하나 이상 선택하세요.</string>
     <string name="cannot_retain_file_access_permission_please_try_again">파일 액세스 권한을 유지할 수 없습니다. 다시 시도해 주세요.</string>
-    <string name="please_enter_a_name_and_select_a_file">이름을 입력하고 파일을 선택하세요</string>
     <string name="error_saving_playlist">재생목록 저장 오류: %1$s</string>
     <string name="add_button">추가 버튼</string>
     <string name="screen_lock_long_press_to_unlock">화면 잠금. 잠금을 해제하려면 길게 누르세요.</string>
+
+    <string name="facebook_id">" "</string>
+
+    <string name="please_select_at_least_one_video">동영상을 하나 이상 선택하세요.</string>
+    <string name="please_enter_a_name">이름을 입력하세요</string>
+    <string name="please_select_a_file">파일을 선택하세요</string>
+    <string name="this_action_can_contain_ads">이 작업에는 광고가 포함될 수 있습니다…</string>
+    <string name="not_found">%1$s에 대한 결과 없음</string>
+    <string name="no_wi_fi_detected">Wi-Fi가 감지되지 않음</string>
+    <string name="opps_just_lost_internet_connection_please_reconnect">이런! 인터넷 연결이 끊겼습니다. 다시 연결해 주세요.</string>
+    <string name="connect">연결하다</string>
+    <string name="error_file_size">30MB보다 큰 파일을 읽을 수 없습니다.</string>
+    <string name="please_enter_a_name_imprt">이름을 입력하세요</string>
+    <string name="please_select_a_video">동영상을 선택하세요.</string>
+    <string name="please_enter_a_name_import">이름을 입력하세요</string>
+    <string name="please_select_a_file_import">파일을 선택하세요</string>
+    <string name="please_enter_a_name_url">이름을 입력하세요</string>
+    <string name="please_fill_in_a_link">링크를 작성해주세요</string>
+    <string name="invalid_url_or_no_channels_found">URL이 잘못되었거나 채널을 찾을 수 없습니다.</string>
+    <string name="playlist_name_already_exists">재생목록 이름이 이미 존재합니다.</string>
+    <string name="playlist_name_already_exists_file">재생목록 이름이 이미 존재합니다.</string>
+    <string name="playlist_name_already_exists_video">재생목록 이름이 이미 존재합니다.</string>
+    <string name="error_saving_playlist_video">재생목록을 저장하는 중에 오류가 발생했습니다.</string>
+    <string name="cannot_open_the_file">파일을 열 수 없습니다.</string>
+    <string name="no_file_access_permission_please_select_again">파일 접근 권한이 없습니다. 다시 선택해 주세요.</string>
+    <string name="there_are_no_channels_in_the_group">%1$s 그룹에 채널이 없습니다</string>
+    <string name="error_loading_data">데이터 로드 오류: %1$s</string>
+    <string name="failed_to_open_input_stream_for_uri">URI: %1$s에 대한 입력 스트림을 열지 못했습니다.</string>
+    <string name="please_select_a_language_first">먼저 언어를 선택해주세요!</string>
+    <string name="device_not_supported">지원되지 않는 장치</string>
+    <string name="please_enable_picture_in_picture_for_this_app">이 앱에 대해 Picture-in-Picture를 활성화하십시오.</string>
+    <string name="go_to_picture_in_picture_settings_and_enable_it_for">Picture-in-Picture 설정으로 이동하여 %1$s에 대해 활성화하세요.</string>
+    <string name="go_to_apps_picture_in_picture_and_enable_it"><![CDATA[Go to Apps > %1$s > Picture-in-Picture and enable it]]></string>
+    <string name="pip_not_supported_on_this_device">이 장치에서는 PiP가 지원되지 않습니다</string>
+    <string name="player_not_ready_for_pip">플레이어가 PiP를 사용할 준비가 되지 않았습니다.</string>
+    <string name="failed_to_entxer_pip_mode">PiP 모드를 실행하지 못했습니다.</string>
 </resources>

@@ -62,13 +62,14 @@ class HomeFragment : Fragment() {
         toolbarTitle = view.findViewById(R.id.toolbar_title)
 
         adapter = ChannelsAdapter(
+            requireActivity(),
             channels = mutableListOf(), // Sửa từ emptyList() thành mutableListOf()
             onChannelClicked = { channel ->
                 Log.d("==Stream==", "onCreateView: ${channel.streamUrl}")
                 PlayerActivity.start(requireContext(), channel)
             },
             onFavoriteClicked = { channel ->
-                channelsProvider.toggleFavorite(channel, true)
+                channelsProvider.toggleFavorite(requireContext(),channel )
             },
             onRenameChannel = { channel, newName ->
                 channelsProvider.updateChannel(channel.copy(name = newName))
@@ -134,7 +135,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun filterChannels(query: String) {
-        channelsProvider.filterChannels(query)
+        channelsProvider.filterChannels(requireContext(),query)
     }
 
     private fun toggleSearchBar() {

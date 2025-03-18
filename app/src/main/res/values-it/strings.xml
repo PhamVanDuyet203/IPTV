@@ -2,15 +2,12 @@
 <resources>
     <string name="app_name">IPTV Smart Player: Stream TV</string>
     <string name="title_language">Language</string>
-
     <string name="title_onboard_1">Trasmetti in streaming i tuoi programmi preferiti</string>
     <string name="content_onboard_1">Goditi l\'intrattenimento illimitato con migliaia di film, programmi TV e altro ancora.</string>
     <string name="title_onboard_2">Scopri l\'intrattenimento senza fine</string>
     <string name="content_onboard_2">Guarda i tuoi programmi e film preferiti sempre e ovunque.</string>
-
     <string name="title_onboard_3">Facile da usare</string>
     <string name="content_onboard_3">Ricerca guida semplice, connessione sicura ai canali di tutto il mondo, TV in diretta, lettore Smart TV</string>
-
     <string name="title_onboard_4">Scopri nuovi spettacoli</string>
     <string name="content_onboard_4">Esplora un\'ampia varietà di contenuti su misura per te.</string>
     <string name="iptv">IPTV</string>
@@ -79,8 +76,8 @@
     <string name="recent_channel">Recente</string>
     <string name="do_you_want_to_delete_channel">Vuoi eliminare il canale %1$s?</string>
     <string name="do_you_want_to_delete_playlist">Vuoi eliminare %s</string>
-    <string name="search_channel">Cerca canale...</string>
-    <string name="search_channel_detail">Cerca canale...</string>
+    <string name="search_channel">Cerca canale…</string>
+    <string name="search_channel_detail">Cerca canale…</string>
     <string name="english">English</string>
     <string name="korean">Korean</string>
     <string name="spanish">Spanish</string>
@@ -103,10 +100,43 @@
     <string name="favorite_txt">Preferito</string>
     <string name="lock_txt">Serratura</string>
     <string name="all_tab">Tutto</string>
-    <string name="please_enter_a_name_and_select_at_least_one_video">Inserisci un nome e seleziona almeno un video</string>
     <string name="cannot_retain_file_access_permission_please_try_again">Impossibile mantenere l\'autorizzazione di accesso al file. Per favore riprova.</string>
-    <string name="please_enter_a_name_and_select_a_file">Inserisci un nome e seleziona un file</string>
     <string name="error_saving_playlist">Errore durante il salvataggio della playlist: %1$s</string>
     <string name="add_button">pulsante Aggiungi</string>
     <string name="screen_lock_long_press_to_unlock">Blocco schermo. Premere a lungo per sbloccare</string>
+    <string name="facebook_id">" "</string>
+
+    <string name="please_select_at_least_one_video">Seleziona almeno un video</string>
+    <string name="please_enter_a_name">Inserisci un nome</string>
+    <string name="please_select_a_file">Seleziona un file</string>
+    <string name="this_action_can_contain_ads">Questa azione può contenere annunci…</string>
+    <string name="not_found">Nessun risultato per %1$s</string>
+    <string name="no_wi_fi_detected">Nessun Wi-Fi rilevato</string>
+    <string name="opps_just_lost_internet_connection_please_reconnect">Ops! Ho appena perso la connessione a Internet, riconnettiti.</string>
+    <string name="connect">Collegare</string>
+    <string name="error_file_size">Impossibile leggere file di dimensioni superiori a 30 MB</string>
+    <string name="please_enter_a_name_imprt">Inserisci un nome</string>
+    <string name="please_select_a_video">Seleziona un video</string>
+    <string name="please_enter_a_name_import">Inserisci un nome</string>
+    <string name="please_select_a_file_import">Seleziona un file</string>
+    <string name="please_enter_a_name_url">Inserisci un nome</string>
+    <string name="please_fill_in_a_link">Si prega di compilare un collegamento</string>
+    <string name="invalid_url_or_no_channels_found">URL non valido o nessun canale trovato</string>
+    <string name="playlist_name_already_exists">Il nome della playlist esiste già</string>
+    <string name="playlist_name_already_exists_file">Il nome della playlist esiste già</string>
+    <string name="playlist_name_already_exists_video">Il nome della playlist esiste già</string>
+    <string name="error_saving_playlist_video">Errore durante il salvataggio della playlist</string>
+    <string name="cannot_open_the_file">Impossibile aprire il file.</string>
+    <string name="no_file_access_permission_please_select_again">Nessuna autorizzazione di accesso al file. Seleziona di nuovo.</string>
+    <string name="there_are_no_channels_in_the_group">Non ci sono canali nel gruppo %1$s</string>
+    <string name="error_loading_data">Errore durante il caricamento dei dati: %1$s</string>
+    <string name="failed_to_open_input_stream_for_uri">Impossibile aprire il flusso di input per l\'URI: %1$s</string>
+    <string name="please_select_a_language_first">Seleziona prima una lingua!</string>
+    <string name="device_not_supported">Dispositivo non supportato</string>
+    <string name="please_enable_picture_in_picture_for_this_app">Abilita Picture-in-Picture per questa app</string>
+    <string name="go_to_picture_in_picture_settings_and_enable_it_for">Vai alle impostazioni Picture-in-Picture e abilitalo per %1$s</string>
+    <string name="go_to_apps_picture_in_picture_and_enable_it"><![CDATA[Go to Apps > %1$s > Picture-in-Picture and enable it]]></string>
+    <string name="pip_not_supported_on_this_device">PiP non supportato su questo dispositivo</string>
+    <string name="player_not_ready_for_pip">Il lettore non è pronto per PiP</string>
+    <string name="failed_to_entxer_pip_mode">Impossibile accedere alla modalità PiP</string>
 </resources>

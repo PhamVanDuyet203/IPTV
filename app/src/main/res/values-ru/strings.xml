@@ -6,10 +6,8 @@
     <string name="content_onboard_1">Наслаждайтесь неограниченными развлечениями с тысячами фильмов, телешоу и многим другим.</string>
     <string name="title_onboard_2">Откройте для себя бесконечные развлечения</string>
     <string name="content_onboard_2">Смотрите любимые сериалы и фильмы в любое время и в любом месте.</string>
-
     <string name="title_onboard_3">Простота в использовании</string>
     <string name="content_onboard_3">Удобный поиск гидов, безопасное подключение к каналам по всему миру, Live TV, Smart TV Player</string>
-
     <string name="title_onboard_4">Откройте для себя новые шоу</string>
     <string name="content_onboard_4">Исследуйте широкий спектр контента, созданного специально для вас.</string>
     <string name="iptv">IPTV</string>
@@ -78,8 +76,8 @@
     <string name="recent_channel">Недавний</string>
     <string name="do_you_want_to_delete_channel">Вы хотите удалить канал %1$s?</string>
     <string name="do_you_want_to_delete_playlist">Вы хотите удалить %s</string>
-    <string name="search_channel">Поиск канала...</string>
-    <string name="search_channel_detail">Поиск канала...</string>
+    <string name="search_channel">Поиск канала…</string>
+    <string name="search_channel_detail">Поиск канала…</string>
     <string name="english">English</string>
     <string name="korean">Korean</string>
     <string name="spanish">Spanish</string>
@@ -102,10 +100,43 @@
     <string name="favorite_txt">Любимый</string>
     <string name="lock_txt">Замок</string>
     <string name="all_tab">все</string>
-    <string name="please_enter_a_name_and_select_at_least_one_video">Пожалуйста, введите имя и выберите хотя бы одно видео.</string>
     <string name="cannot_retain_file_access_permission_please_try_again">Невозможно сохранить разрешение на доступ к файлу. Пожалуйста, попробуйте еще раз.</string>
-    <string name="please_enter_a_name_and_select_a_file">Пожалуйста, введите имя и выберите файл</string>
     <string name="error_saving_playlist">Ошибка сохранения плейлиста: %1$s.</string>
     <string name="add_button">кнопка Добавить</string>
     <string name="screen_lock_long_press_to_unlock">Блокировка экрана. Длительное нажатие, чтобы разблокировать</string>
+    <string name="facebook_id">" "</string>
+
+    <string name="please_select_at_least_one_video">Пожалуйста, выберите хотя бы одно видео</string>
+    <string name="please_enter_a_name">Пожалуйста, введите имя</string>
+    <string name="please_select_a_file">Пожалуйста, выберите файл</string>
+    <string name="this_action_can_contain_ads">Это действие может содержать рекламу…</string>
+    <string name="not_found">Нет результата для %1$s</string>
+    <string name="no_wi_fi_detected">Wi-Fi не обнаружен</string>
+    <string name="opps_just_lost_internet_connection_please_reconnect">Упс! Просто потеряно подключение к Интернету, пожалуйста, подключитесь снова.</string>
+    <string name="connect">Соединять</string>
+    <string name="error_file_size">Невозможно прочитать файлы размером более 30 МБ.</string>
+    <string name="please_enter_a_name_imprt">Пожалуйста, введите имя</string>
+    <string name="please_select_a_video">Пожалуйста, выберите видео</string>
+    <string name="please_enter_a_name_import">Пожалуйста, введите имя</string>
+    <string name="please_select_a_file_import">Пожалуйста, выберите файл</string>
+    <string name="please_enter_a_name_url">Пожалуйста, введите имя</string>
+    <string name="please_fill_in_a_link">Пожалуйста, заполните ссылку</string>
+    <string name="invalid_url_or_no_channels_found">Неверный URL-адрес или каналы не найдены.</string>
+    <string name="playlist_name_already_exists">Название плейлиста уже существует</string>
+    <string name="playlist_name_already_exists_file">Название плейлиста уже существует</string>
+    <string name="playlist_name_already_exists_video">Название плейлиста уже существует</string>
+    <string name="error_saving_playlist_video">Ошибка сохранения плейлиста.</string>
+    <string name="cannot_open_the_file">Невозможно открыть файл.</string>
+    <string name="no_file_access_permission_please_select_again">Нет разрешения на доступ к файлу. Пожалуйста, выберите еще раз.</string>
+    <string name="there_are_no_channels_in_the_group">В группе %1$s нет каналов.</string>
+    <string name="error_loading_data">Ошибка загрузки данных: %1$s.</string>
+    <string name="failed_to_open_input_stream_for_uri">Не удалось открыть поток ввода для URI: %1$s.</string>
+    <string name="please_select_a_language_first">Пожалуйста, сначала выберите язык!</string>
+    <string name="device_not_supported">Устройство не поддерживается</string>
+    <string name="please_enable_picture_in_picture_for_this_app">Пожалуйста, включите функцию «Картинка в картинке» для этого приложения.</string>
+    <string name="go_to_picture_in_picture_settings_and_enable_it_for">Перейдите в настройки «Картинка в картинке» и включите ее для %1$s.</string>
+    <string name="go_to_apps_picture_in_picture_and_enable_it"><![CDATA[Go to Apps > %1$s > Picture-in-Picture and enable it]]></string>
+    <string name="pip_not_supported_on_this_device">PiP не поддерживается на этом устройстве</string>
+    <string name="player_not_ready_for_pip">Игрок не готов к PiP</string>
+    <string name="failed_to_entxer_pip_mode">Не удалось включить режим PiP.</string>
 </resources>

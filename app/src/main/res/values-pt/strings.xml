@@ -2,7 +2,6 @@
 <resources>
     <string name="app_name">IPTV Smart Player: Stream TV</string>
     <string name="title_language">Language</string>
-
     <string name="title_onboard_1">Transmita seus programas favoritos</string>
     <string name="content_onboard_1">Desfrute de entretenimento ilimitado com milhares de filmes, programas de TV e muito mais.</string>
     <string name="title_onboard_2">Descubra entretenimento sem fim</string>
@@ -77,8 +76,8 @@
     <string name="recent_channel">Recente</string>
     <string name="do_you_want_to_delete_channel">Quer excluir o canal %1$s?</string>
     <string name="do_you_want_to_delete_playlist">Você quer excluir %s</string>
-    <string name="search_channel">Pesquisar canal...</string>
-    <string name="search_channel_detail">Pesquisar canal...</string>
+    <string name="search_channel">Pesquisar canal…</string>
+    <string name="search_channel_detail">Pesquisar canal…</string>
     <string name="english">English</string>
     <string name="korean">Korean</string>
     <string name="spanish">Spanish</string>
@@ -101,10 +100,44 @@
     <string name="favorite_txt">Favorito</string>
     <string name="lock_txt">Trancar</string>
     <string name="all_tab">todos</string>
-    <string name="please_enter_a_name_and_select_at_least_one_video">Insira um nome e selecione pelo menos um vídeo</string>
     <string name="cannot_retain_file_access_permission_please_try_again">Não é possível manter a permissão de acesso ao arquivo. Por favor, tente novamente.</string>
-    <string name="please_enter_a_name_and_select_a_file">Por favor insira um nome e selecione um arquivo</string>
     <string name="error_saving_playlist">Erro ao salvar a lista de reprodução: %1$s</string>
     <string name="add_button">botão Adicionar</string>
     <string name="screen_lock_long_press_to_unlock">Bloqueio de tela. Pressione e segure para desbloquear</string>
+
+    <string name="facebook_id">" "</string>
+
+    <string name="please_select_at_least_one_video">Selecione pelo menos um vídeo</string>
+    <string name="please_enter_a_name">Por favor insira um nome</string>
+    <string name="please_select_a_file">Selecione um arquivo</string>
+    <string name="this_action_can_contain_ads">Esta ação pode conter anúncios…</string>
+    <string name="not_found">Não há resultado para %1$s</string>
+    <string name="no_wi_fi_detected">Nenhum Wi-Fi detectado</string>
+    <string name="opps_just_lost_internet_connection_please_reconnect">Ops! Acabei de perder a conexão com a Internet. Reconecte-se.</string>
+    <string name="connect">Conectar</string>
+    <string name="error_file_size">Não é possível ler arquivos maiores que 30 MB</string>
+    <string name="please_enter_a_name_imprt">Por favor insira um nome</string>
+    <string name="please_select_a_video">Selecione um vídeo</string>
+    <string name="please_enter_a_name_import">Por favor insira um nome</string>
+    <string name="please_select_a_file_import">Selecione um arquivo</string>
+    <string name="please_enter_a_name_url">Por favor insira um nome</string>
+    <string name="please_fill_in_a_link">Por favor preencha um link</string>
+    <string name="invalid_url_or_no_channels_found">URL inválido ou nenhum canal encontrado</string>
+    <string name="playlist_name_already_exists">O nome da lista de reprodução já existe</string>
+    <string name="playlist_name_already_exists_file">O nome da lista de reprodução já existe</string>
+    <string name="playlist_name_already_exists_video">O nome da lista de reprodução já existe</string>
+    <string name="error_saving_playlist_video">Erro ao salvar a playlist</string>
+    <string name="cannot_open_the_file">Não é possível abrir o arquivo.</string>
+    <string name="no_file_access_permission_please_select_again">Sem permissão de acesso a arquivos. Selecione novamente.</string>
+    <string name="there_are_no_channels_in_the_group">Não há canais no grupo %1$s</string>
+    <string name="error_loading_data">Erro ao carregar dados: %1$s</string>
+    <string name="failed_to_open_input_stream_for_uri">Falha ao abrir stream de entrada para URI: %1$s</string>
+    <string name="please_select_a_language_first">Selecione um idioma primeiro!</string>
+    <string name="device_not_supported">Dispositivo não compatível</string>
+    <string name="please_enable_picture_in_picture_for_this_app">Ative o Picture-in-Picture para este aplicativo</string>
+    <string name="go_to_picture_in_picture_settings_and_enable_it_for">Vá para as configurações de Picture-in-Picture e ative-o para %1$s</string>
+    <string name="go_to_apps_picture_in_picture_and_enable_it"><![CDATA[Go to Apps > %1$s > Picture-in-Picture and enable it]]></string>
+    <string name="pip_not_supported_on_this_device">PiP não é compatível com este dispositivo</string>
+    <string name="player_not_ready_for_pip">Jogador não está pronto para PiP</string>
+    <string name="failed_to_entxer_pip_mode">Falha ao entrar no modo PiP</string>
 </resources>

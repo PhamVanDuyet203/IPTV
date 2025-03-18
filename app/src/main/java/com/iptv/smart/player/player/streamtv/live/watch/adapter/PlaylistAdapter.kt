@@ -142,6 +142,11 @@ class PlaylistAdapter(
             optButton.setOnClickListener {
                 showBottomSheet(itemView.context, playlist)
             }
+
+            itemView.setOnLongClickListener {
+                showBottomSheet(itemView.context, playlist)
+                true
+            }
         }
 
         private fun startAds(playlist: PlaylistEntity) {
