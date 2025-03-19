@@ -1,84 +1,98 @@
 package com.iptv.smart.player.player.streamtv.live.watch.adapter
 
+import android.app.Activity
 import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.AdLoader
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.nativead.NativeAd
-import com.google.android.gms.ads.nativead.NativeAdView
-import com.iptv.smart.player.player.streamtv.live.watch.R
+import com.admob.max.dktlibrary.AdmobUtils
 import com.iptv.smart.player.player.streamtv.live.watch.ChannelDetailActivity
+import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
+import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
+import com.iptv.smart.player.player.streamtv.live.watch.databinding.ItemadBinding
 import com.iptv.smart.player.player.streamtv.live.watch.db.PlaylistEntity
 import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
-import com.iptv.smart.player.player.streamtv.live.watch.utils.ViewTypeGroup
 
-class GroupAdapter(private var groups: List<PlaylistEntity>) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class GroupAdapter(
+    private val context: Activity, private var groups: List<PlaylistEntity> = emptyList()
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val items = mutableListOf<Any>()
-
-    init {
-        setupItems()
+    companion object {
+        const val TYPE_GROUP = 1
+        const val TYPE_AD = 2
     }
 
-    private fun setupItems() {
-        items.clear()
-        var adCount = 0
-        groups.forEachIndexed { index, group ->
-            if (RemoteConfig.NATIVE_PLAYLIST_CHANNEL_050325 != "0" &&
-                (index == 2 || (index > 2 && (index - 2) % 4 == 0))) {
-                items.add("Native Ad $adCount")
-                adCount++
-            }
-            items.add(group)
-        }
+    override fun getItemCount(): Int {
+        val itemCount = groups.size
+        val adCount = getAdPositions().count { it < itemCount }
+        return itemCount + adCount
     }
-
-    override fun getItemCount() = items.size
 
     override fun getItemViewType(position: Int): Int {
-        val type = if (items[position] is String && (items[position] as String).startsWith("Native Ad")) {
-            ViewTypeGroup.NATIVE_AD_G
+        val isNetworkConnected = AdmobUtils.isNetworkConnected(context)
+        return if (RemoteConfig.NATIVE_PLAYLIST_CHANNEL_050325 == "1" && isNetworkConnected) {
+            val adPositions = getAdPositions()
+            if (adPositions.contains(position)) TYPE_AD else TYPE_GROUP
         } else {
-            ViewTypeGroup.PLAYLIST_GROUP
+            TYPE_GROUP
         }
-        return type
+    }
+
+    private fun getAdPositions(): List<Int> {
+        val positions = mutableListOf<Int>()
+        if (RemoteConfig.NATIVE_PLAYLIST_CHANNEL_050325 == "1" && AdmobUtils.isNetworkConnected(
+                context
+            ) && groups.size >= 3
+        ) {
+            var position = 2
+            while (position < groups.size + positions.size) {
+                positions.add(position)
+                position += 5
+            }
+        }
+        return positions
+    }
+
+    private fun getAdsCountBeforePosition(position: Int): Int {
+        return getAdPositions().count { it < position }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
-            ViewTypeGroup.PLAYLIST_GROUP -> {
+            TYPE_GROUP -> {
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_playlist_detail, parent, false)
                 GroupViewHolder(view)
             }
-            ViewTypeGroup.NATIVE_AD_G -> {
-                val view = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.ad_template_item, parent, false)
-                NativeAdViewHolder(view)
+
+            TYPE_AD -> {
+                val binding =
+                    ItemadBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                NativeAdViewHolder(binding)
             }
-            else -> throw IllegalArgumentException("Invalid view type: $viewType")
+
+            else -> throw IllegalArgumentException("Invalid view type")
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (holder) {
-            is GroupViewHolder -> {
-                if (items[position] is PlaylistEntity) {
-                    val group = items[position] as PlaylistEntity
-                    holder.bind(group)
+        if (getItemViewType(position) == TYPE_AD) {
+            (holder as NativeAdViewHolder).bind()
+        } else {
+            val actualPosition =
+                if (RemoteConfig.NATIVE_PLAYLIST_CHANNEL_050325 == "1" && AdmobUtils.isNetworkConnected(
+                        holder.itemView.context
+                    )
+                ) {
+                    position - getAdsCountBeforePosition(position)
+                } else {
+                    position
                 }
-            }
-            is NativeAdViewHolder -> {
-                holder.bind()
+            if (actualPosition in groups.indices) {
+                (holder as GroupViewHolder).bind(groups[actualPosition])
             }
         }
     }
@@ -100,29 +114,33 @@ class GroupAdapter(private var groups: List<PlaylistEntity>) :
         }
     }
 
-    class NativeAdViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class NativeAdViewHolder(private val binding: ItemadBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bind() {
-            val adLoader = AdLoader.Builder(itemView.context, AdsManager.NATIVE_PLAYLIST_CHANNEL.toString())
-                .forNativeAd { nativeAd ->
-                    val adView = itemView as NativeAdView
-                    adView.headlineView = adView.findViewById(R.id.ad_headline)
-                    adView.setNativeAd(nativeAd)
-                }
-                .withAdListener(object : AdListener() {
-                    override fun onAdFailedToLoad(error: LoadAdError) {
-                    }
-                    override fun onAdLoaded() {
-                    }
-                })
-                .build()
 
-            adLoader.loadAd(AdRequest.Builder().build())
+            if ((RemoteConfig.NATIVE_PLAYLIST_CHANNEL_050325 == "1") && AdmobUtils.isNetworkConnected(
+                    itemView.context
+                )
+            ) {
+                when (RemoteConfig.NATIVE_PLAYLIST_CHANNEL_050325) {
+                    "1" -> AdsManager.loadAndShowAdsNativeCustom(
+                        context,
+                        binding.frbannerHome,
+                        AdsManager.NATIVE_PLAYLIST_CHANNEL,
+                    )
+
+                    else -> {
+                        binding.frbannerHome.gone()
+                    }
+                }
+            } else {
+                binding.frbannerHome.gone()
+            }
         }
     }
 
     fun updateData(newGroups: List<PlaylistEntity>) {
         groups = newGroups
-        setupItems()
         notifyDataSetChanged()
     }
 

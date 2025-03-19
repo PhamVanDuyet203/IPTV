@@ -47,7 +47,6 @@ class PlaylistAdapter(
     private val onRenamePlaylist: (PlaylistEntity, String) -> Unit = { _, _ -> }
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    // Danh sách tổng hợp playlist và quảng cáo
     private val items = mutableListOf<Any>()
 
     init {
@@ -314,7 +313,6 @@ class PlaylistAdapter(
         }
     }
 
-    // Cập nhật dữ liệu và danh sách item
     fun updateData(newPlaylists: List<PlaylistEntity>) {
         playlists = newPlaylists
         setupItems()

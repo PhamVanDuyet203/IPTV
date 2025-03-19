@@ -7,7 +7,7 @@ import androidx.annotation.RequiresApi
 
 data class Channel(
     var name: String,
-    val logoUrl: String,
+    var logoUrl: String,
     val streamUrl: String,
     val isVideo:String = "false",
     var isFavorite: Boolean = false,

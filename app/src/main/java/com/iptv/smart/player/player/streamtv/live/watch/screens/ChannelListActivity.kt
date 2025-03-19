@@ -2,6 +2,7 @@ package com.iptv.smart.player.player.streamtv.live.watch
 
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -39,15 +40,18 @@ import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.visible
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.ActivityPlaylistDetailBinding
 import com.iptv.smart.player.player.streamtv.live.watch.db.PlaylistEntity
+import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
 import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
 import com.iptv.smart.player.player.streamtv.live.watch.util.parseM3U
 import com.iptv.smart.player.player.streamtv.live.watch.util.parseM3UFromFile
 import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
+import com.iptv.smart.player.player.streamtv.live.watch.utils.NetworkChangeReceiver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ChannelListActivity : BaseActivity() {
+    lateinit var networkChangeReceiver: NetworkChangeReceiver
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: GroupAdapter
@@ -93,7 +97,7 @@ class ChannelListActivity : BaseActivity() {
         recyclerView.visibility = View.VISIBLE
 
         recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = GroupAdapter(emptyList())
+        adapter = GroupAdapter(this)
         recyclerView.adapter = adapter
 
 
@@ -125,6 +129,7 @@ class ChannelListActivity : BaseActivity() {
                     filterGroups(s.toString())
                 }, 500)
             }
+
             override fun afterTextChanged(s: Editable?) {}
         })
 
@@ -138,14 +143,41 @@ class ChannelListActivity : BaseActivity() {
             }
         }
 
-
+        startAds()
 
         sortIcon.setOnClickListener {
-                showSortPopup(it)
+            showSortPopup(it)
         }
 
         setupNetworkMonitoring()
         checkInternetConnection()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        networkChangeReceiver = NetworkChangeReceiver { isConnected ->
+            if (!isConnected) {
+                adapter.notifyDataSetChanged()
+            } else {
+                adapter.notifyDataSetChanged()
+            }
+        }
+
+        val intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(
+                networkChangeReceiver, intentFilter, Context.RECEIVER_NOT_EXPORTED
+            )
+        } else {
+            registerReceiver(networkChangeReceiver, intentFilter)
+
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        unregisterReceiver(networkChangeReceiver)
+
     }
 
     private fun setupNetworkMonitoring() {
@@ -167,10 +199,9 @@ class ChannelListActivity : BaseActivity() {
             }
         }
 
-        val networkRequest = NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
-            .build()
+        val networkRequest =
+            NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED).build()
 
         networkCallback?.let {
             connectivityManager?.registerNetworkCallback(networkRequest, it)
@@ -193,20 +224,40 @@ class ChannelListActivity : BaseActivity() {
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun isInternetAvailable(): Boolean {
-        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager =
+            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = connectivityManager.activeNetwork ?: return false
-        val networkCapabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
-        return networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-                networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+        val networkCapabilities =
+            connectivityManager.getNetworkCapabilities(network) ?: return false
+        return networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) && networkCapabilities.hasCapability(
+            NetworkCapabilities.NET_CAPABILITY_VALIDATED
+        )
+    }
+
+    private fun startAds(channel: Channel) {
+        when (RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325) {
+            "0" -> {
+
+            }
+
+            else -> {
+                Common.countInterSelect++
+                if (Common.countInterSelect % RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325.toInt() == 0) {
+                    AdsManager.loadAndShowInter(this, INTER_SELECT_CATEG_OR_CHANNEL) {
+
+                    }
+                } else {
+                }
+            }
+        }
+
     }
 
     private fun showNoInternetDialog() {
         if (noInternetDialog == null || !noInternetDialog!!.isShowing) {
             val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_no_internet, null)
-            noInternetDialog = AlertDialog.Builder(this)
-                .setView(dialogView)
-                .setCancelable(false)
-                .create()
+            noInternetDialog =
+                AlertDialog.Builder(this).setView(dialogView).setCancelable(false).create()
 
             val width = (320 * resources.displayMetrics.density).toInt()
             val height = (312 * resources.displayMetrics.density).toInt()
@@ -245,34 +296,34 @@ class ChannelListActivity : BaseActivity() {
                 sortIcon.isEnabled = false
                 sortIcon.alpha = 0.5f
                 progressBar.visibility = View.VISIBLE
-                val channels = if (sourcePath.startsWith("http://") || sourcePath.startsWith("https://")) {
-                    parseM3U(sourcePath)
-                } else {
-                    val uri = android.net.Uri.parse(sourcePath)
+                val channels =
+                    if (sourcePath.startsWith("http://") || sourcePath.startsWith("https://")) {
+                        parseM3U(sourcePath)
+                    } else {
+                        val uri = android.net.Uri.parse(sourcePath)
 
-                    val hasPermission = contentResolver.persistedUriPermissions.any {
-                        it.uri == uri && it.isReadPermission
-                    }
+                        val hasPermission = contentResolver.persistedUriPermissions.any {
+                            it.uri == uri && it.isReadPermission
+                        }
 
 
-                    if (!hasPermission) {
+                        if (!hasPermission) {
 //                        Toast.makeText(this@ChannelListActivity, "Quyền truy cập tệp đã bị thu hồi. Vui lòng chọn lại tệp.", Toast.LENGTH_LONG).show()
-                        finish()
-                        return@launch
-                    }
+                            finish()
+                            return@launch
+                        }
 
-                    val inputStream = try {
-                        contentResolver.openInputStream(uri)
-                            ?: throw Exception(
+                        val inputStream = try {
+                            contentResolver.openInputStream(uri) ?: throw Exception(
                                 getString(
-                                    R.string.failed_to_open_input_stream_for_uri,
-                                    uri
-                                ))
-                    } catch (e: SecurityException) {
-                        throw Exception("Permission denied for URI: $uri. Please select the file again.")
+                                    R.string.failed_to_open_input_stream_for_uri, uri
+                                )
+                            )
+                        } catch (e: SecurityException) {
+                            throw Exception("Permission denied for URI: $uri. Please select the file again.")
+                        }
+                        inputStream.use { parseM3UFromFile(it) }
                     }
-                    inputStream.use { parseM3UFromFile(it) }
-                }
                 val groupedChannels = channels.groupBy { it.groupTitle ?: "Unknown" }
                 val playlistEntities = groupedChannels.map { (groupTitle, channelList) ->
                     PlaylistEntity(
@@ -327,20 +378,11 @@ class ChannelListActivity : BaseActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        if (RemoteConfig.BANNER_DETAIL_PLAYLIST_CHANNEL_050325 == "1") {
-            AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_DETAIL_PLAYLIST_CHANNEL, frNative, vLine)
-        } else {
-            frNative.gone()
-            vLine.gone()
-        }
-    }
 
     private fun toggleSearchBar() {
-        // Implement toggle logic if needed
-        isSearchVisible = !isSearchVisible
-        searchEditText.visibility = if (isSearchVisible) View.VISIBLE else View.GONE
+//        // Implement toggle logic if needed
+//        isSearchVisible = !isSearchVisible
+//        searchEditText.visibility = if (isSearchVisible) View.VISIBLE else View.GONE
     }
 
     private fun startAds() {
@@ -407,9 +449,18 @@ class ChannelListActivity : BaseActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onResume() {
         super.onResume()
+
+        if (RemoteConfig.BANNER_DETAIL_PLAYLIST_CHANNEL_050325 == "1") {
+            AdsManager.showAdBannerCollapsible(
+                this, AdsManager.BANNER_DETAIL_PLAYLIST_CHANNEL, frNative, vLine
+            )
+        } else {
+            frNative.gone()
+            vLine.gone()
+        }
+
         checkInternetConnection()
         if (fullGroupList.isNotEmpty()) {
             adapter.updateData(fullGroupList)

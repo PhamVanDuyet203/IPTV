@@ -21,6 +21,7 @@ import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.ActivityLanguageSelectorBinding
 import com.iptv.smart.player.player.streamtv.live.watch.intro.IntroActivity
 import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
+import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
 import java.util.Locale
 import java.util.SimpleTimeZone
 
@@ -42,6 +43,9 @@ class LanguageSelectionActivity : BaseActivity() {
         fromSplash = intent.getBooleanExtra("FROMSPLASH", false)
 
         if (fromSplash) {
+            if (!Common.checkBoolAndroid13(this)) {
+               Common.checkAndroid13(this)
+            }
             binding.icBack.gone()
             if (RemoteConfig.NATIVE_LANGUAGE_050325=="1"){
                 AdsManager.showNativeBottom(this, binding.frNative, AdsManager.NATIVE_LANGUAGE)
@@ -58,7 +62,6 @@ class LanguageSelectionActivity : BaseActivity() {
 
         binding.icBack.setOnClickListener {
             val intent = Intent(this, HomePageActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
             startActivity(intent)
             finish()
         }
@@ -116,7 +119,6 @@ class LanguageSelectionActivity : BaseActivity() {
     override fun onBackPressed() {
         if (!fromSplash) {
             val intent = Intent(this, HomePageActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
             startActivity(intent)
             finish()
         } else {
@@ -174,7 +176,6 @@ class LanguageSelectionActivity : BaseActivity() {
             finish()
         } else {
             val intent = Intent(this, HomePageActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
             startActivity(intent)
             finish()
         }

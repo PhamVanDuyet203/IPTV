@@ -106,7 +106,7 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
                     val fileName = getFileName(uri)
                     val fileSize = getFileSizeFromFileUri(uri) ?: return@let
                     val maxSize = 30 * 1024 * 1024 // 30MB
-                    if (fileName != null) {
+                    if (fileName != null && fileSize <= maxSize) {
                         videoList.add(Channel(fileName,"",uri.toString(), ))
                         videoAdapter.notifyDataSetChanged()
                     } else {

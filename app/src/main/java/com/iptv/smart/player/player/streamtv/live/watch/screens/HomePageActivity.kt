@@ -59,12 +59,9 @@ class HomePageActivity : BaseActivity() {
     }
 
     private fun nextActivity() {
-
         val intent = Intent(this, LanguageSelectionActivity::class.java)
-        intent.putExtra("FROMHOME", true)
-        intent.flags =
-            Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
+        finish()
     }
 
     fun startPlayerActivity(channel: Channel) {
@@ -101,18 +98,19 @@ class HomePageActivity : BaseActivity() {
             .commit()
     }
 
-    override fun onStart() {
-        super.onStart()
-
-        if (RemoteConfig.ADS_HOME_050325 == "1") {
-            AdsManager.showAdsBanner(this, AdsManager.BANNER_HOME, binding.frHome, binding.line)
-        }
-        else if (RemoteConfig.ADS_HOME_050325 == "2") {
-            AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_COLLAP_HOME, binding.frHome,binding.line)
-        }
-        else {
-            binding.frHome.gone()
-            binding.line.gone()
+    override fun onResume() {
+        super.onResume()
+        when (RemoteConfig.ADS_HOME_050325) {
+            "1" -> {
+                AdsManager.showAdsBanner(this, AdsManager.BANNER_HOME, binding.frHome, binding.line)
+            }
+            "2" -> {
+                AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_COLLAP_HOME, binding.frHome,binding.line)
+            }
+            else -> {
+                binding.frHome.gone()
+                binding.line.gone()
+            }
         }
 
     }

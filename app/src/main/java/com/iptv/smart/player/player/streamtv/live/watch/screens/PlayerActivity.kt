@@ -117,12 +117,14 @@ class PlayerActivity : BaseActivity() {
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var isLocalFile = false
 
+    private var defaultLockLayoutParams: LinearLayout.LayoutParams? = null
 
     companion object {
         private const val INCREMENT_MILLIS = 3000L
         private const val MIN_PIP_API = Build.VERSION_CODES.O
 
         fun start(context: Context, channel: Channel) {
+            Log.d("sadasdasdsads", "start From: "+channel)
             val intent = Intent(context, PlayerActivity::class.java).apply {
                 putExtra("channel", channel)
             }
@@ -320,14 +322,17 @@ class PlayerActivity : BaseActivity() {
         frHome = findViewById(R.id.fr_home)
         vLine = findViewById(R.id.line)
 
+        val lockLayoutNormal = findViewById<LinearLayout>(R.id.btn_lock)
+        defaultLockLayoutParams = lockLayoutNormal.layoutParams as LinearLayout.LayoutParams
+
         btnMirroring.setOnClickListener {
             if (isLocalFile || isInternetAvailable()) wifiDisplay() else showNoInternetDialog()
-            AppOpenManager.getInstance().enableAppResumeWithActivity(PlayerActivity::class.java)
+            AppOpenManager.getInstance().disableAppResumeWithActivity(PlayerActivity::class.java)
         }
 
         binding.btnMirroring1.setOnClickListener {
             if (isLocalFile || isInternetAvailable()) wifiDisplay() else showNoInternetDialog()
-            AppOpenManager.getInstance().enableAppResumeWithActivity(PlayerActivity::class.java)
+            AppOpenManager.getInstance().disableAppResumeWithActivity(PlayerActivity::class.java)
         }
 
         btnBack.setOnClickListener {
@@ -383,7 +388,6 @@ class PlayerActivity : BaseActivity() {
         } catch (ex: Exception) {
             Toast.makeText(applicationContext, R.string.device_not_supported, Toast.LENGTH_LONG).show()
         }
-        AppOpenManager.getInstance().enableAppResumeWithActivity(PlayerActivity::class.java)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -394,6 +398,8 @@ class PlayerActivity : BaseActivity() {
             }
         }
     }
+
+
 
     private fun setupFavorite() {
         val favoriteLayout = controlButtonsTop.getChildAt(2) as? LinearLayout
@@ -412,9 +418,7 @@ class PlayerActivity : BaseActivity() {
     ) {
         val listFav: ArrayList<Channel> = ArrayList()
         listFav.addAll(Common.getChannels(this))
-        val newChannel = channel
-        newChannel.isFavorite = false
-        newChannel.groupTitle=""
+        val newChannel = filterChannelsByStreamUrl(listFav,channel.streamUrl)
         if (listFav.contains(newChannel)) {
             favoriteIcon?.setImageResource(
                 R.drawable.fav_on_channel
@@ -424,7 +428,10 @@ class PlayerActivity : BaseActivity() {
                 R.drawable.ic_fav
             )
         }
+    }
 
+    private fun filterChannelsByStreamUrl(channels: List<Channel>, selectedStreamUrl: String): Channel? {
+        return channels.find { it.streamUrl == selectedStreamUrl }
     }
 
     private fun showErrorDialog() {
@@ -468,11 +475,11 @@ class PlayerActivity : BaseActivity() {
 
                 val uri = Uri.parse(channel.streamUrl)
                 if (uri == null || uri.toString().isEmpty()) {
-                    Log.e(TAG, "setupPlayer: Invalid URI: ${channel.streamUrl}")
+
                     Toast.makeText(this, "Invalid video URL", Toast.LENGTH_SHORT).show()
                     return
                 }
-
+                Log.e(TAG, "setupPlayer: Invalid URIiiiiiiiiiiiiii: ${uri}")
                 val mediaItem = MediaItem.fromUri(uri)
                 val mediaSource = when {
                     uri.scheme == "content" || uri.scheme == "file" -> {
@@ -480,6 +487,8 @@ class PlayerActivity : BaseActivity() {
                             TAG,
                             "setupPlayer: Detected local file URI (MP4), using ProgressiveMediaSource"
                         )
+                        binding.btnFav.gone()
+                        binding.btnFa.gone()
                         ProgressiveMediaSource.Factory(
                             DefaultDataSource.Factory(this)
                         ).createMediaSource(mediaItem)
@@ -487,6 +496,8 @@ class PlayerActivity : BaseActivity() {
 
                     uri.scheme == "http" || uri.scheme == "https" -> {
                         Log.d(TAG, "setupPlayer: Detected streaming URL, using HlsMediaSource")
+                        binding.btnFav.visible()
+                        binding.btnFa.visible()
                         HlsMediaSource.Factory(DefaultHttpDataSource.Factory())
                             .createMediaSource(mediaItem)
                     }
@@ -1187,6 +1198,10 @@ class PlayerActivity : BaseActivity() {
             binding.frHome.visibility = View.GONE
             binding.line.visibility = View.GONE
 
+            if (isFullScreen) {
+                binding.controlButtonsTop1.gone()
+            }
+
             val params = playerView.layoutParams as ConstraintLayout.LayoutParams
             params.height = ConstraintLayout.LayoutParams.MATCH_PARENT
             params.topToBottom = ConstraintLayout.LayoutParams.UNSET
@@ -1195,10 +1210,15 @@ class PlayerActivity : BaseActivity() {
             params.bottomMargin = 0
             playerView.layoutParams = params
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
         } else {
 
             if (::player.isInitialized) {
                     player.playWhenReady = false
+            }
+
+            if (isFullScreen) {
+                binding.controlButtonsTop1.visible()
             }
 
             btnBack.visibility = View.VISIBLE
@@ -1290,23 +1310,27 @@ class PlayerActivity : BaseActivity() {
 
     override fun onStart() {
         super.onStart()
-        if (RemoteConfig.ADS_PLAY_CONTROL_050325 == "1") {
-            AdsManager.showAdsBanner(
-                this,
-                AdsManager.BANNER_PLAY_CONTROL,
-                binding.frHome,
-                binding.line
-            )
-        } else if (RemoteConfig.ADS_PLAY_CONTROL_050325 == "2") {
-            AdsManager.showAdBannerCollapsible(
-                this,
-                AdsManager.BANNER_COLLAP_PLAY_CONTROL,
-                binding.frHome,
-                binding.line
-            )
-        } else {
-            binding.frHome.gone()
-            binding.line.gone()
+        when (RemoteConfig.ADS_PLAY_CONTROL_050325) {
+            "1" -> {
+                AdsManager.showAdsBanner(
+                    this,
+                    AdsManager.BANNER_PLAY_CONTROL,
+                    binding.frHome,
+                    binding.line
+                )
+            }
+            "2" -> {
+                AdsManager.showAdBannerCollapsible(
+                    this,
+                    AdsManager.BANNER_COLLAP_PLAY_CONTROL,
+                    binding.frHome,
+                    binding.line
+                )
+            }
+            else -> {
+                binding.frHome.gone()
+                binding.line.gone()
+            }
         }
     }
 

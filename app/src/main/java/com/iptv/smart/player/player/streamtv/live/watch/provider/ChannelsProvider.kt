@@ -161,18 +161,21 @@ class ChannelsProvider : ViewModel() {
 
     private suspend fun fetchChannelsFromUri(uri: Uri): List<Channel> {
         return withContext(Dispatchers.IO) {
+            val channelList = mutableListOf<Channel>()
             try {
-                val inputStream = appContext.contentResolver.openInputStream(uri)
-                val reader = BufferedReader(InputStreamReader(inputStream))
-                val fileText = reader.readText()
-                reader.close()
-                parseM3UFile(fileText)
+                appContext.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    BufferedReader(InputStreamReader(inputStream)).use { reader ->
+                        val lines = reader.lineSequence()
+                        channelList.addAll(parseM3UFile(lines.toString()))
+                    }
+                }
             } catch (e: Exception) {
                 Log.e("ChannelsProvider", "Error fetching from URI $uri: ${e.message}")
-                emptyList()
             }
+            channelList
         }
     }
+
 
     private fun parseM3UFile(fileText: String): List<Channel> {
         val lines = fileText.split("\n")
@@ -259,17 +262,19 @@ class ChannelsProvider : ViewModel() {
     fun toggleFavorite(context: Context,channel: Channel) {
         val listFav :ArrayList<Channel> = ArrayList()
         listFav.addAll(Common.getChannels(context))
-        val newChannel = channel
-        newChannel.isFavorite = false
-        newChannel.groupTitle = ""
+        val newChannel = filterChannelsByStreamUrl(listFav,channel.streamUrl)
         if (listFav.contains(newChannel)){
             listFav.remove(newChannel)
         }else{
-            listFav.add(newChannel)
+             listFav.add(channel)
         }
+        Log.d("asdasdsd", "toggleFavorite: $newChannel")
+
         Common.saveChannels(context,listFav)
     }
-
+    private fun filterChannelsByStreamUrl(channels: List<Channel>, selectedStreamUrl: String): Channel? {
+        return channels.find { it.streamUrl == selectedStreamUrl }
+    }
 
 
 

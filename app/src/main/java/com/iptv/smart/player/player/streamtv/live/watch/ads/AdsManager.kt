@@ -141,6 +141,42 @@ object AdsManager {
             })
     }
 
+    fun loadAndShowAdsNativeCustom(activity: Activity, viewGroup: ViewGroup, holder: NativeHolderAdmob) {
+        if (!AdmobUtils.isNetworkConnected(activity)) {
+            viewGroup.visibility = View.GONE
+            return
+        }
+        AdmobUtils.loadAndShowNativeAdsWithLayoutAds(activity,
+            holder,
+            viewGroup,
+            R.layout.ad_template_item,
+            GoogleENative.UNIFIED_BANNER,
+            object : AdmobUtils.NativeAdCallbackNew {
+                override fun onLoadedAndGetNativeAd(ad: NativeAd?) {
+
+                }
+
+                override fun onNativeAdLoaded() {
+                    viewGroup.visible()
+                }
+
+                override fun onAdFail(error: String) {
+                    viewGroup.gone()
+                }
+
+                override fun onAdPaid(adValue: AdValue?, adUnitAds: String?) {
+                    postRevenueAdjust(adValue!!, adUnitAds)
+                }
+
+                override fun onClickAds() {
+
+                }
+
+
+            })
+    }
+
+
     fun loadAndShowAdsNative(activity: Activity, viewGroup: ViewGroup, holder: NativeHolderAdmob) {
         if (!AdmobUtils.isNetworkConnected(activity)) {
             viewGroup.visibility = View.GONE

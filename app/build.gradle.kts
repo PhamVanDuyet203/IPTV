@@ -42,6 +42,9 @@ android {
         viewBinding = true
         buildConfig = true
     }
+    base{
+        archivesName = "iptv${version}"
+    }
 }
 
 dependencies {

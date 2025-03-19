@@ -1,7 +1,11 @@
 package com.iptv.smart.player.player.streamtv.live.watch.screens
 
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.ConnectivityManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -24,8 +28,10 @@ import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.adapter.ChannelsAdapter
 import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
 import com.iptv.smart.player.player.streamtv.live.watch.provider.ChannelsProvider
+import com.iptv.smart.player.player.streamtv.live.watch.utils.NetworkChangeReceiver
 
 class HomeFragment : Fragment() {
+    lateinit var networkChangeReceiver: NetworkChangeReceiver
 
     private lateinit var channelsProvider: ChannelsProvider
     private lateinit var searchEditText: EditText
@@ -38,19 +44,19 @@ class HomeFragment : Fragment() {
     private var debounceHandler: Handler? = null
     private var isSearchVisible: Boolean = false
 
-    private val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == android.app.Activity.RESULT_OK) {
-            val uri: Uri? = result.data?.data
-            if (uri != null) {
-                Log.d("HomeFragment", "Selected M3U file URI: $uri")
-                // TODO: Xử lý file M3U từ URI nếu cần, hiện tại fetch từ Room nên bỏ qua
+    private val startForResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == android.app.Activity.RESULT_OK) {
+                val uri: Uri? = result.data?.data
+                if (uri != null) {
+                    Log.d("HomeFragment", "Selected M3U file URI: $uri")
+                    // TODO: Xử lý file M3U từ URI nếu cần, hiện tại fetch từ Room nên bỏ qua
+                }
             }
         }
-    }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
@@ -69,15 +75,14 @@ class HomeFragment : Fragment() {
                 PlayerActivity.start(requireContext(), channel)
             },
             onFavoriteClicked = { channel ->
-                channelsProvider.toggleFavorite(requireContext(),channel )
+                channelsProvider.toggleFavorite(requireContext(), channel)
             },
             onRenameChannel = { channel, newName ->
                 channelsProvider.updateChannel(channel.copy(name = newName))
             },
             onDeleteChannel = { channel ->
                 channelsProvider.deleteChannel(channel)
-            }
-        )
+            })
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
@@ -105,10 +110,38 @@ class HomeFragment : Fragment() {
                     filterChannels(s.toString())
                 }, 500)
             }
+
             override fun afterTextChanged(s: Editable?) {}
         })
 
         return view
+    }
+
+    override fun onStop() {
+        super.onStop()
+        requireActivity().unregisterReceiver(networkChangeReceiver)
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+        networkChangeReceiver = NetworkChangeReceiver { isConnected ->
+            if (!isConnected) {
+                adapter.notifyDataSetChanged()
+            } else {
+                adapter.notifyDataSetChanged()
+            }
+        }
+
+        val intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requireActivity().registerReceiver(
+                networkChangeReceiver, intentFilter, Context.RECEIVER_NOT_EXPORTED
+            )
+        } else {
+            requireActivity().registerReceiver(networkChangeReceiver, intentFilter)
+
+        }
     }
 
     private fun setupObservers() {
@@ -135,7 +168,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun filterChannels(query: String) {
-        channelsProvider.filterChannels(requireContext(),query)
+        channelsProvider.filterChannels(requireContext(), query)
     }
 
     private fun toggleSearchBar() {

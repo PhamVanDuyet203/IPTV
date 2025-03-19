@@ -39,113 +39,127 @@
         android:layout_marginTop="14dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="54dp"/>
-
-
-    <TextView
-        android:id="@+id/tvPlaylistName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/playlist_name_add"
-        android:textSize="14sp"
-        android:textColor="#171D1E"
-        android:fontFamily="@font/inter_regular"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle"
-        android:layout_marginTop="24dp"/>
-
-    <EditText
-        android:id="@+id/etPlaylistName"
+    <ScrollView
+        android:fillViewport="true"
+        android:layout_marginVertical="10dp"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:hint="@string/enter_playlist_name"
-        android:background="@drawable/bg_edittext"
-        android:padding="16dp"
-        android:textSize="16sp"
-        android:textColorHint="#AFB3B4"
-        android:textColor="#171D1E"
-        android:backgroundTint="#E9EFF0"
-        android:fontFamily="@font/inter_regular"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvPlaylistName"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:singleLine="true"
-        android:gravity="center_vertical"
-        android:layout_marginTop="8dp"/>
-
-    <TextView
-        android:id="@+id/errorTextName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/please_enter_a_name_imprt"
-        app:layout_constraintTop_toBottomOf="@+id/etPlaylistName"
-        android:visibility="gone"
-        android:fontFamily="@font/inter_italic"
-        android:textSize="12sp"
-        android:textColor="@color/gnt_red"
-        android:layout_marginTop="8dp"/>
-
-    <TextView
-        android:id="@+id/tvPlaylistUrl"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/upload_m3u_file"
-        android:textSize="14sp"
-        android:textColor="#171D1E"
-        android:fontFamily="@font/inter_regular"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/errorTextName"
-        android:layout_marginTop="16dp"/>
-
-    <LinearLayout
-        android:id="@+id/ln_upload"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:padding="16dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/tvPlaylistUrl"
-        android:background="@drawable/bg_dashed_border">
-
-        <ImageView
-            android:id="@+id/imgUploadIcon"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@drawable/upload_file"
-            android:layout_marginEnd="8dp"/>
-
-        <TextView
-            android:id="@+id/tvUploadText"
-            android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/btn_add_playlist"
+        >
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/select_videos_to_upload"
-            android:fontFamily="@font/inter_semibold"
-            android:textSize="14sp"
-            android:textColor="@color/cool_blue"/>
-    </LinearLayout>
+            >
 
-    <TextView
-        android:id="@+id/errorTextFile"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/please_select_a_video"
-        app:layout_constraintTop_toBottomOf="@+id/ln_upload"
-        android:visibility="gone"
-        android:fontFamily="@font/inter_italic"
-        android:textSize="12sp"
-        android:textColor="@color/gnt_red"
-        android:layout_marginTop="8dp"/>
+            <TextView
+                app:layout_constraintTop_toTopOf="parent"
+                android:id="@+id/tvPlaylistName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/playlist_name_add"
+                android:textSize="14sp"
+                android:textColor="#171D1E"
+                android:fontFamily="@font/inter_regular"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="24dp"/>
+
+            <EditText
+                android:id="@+id/etPlaylistName"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:hint="@string/enter_playlist_name"
+                android:background="@drawable/bg_edittext"
+                android:padding="16dp"
+                android:textSize="16sp"
+                android:textColorHint="#AFB3B4"
+                android:textColor="#171D1E"
+                android:backgroundTint="#E9EFF0"
+                android:fontFamily="@font/inter_regular"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvPlaylistName"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:singleLine="true"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp"/>
+
+            <TextView
+                android:id="@+id/errorTextName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/please_enter_a_name_imprt"
+                app:layout_constraintTop_toBottomOf="@+id/etPlaylistName"
+                android:visibility="gone"
+                android:fontFamily="@font/inter_italic"
+                android:textSize="12sp"
+                android:textColor="@color/gnt_red"
+                android:layout_marginTop="8dp"/>
+
+            <TextView
+                android:id="@+id/tvPlaylistUrl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/upload_m3u_file"
+                android:textSize="14sp"
+                android:textColor="#171D1E"
+                android:fontFamily="@font/inter_regular"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/errorTextName"
+                android:layout_marginTop="16dp"/>
+
+            <LinearLayout
+                android:id="@+id/ln_upload"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:padding="16dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintTop_toBottomOf="@+id/tvPlaylistUrl"
+                android:background="@drawable/bg_dashed_border">
+
+                <ImageView
+                    android:id="@+id/imgUploadIcon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/upload_file"
+                    android:layout_marginEnd="8dp"/>
+
+                <TextView
+                    android:id="@+id/tvUploadText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/select_videos_to_upload"
+                    android:fontFamily="@font/inter_semibold"
+                    android:textSize="14sp"
+                    android:textColor="@color/cool_blue"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/errorTextFile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/please_select_a_video"
+                app:layout_constraintTop_toBottomOf="@+id/ln_upload"
+                android:visibility="gone"
+                android:fontFamily="@font/inter_italic"
+                android:textSize="12sp"
+                android:textColor="@color/gnt_red"
+                android:layout_marginTop="8dp"/>
 
 
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvVideo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@+id/errorTextFile"/>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvVideo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="24dp"
+                app:layout_constraintTop_toBottomOf="@+id/errorTextFile"/>
 
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
 
     <TextView
         android:id="@+id/btn_add_playlist"
