@@ -4,6 +4,7 @@
   ~  Last modified 8/15/24, 07:02 PM
   -->
 <LinearLayout
+    android:id="@+id/layoutItem"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -12,12 +13,12 @@
     android:background="@drawable/item_channel"
     android:layout_marginTop="4dp"
     android:layout_marginBottom="4dp"
+    android:padding="14dp"
     >
 
     <androidx.cardview.widget.CardView
         android:layout_width="44dp"
         android:layout_height="44dp"
-        android:layout_margin="14dp"
         app:cardCornerRadius="8dp"
         app:cardElevation="0dp">
 
@@ -54,7 +55,6 @@
         android:contentDescription="Options"
         android:layout_gravity="center_vertical"
         android:padding="8dp"
-        android:layout_marginEnd="14dp"
         android:src="@drawable/fav_channel" />
 
 </LinearLayout>

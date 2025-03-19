@@ -124,7 +124,6 @@ class PlayerActivity : BaseActivity() {
         private const val MIN_PIP_API = Build.VERSION_CODES.O
 
         fun start(context: Context, channel: Channel) {
-            Log.d("sadasdasdsads", "start From: "+channel)
             val intent = Intent(context, PlayerActivity::class.java).apply {
                 putExtra("channel", channel)
             }
@@ -137,11 +136,13 @@ class PlayerActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        channel = savedInstanceState?.getParcelable("channel") ?: intent.getParcelableExtra("channel") ?: run {
-            finish()
-            return
-        }
-        Log.d("TAG23232323232", "onCreate: "+channel.isFavorite)
+        channel =
+            savedInstanceState?.getParcelable("channel") ?: intent.getParcelableExtra("channel")
+                    ?: run {
+                finish()
+                return
+            }
+        Log.d("TAG23232323232", "onCreate: " + channel.isFavorite)
 
         channelsProvider = ViewModelProvider(this).get(ChannelsProvider::class.java)
         channelsProvider.init(this)
@@ -153,11 +154,15 @@ class PlayerActivity : BaseActivity() {
         setFullScreen()
         setupFavorite()
         setupPip()
-
+        if (intent.getBooleanExtra("FROMCHANNEL", false)) {
+            if (isInPictureInPictureMode){
+                finishAndRemoveTask()
+            }
+        }
         binding.btnMirroring1.gone()
         binding.btnPip1.gone()
 
-        channelsProvider.addToRecent(this,channel)
+        channelsProvider.addToRecent(this, channel)
         controlButtonsTop.visibility = View.VISIBLE
         binding.controlButtonsTop1.visibility = View.GONE
 
@@ -260,6 +265,9 @@ class PlayerActivity : BaseActivity() {
 
             dialogView.findViewById<TextView>(R.id.btn_Connect).setOnClickListener {
                 startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
+                AppOpenManager.getInstance()
+                    .disableAppResumeWithActivity(PlayerActivity::class.java)
+
             }
 
             noInternetDialog?.show()
@@ -326,13 +334,15 @@ class PlayerActivity : BaseActivity() {
         defaultLockLayoutParams = lockLayoutNormal.layoutParams as LinearLayout.LayoutParams
 
         btnMirroring.setOnClickListener {
-            if (isLocalFile || isInternetAvailable()) wifiDisplay() else showNoInternetDialog()
             AppOpenManager.getInstance().disableAppResumeWithActivity(PlayerActivity::class.java)
+
+            if (isLocalFile || isInternetAvailable()) wifiDisplay() else showNoInternetDialog()
         }
 
         binding.btnMirroring1.setOnClickListener {
-            if (isLocalFile || isInternetAvailable()) wifiDisplay() else showNoInternetDialog()
             AppOpenManager.getInstance().disableAppResumeWithActivity(PlayerActivity::class.java)
+
+            if (isLocalFile || isInternetAvailable()) wifiDisplay() else showNoInternetDialog()
         }
 
         btnBack.setOnClickListener {
@@ -341,6 +351,7 @@ class PlayerActivity : BaseActivity() {
             }
             if (isFullScreen && resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 imageViewFullScreen.performClick()
+                binding.btnFav.visible()
             } else if (Build.VERSION.SDK_INT >= MIN_PIP_API && isInPictureInPictureMode) {
                 moveTaskToBack(true)
             } else {
@@ -380,14 +391,19 @@ class PlayerActivity : BaseActivity() {
                 try {
                     startActivityForResult(Intent("android.settings.CAST_SETTINGS"), 169)
                 } catch (e3: Exception) {
-                    Toast.makeText(applicationContext,
-                        getString(R.string.device_not_supported), Toast.LENGTH_LONG)
+                    Toast.makeText(
+                        applicationContext,
+                        getString(R.string.device_not_supported), Toast.LENGTH_LONG
+                    )
                         .show()
                 }
             }
         } catch (ex: Exception) {
-            Toast.makeText(applicationContext, R.string.device_not_supported, Toast.LENGTH_LONG).show()
+            Toast.makeText(applicationContext, R.string.device_not_supported, Toast.LENGTH_LONG)
+                .show()
         }
+        AppOpenManager.getInstance().disableAppResumeWithActivity(PlayerActivity::class.java)
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -398,7 +414,6 @@ class PlayerActivity : BaseActivity() {
             }
         }
     }
-
 
 
     private fun setupFavorite() {
@@ -418,7 +433,7 @@ class PlayerActivity : BaseActivity() {
     ) {
         val listFav: ArrayList<Channel> = ArrayList()
         listFav.addAll(Common.getChannels(this))
-        val newChannel = filterChannelsByStreamUrl(listFav,channel.streamUrl)
+        val newChannel = filterChannelsByStreamUrl(listFav, channel.streamUrl)
         if (listFav.contains(newChannel)) {
             favoriteIcon?.setImageResource(
                 R.drawable.fav_on_channel
@@ -430,12 +445,15 @@ class PlayerActivity : BaseActivity() {
         }
     }
 
-    private fun filterChannelsByStreamUrl(channels: List<Channel>, selectedStreamUrl: String): Channel? {
+    private fun filterChannelsByStreamUrl(
+        channels: List<Channel>,
+        selectedStreamUrl: String
+    ): Channel? {
         return channels.find { it.streamUrl == selectedStreamUrl }
     }
 
     private fun showErrorDialog() {
-        if (!this.isFinishing && !isDestroyed) {
+        if (this.isFinishing && this.isDestroyed()) {
             return
         }
 
@@ -524,6 +542,16 @@ class PlayerActivity : BaseActivity() {
                     controlButtonsTop.visibility = View.GONE
                 }
 
+                val timeoutHandler = Handler(Looper.getMainLooper())
+                val timeoutRunnable = Runnable {
+                    if (!isPlayerReady && exoPlayer.playbackState != Player.STATE_READY) {
+                        loadingProgress.visibility = View.GONE
+                        showErrorDialog()
+                        exoPlayer.release()
+                    }
+                }
+                timeoutHandler.postDelayed(timeoutRunnable, 8000L)
+
                 exoPlayer.addListener(object : Player.Listener {
                     override fun onIsLoadingChanged(isLoading: Boolean) {
                         Log.d(TAG, "onIsLoadingChanged: isLoading = $isLoading")
@@ -532,10 +560,7 @@ class PlayerActivity : BaseActivity() {
                     }
 
                     override fun onPlayerError(error: PlaybackException) {
-                        Log.e(
-                            TAG,
-                            "onPlayerError: Error playing video - ${error.errorCodeName}, ${error.message}"
-                        )
+                        timeoutHandler.removeCallbacks(timeoutRunnable)
                         loadingProgress.visibility = View.GONE
                         showErrorDialog()
                     }
@@ -544,6 +569,7 @@ class PlayerActivity : BaseActivity() {
                         Log.d(TAG, "onPlaybackStateChanged: State = $playbackState")
                         when (playbackState) {
                             Player.STATE_READY -> {
+                                timeoutHandler.removeCallbacks(timeoutRunnable)
                                 loadingProgress.visibility = View.GONE
                                 isPlayerReady = true
                                 Log.d(TAG, "onPlaybackStateChanged: Player ready")
@@ -783,7 +809,7 @@ class PlayerActivity : BaseActivity() {
                 if (binding.controlButtonsTop1.visibility != View.VISIBLE) {
                     showBottomTool()
                     playerView.showController()
-                } else  {
+                } else {
                     hideBottomTool()
                     playerView.hideController()
                 }
@@ -1049,11 +1075,13 @@ class PlayerActivity : BaseActivity() {
     private fun setupPip() {
         if (Build.VERSION.SDK_INT >= MIN_PIP_API) {
             btnPip.setOnClickListener {
-                AppOpenManager.getInstance().disableAppResumeWithActivity(PlayerActivity::class.java)
+                AppOpenManager.getInstance()
+                    .disableAppResumeWithActivity(PlayerActivity::class.java)
                 enterPictureInPictureModeIfAvailable()
             }
             binding.btnPip1.setOnClickListener {
-                AppOpenManager.getInstance().disableAppResumeWithActivity(PlayerActivity::class.java)
+                AppOpenManager.getInstance()
+                    .disableAppResumeWithActivity(PlayerActivity::class.java)
                 enterPictureInPictureModeIfAvailable()
             }
         } else {
@@ -1141,8 +1169,10 @@ class PlayerActivity : BaseActivity() {
         binding.frHome.gone()
         playerView.hideController()
         if (!packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
-            Toast.makeText(this,
-                getString(R.string.pip_not_supported_on_this_device), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                getString(R.string.pip_not_supported_on_this_device), Toast.LENGTH_SHORT
+            ).show()
             return
         }
 
@@ -1157,8 +1187,10 @@ class PlayerActivity : BaseActivity() {
             val width = playerView.measuredWidth
             val height = playerView.measuredHeight
             if (width <= 0 || height <= 0) {
-                Toast.makeText(this,
-                    getString(R.string.player_not_ready_for_pip), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    getString(R.string.player_not_ready_for_pip), Toast.LENGTH_SHORT
+                ).show()
                 return@post
             }
 
@@ -1171,8 +1203,10 @@ class PlayerActivity : BaseActivity() {
                 }
             } else {
                 player.playWhenReady = false
-                Toast.makeText(this,
-                    getString(R.string.failed_to_entxer_pip_mode), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    getString(R.string.failed_to_entxer_pip_mode), Toast.LENGTH_SHORT
+                ).show()
             }
         }
         AppOpenManager.getInstance().disableAppResumeWithActivity(PlayerActivity::class.java)
@@ -1186,6 +1220,11 @@ class PlayerActivity : BaseActivity() {
         this.isInPictureInPictureMode = isInPictureInPictureMode
 
         if (isInPictureInPictureMode) {
+
+            Log.d(
+                TAG,
+                "PiP mode: PlayerView width=${playerView.width}, height=${playerView.height}"
+            )
             btnBack.visibility = View.GONE
             tvTitle.visibility = View.GONE
             toolPlayer = findViewById(R.id.toolbar_player)
@@ -1198,23 +1237,30 @@ class PlayerActivity : BaseActivity() {
             binding.frHome.visibility = View.GONE
             binding.line.visibility = View.GONE
 
-            if (isFullScreen) {
-                binding.controlButtonsTop1.gone()
-            }
+            binding.controlButtonsTop1.visibility = View.GONE
+
+//            if (isFullScreen) {
+//                binding.controlButtonsTop1.gone()
+//            }
 
             val params = playerView.layoutParams as ConstraintLayout.LayoutParams
+            params.width = ConstraintLayout.LayoutParams.MATCH_PARENT
             params.height = ConstraintLayout.LayoutParams.MATCH_PARENT
             params.topToBottom = ConstraintLayout.LayoutParams.UNSET
             params.bottomToTop = ConstraintLayout.LayoutParams.UNSET
             params.topMargin = 0
             params.bottomMargin = 0
+            params.leftMargin = 0
+            params.rightMargin = 0
             playerView.layoutParams = params
+
+            binding.root.setPadding(0, 0, 0, 0)
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
         } else {
 
             if (::player.isInitialized) {
-                    player.playWhenReady = false
+                player.playWhenReady = false
             }
 
             if (isFullScreen) {
@@ -1319,6 +1365,7 @@ class PlayerActivity : BaseActivity() {
                     binding.line
                 )
             }
+
             "2" -> {
                 AdsManager.showAdBannerCollapsible(
                     this,
@@ -1327,6 +1374,7 @@ class PlayerActivity : BaseActivity() {
                     binding.line
                 )
             }
+
             else -> {
                 binding.frHome.gone()
                 binding.line.gone()
@@ -1334,19 +1382,28 @@ class PlayerActivity : BaseActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onResume() {
         super.onResume()
+        AppOpenManager.getInstance().enableAppResumeWithActivity(PlayerActivity::class.java)
+
+//        if (isInPictureInPictureMode) {
+//            finishAndRemoveTask()
+//            Log.d("TAG1212121", "onResume: ")
+//        }
         checkInternetConnection()
-        if (!isReturnFromPiPSetting) {
-            AppOpenManager.getInstance().enableAppResumeWithActivity(PlayerActivity::class.java)
-        } else {
-            AppOpenManager.getInstance().disableAppResumeWithActivity(PlayerActivity::class.java)
-            isReturnFromPiPSetting = false
-        }
+
+
+
         if (isLock) {
             Log.d(TAG, "onResume: ")
             binding.btnLock1.visible()
+            binding.btnFa.visibility = View.GONE
+            binding.btnFav.visibility = View.GONE
+            if (isFullScreen) {
+                tvTitle.gone()
+                btnBack.gone()
+                binding.btnLock1.setBackgroundResource(R.drawable.bg_locked)
+            }
             linearLayoutControlUp.visibility = View.INVISIBLE
             linearLayoutControlBottom.visibility = View.INVISIBLE
             playerView.useController = false
@@ -1354,6 +1411,8 @@ class PlayerActivity : BaseActivity() {
         } else {
             playerView.useController = true
             playerView.showController()
+//            binding.btnFa.visibility = View.VISIBLE
+//            binding.btnFav.visibility = View.VISIBLE
         }
 
         if (::player.isInitialized && !isInPictureInPictureMode && wasPlayingBeforePause && isPipPermissionGranted()) {
@@ -1362,6 +1421,16 @@ class PlayerActivity : BaseActivity() {
 
         updateFavoriteIcon()
 
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        intent.getParcelableExtra<Channel>("channel")?.let { newChannel ->
+            channel = newChannel
+            tvTitle.text = channel.name
+            tvTitle.isSelected = true
+            updateFavoriteIcon()
+        }
     }
 
     override fun onPause() {

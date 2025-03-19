@@ -48,11 +48,18 @@
         android:paddingBottom="8dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-<!--    <ProgressBar-->
-<!--        android:id="@+id/loadingMoreIndicator"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        app:layout_constraintBottom_toBottomOf="@+id/recyclerViewChannels"/>-->
+
+<!--    edit-->
+    <ProgressBar
+        android:id="@+id/loadingMoreIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/recyclerViewChannels"
+        app:layout_constraintStart_toStartOf="@id/recyclerViewChannels"
+        app:layout_constraintEnd_toEndOf="@id/recyclerViewChannels"
+        android:layout_marginBottom="16dp"/>
 
     <ListView
         android:id="@+id/lv_item_home"

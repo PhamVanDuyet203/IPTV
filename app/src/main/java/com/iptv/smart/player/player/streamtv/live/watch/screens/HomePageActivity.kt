@@ -16,6 +16,8 @@ import com.iptv.smart.player.player.streamtv.live.watch.databinding.ActivityHome
 import com.iptv.smart.player.player.streamtv.live.watch.dialog.ImportPlaylistDialog
 import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
 import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
+import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
+import kotlin.system.exitProcess
 
 class HomePageActivity : BaseActivity() {
 
@@ -35,9 +37,12 @@ class HomePageActivity : BaseActivity() {
         val selectedLanguageCode = sharedPreferences.getString("selectedLanguage", "en") ?: "en"
         updateLanguageIcon(selectedLanguageCode)
 
-
+        if (!Common.checkBoolAndroid13(this)) {
+            Common.checkAndroid13(this)
+        }
         replaceFragment(HomePageFragment())
         setSelected(binding.navHome)
+        Common.isCheckChannel = false
 
         binding.navHome.setOnClickListener {
             replaceFragment(HomePageFragment())
@@ -64,9 +69,16 @@ class HomePageActivity : BaseActivity() {
         finish()
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finishAffinity()
+        exitProcess(0)
+    }
+
     fun startPlayerActivity(channel: Channel) {
         val intent = Intent(this, PlayerActivity::class.java).apply {
             putExtra("channel", channel)
+            putExtra("FROMCHANNEL", true)
         }
         playerActivityResultLauncher.launch(intent)
     }

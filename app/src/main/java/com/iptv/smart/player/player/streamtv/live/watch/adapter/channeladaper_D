@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -39,37 +38,6 @@ class ChannelsAdapter(
     companion object {
         const val TYPE_CHANNEL = 1
         const val TYPE_AD = 2
-        const val PAGE_SIZE = 100
-    }
-
-    private var fullChannelList: List<Channel> = emptyList()
-    private var isLoadingMore = false
-
-    fun setFullChannelList(channels: List<Channel>) {
-        fullChannelList = channels
-        this.channels.clear()
-        loadMoreChannels()
-    }
-
-    fun loadMoreChannels(): Boolean {
-        if (isLoadingMore || channels.size >= fullChannelList.size) return false
-
-        isLoadingMore = true
-        val startIndex = channels.size
-        val endIndex = minOf(startIndex + PAGE_SIZE, fullChannelList.size)
-
-        if (startIndex < fullChannelList.size) {
-            channels.addAll(fullChannelList.subList(startIndex, endIndex))
-            notifyItemRangeInserted(startIndex, endIndex - startIndex)
-            isLoadingMore = false
-            return true
-        }
-        isLoadingMore = false
-        return false
-    }
-
-    fun hasMoreData(): Boolean {
-        return channels.size < fullChannelList.size
     }
 
     var listUrl = mutableListOf<Channel>()
@@ -171,7 +139,6 @@ class ChannelsAdapter(
         private val logoImageView: ImageView = itemView.findViewById(R.id.logoImageView)
         private val nameTextView: TextView = itemView.findViewById(R.id.nameTextView)
         private val favButton: ImageButton = itemView.findViewById(R.id.fav_channel)
-        private val root: LinearLayout = itemView.findViewById(R.id.layoutItem)
 
         fun bind(channel: Channel) {
             nameTextView.text = channel.name
@@ -198,7 +165,6 @@ class ChannelsAdapter(
             if (listFav.contains(newChannel)) {
                 favButton.setImageResource(R.drawable.fav_on_channel)
             } else {
-
                 favButton.setImageResource(R.drawable.fav_channel)
             }
         }
@@ -246,3 +212,4 @@ class ChannelsAdapter(
         }
     }
 }
+

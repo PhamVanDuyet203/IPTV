@@ -1,4 +1,4 @@
-package com.iptv.smart.player.player.streamtv.live.watch
+package com.iptv.smart.player.player.streamtv.live.watch.screens
 
 import android.content.Context
 import android.content.Intent
@@ -14,7 +14,6 @@ import android.os.Looper
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -26,17 +25,17 @@ import android.widget.ImageView
 import android.widget.PopupWindow
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.iptv.smart.player.player.streamtv.live.watch.MainActivity
+import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.adapter.GroupAdapter
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.INTER_SELECT_CATEG_OR_CHANNEL
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.showRate
-import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.visible
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.ActivityPlaylistDetailBinding
 import com.iptv.smart.player.player.streamtv.live.watch.db.PlaylistEntity
@@ -116,7 +115,9 @@ class ChannelListActivity : BaseActivity() {
 
         }
 
-        btnBack.setOnClickListener { finish() }
+        btnBack.setOnClickListener {
+            onBackPressed()
+        }
 
         searchIcon.setOnClickListener { toggleSearchBar() }
 
@@ -151,6 +152,11 @@ class ChannelListActivity : BaseActivity() {
 
         setupNetworkMonitoring()
         checkInternetConnection()
+    }
+
+    override fun onBackPressed() {
+        startActivity(Intent(this, HomePageActivity::class.java))
+
     }
 
     override fun onStart() {

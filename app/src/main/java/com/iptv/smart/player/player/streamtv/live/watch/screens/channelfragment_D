@@ -22,7 +22,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -40,9 +39,6 @@ import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
 import com.iptv.smart.player.player.streamtv.live.watch.provider.ChannelsProvider
 import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
 import com.iptv.smart.player.player.streamtv.live.watch.utils.NetworkChangeReceiver
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class ChannelFragment : Fragment() {
     lateinit var networkChangeReceiver: NetworkChangeReceiver
@@ -54,9 +50,6 @@ class ChannelFragment : Fragment() {
     private lateinit var channelAdapter: ChannelsAdapter
 
     private var isLoading = false
-
-    private lateinit var loadingMoreIndicator: ProgressBar
-    private var isLoadingMore = false
 
     private val channelsProvider: ChannelsProvider by viewModels()
     private val tabViews = mutableListOf<View>()
@@ -90,9 +83,6 @@ class ChannelFragment : Fragment() {
         emptyStateLayout = view.findViewById(R.id.emptyStateLayout)
         loadingPanel = view.findViewById(R.id.loadingPanel)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-
-        loadingMoreIndicator = view.findViewById(R.id.loadingMoreIndicator)
-
         channelAdapter = ChannelsAdapter(
             requireActivity(),
             channels = mutableListOf(),
@@ -110,8 +100,6 @@ class ChannelFragment : Fragment() {
 
         recyclerView.adapter = channelAdapter
 
-        setupLoadMore()
-
         channelsProvider.init(requireContext())
         setupTabs()
         setupAddButton(view)
@@ -122,32 +110,6 @@ class ChannelFragment : Fragment() {
         refreshData()
 
         return view
-    }
-
-    private fun setupLoadMore() {
-        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                val totalItemCount = layoutManager.itemCount
-                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
-
-                if (!isLoadingMore && selectedTabIndex == 0 && channelAdapter.hasMoreData() &&
-                    lastVisibleItem >= totalItemCount - 5) {
-                    loadMoreChannels()
-                }
-            }
-        })
-    }
-
-    private fun loadMoreChannels() {
-        isLoadingMore = true
-        loadingMoreIndicator.visibility = View.VISIBLE
-        CoroutineScope(Dispatchers.Main).launch {
-            val hasMore = channelAdapter.loadMoreChannels()
-            isLoadingMore = false
-            loadingMoreIndicator.visibility = if (hasMore) View.GONE else View.GONE
-        }
     }
 
     override fun onStop() {
@@ -168,7 +130,7 @@ class ChannelFragment : Fragment() {
 
         val intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requireActivity().registerReceiver(networkChangeReceiver, intentFilter, Context.RECEIVER_NOT_EXPORTED)
+           requireActivity().registerReceiver(networkChangeReceiver, intentFilter, Context.RECEIVER_NOT_EXPORTED)
         } else {
             requireActivity().registerReceiver(networkChangeReceiver, intentFilter)
 
@@ -182,7 +144,7 @@ class ChannelFragment : Fragment() {
                 channelsProvider.channels.value?.let {
                     updateUI(it)
                     setTabsLoadingState(false)
-                }
+            }
                 channelAdapter.notifyDataSetChanged()
             }
             1 ->{
@@ -478,21 +440,13 @@ class ChannelFragment : Fragment() {
         if (channels.isEmpty()) {
             emptyStateLayout.visibility = View.VISIBLE
             recyclerView.visibility = View.GONE
-
-            loadingMoreIndicator.visibility = View.GONE
-
         } else {
             emptyStateLayout.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
-//            channelAdapter.updateChannels(channels)
-//
-//            recyclerView.post {
-//                recyclerView.scrollToPosition(0)            }
-            if (selectedTabIndex == 0) {
-                channelAdapter.setFullChannelList(channels)
-            } else {
-                channelAdapter.updateChannels(channels)
-            }
+            channelAdapter.updateChannels(channels)
+
+            recyclerView.post {
+                recyclerView.scrollToPosition(0)            }
 
         }
     }

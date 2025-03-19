@@ -177,18 +177,18 @@ class ChannelsProvider : ViewModel() {
 
     private suspend fun fetchChannelsFromUri(uri: Uri): List<Channel> {
         return withContext(Dispatchers.IO) {
-            //val channelList = mutableListOf<Channel>()
+            val channelList = mutableListOf<Channel>()
             try {
-                val inputStream = appContext.contentResolver.openInputStream(uri)
-                val reader = BufferedReader(InputStreamReader(inputStream))
-                val fileText = reader.readText()
-                reader.close()
-                parseM3UFile(fileText)
+                appContext.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    BufferedReader(InputStreamReader(inputStream)).use { reader ->
+                        val lines = reader.lineSequence()
+                        channelList.addAll(parseM3UFile(lines.toString()))
+                    }
+                }
             } catch (e: Exception) {
                 Log.e("ChannelsProvider", "Error fetching from URI $uri: ${e.message}")
-                emptyList()
             }
-            //channelList
+            channelList
         }
     }
 
@@ -282,7 +282,7 @@ class ChannelsProvider : ViewModel() {
         if (listFav.contains(newChannel)){
             listFav.remove(newChannel)
         }else{
-            listFav.add(channel)
+             listFav.add(channel)
         }
         Log.d("asdasdsd", "toggleFavorite: $newChannel")
 

@@ -35,9 +35,6 @@ class MainActivity : BaseActivity() {
                 replace(R.id.fragmentContainerView, HomeFragment())
             }
         }
-        if (!Common.checkBoolAndroid13(this)) {
-            Common.checkAndroid13(this)
-        }
     }
 
     private fun applyLocale(languageCode: String) {

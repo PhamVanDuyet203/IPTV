@@ -26,11 +26,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdView
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.db.PlaylistEntity
-import com.iptv.smart.player.player.streamtv.live.watch.ChannelListActivity
+import com.iptv.smart.player.player.streamtv.live.watch.screens.ChannelListActivity
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
 import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
 import com.iptv.smart.player.player.streamtv.live.watch.screens.VideoDetailActivity
@@ -80,7 +79,7 @@ class PlaylistAdapter(
             }
             ViewType.NATIVE_AD -> {
                 val view = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.ad_template_item, parent, false) // Layout cho Native Ad
+                    .inflate(R.layout.ad_template_item, parent, false)
                 NativeAdViewHolder(view)
             }
             else -> throw IllegalArgumentException("Invalid view type")
@@ -97,8 +96,8 @@ class PlaylistAdapter(
     class PlaylistViewHolder(
         itemView: View,
         private val activity: Activity,
-        private val onRenamePlaylist: (PlaylistEntity, String) -> Unit, // Thêm callback
-        private val onDeletePlaylist: (PlaylistEntity) -> Unit // Thêm callback
+        private val onRenamePlaylist: (PlaylistEntity, String) -> Unit,
+        private val onDeletePlaylist: (PlaylistEntity) -> Unit
     ) : RecyclerView.ViewHolder(itemView) {
         val name: TextView = itemView.findViewById(R.id.playlistName)
         val count: TextView = itemView.findViewById(R.id.channelCount)

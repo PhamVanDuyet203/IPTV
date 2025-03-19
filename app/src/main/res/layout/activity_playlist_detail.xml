@@ -99,13 +99,16 @@
     </LinearLayout>
 
     <ProgressBar
+
+        android:padding="@dimen/_140sdp"
         android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+        app:layout_constraintBottom_toTopOf="@+id/line"
+        />
 
     <ImageView
         android:id="@+id/imgNotFound"
@@ -145,11 +148,8 @@
         android:paddingTop="14dp"
         android:paddingLeft="14dp"
         android:paddingRight="14dp"
-        android:paddingBottom="14dp"
         android:id="@+id/recyclerView"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/line"/>
 
     <View
@@ -160,6 +160,7 @@
         app:layout_constraintBottom_toTopOf="@+id/fr_home"
         />
     <FrameLayout
+        android:minHeight="50dp"
         android:id="@+id/fr_home"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

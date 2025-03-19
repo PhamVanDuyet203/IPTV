@@ -41,7 +41,7 @@ class SplashActivity : BaseActivity() {
         setContentView(binding.root)
 
         val loaderGif = findViewById<ImageView>(R.id.loader_gif)
-
+        Common.isCheckChannel = false
         Glide.with(this).asGif().load(R.drawable.loader).into(loaderGif)
 
         Common.countInterAdd = 0

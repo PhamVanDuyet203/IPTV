@@ -31,7 +31,7 @@
             android:name=".screens.PlayerActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|uiMode"
             android:exported="true"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true" />
         <activity
@@ -76,7 +76,7 @@
             android:screenOrientation="portrait"
             android:exported="true" />
         <activity
-            android:name=".ChannelListActivity"
+            android:name=".screens.ChannelListActivity"
             android:screenOrientation="portrait"
             android:exported="true" />
         <activity

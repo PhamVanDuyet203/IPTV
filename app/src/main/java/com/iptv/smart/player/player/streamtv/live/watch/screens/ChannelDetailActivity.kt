@@ -1,6 +1,7 @@
 package com.iptv.smart.player.player.streamtv.live.watch
 
 import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.Build
@@ -33,6 +34,8 @@ import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
 import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
 import com.iptv.smart.player.player.streamtv.live.watch.provider.ChannelsProvider
 import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
+import com.iptv.smart.player.player.streamtv.live.watch.screens.ChannelListActivity
+import com.iptv.smart.player.player.streamtv.live.watch.screens.HomePageActivity
 import com.iptv.smart.player.player.streamtv.live.watch.screens.PlayerActivity
 import com.iptv.smart.player.player.streamtv.live.watch.util.parseM3U
 import com.iptv.smart.player.player.streamtv.live.watch.util.parseM3UFromFile
@@ -90,7 +93,7 @@ class ChannelDetailActivity : BaseActivity() {
 
         channelsProvider = ViewModelProvider(this).get(ChannelsProvider::class.java)
         channelsProvider.init(this)
-
+        Common.isCheckChannel = true
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = ChannelsAdapter(
             this,
@@ -118,7 +121,7 @@ class ChannelDetailActivity : BaseActivity() {
         tvTitle.text = groupName
         tvTitle.isSelected = true
 
-        btnBack.setOnClickListener { finish() }
+        btnBack.setOnClickListener { onBackPressed() }
 
         searchIcon.setOnClickListener { toggleSearchBar() }
 
@@ -157,6 +160,12 @@ class ChannelDetailActivity : BaseActivity() {
 
     }
 
+    override fun onBackPressed() {
+        val intent = Intent(this, ChannelListActivity::class.java)
+        startActivity(intent)
+        super.onBackPressed()
+    }
+
     override fun onStop() {
         super.onStop()
         unregisterReceiver(networkChangeReceiver)
@@ -170,6 +179,7 @@ class ChannelDetailActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         Common.isCheckChannel = true
+
         if (RemoteConfig.BANNER_DETAIL_PLAYLIST_CHANNEL_050325 == "1") {
             AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_DETAIL_PLAYLIST_CHANNEL, frNative , vLine)
         }
