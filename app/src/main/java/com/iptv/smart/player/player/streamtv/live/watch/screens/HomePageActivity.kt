@@ -83,24 +83,28 @@ class HomePageActivity : BaseActivity() {
         playerActivityResultLauncher.launch(intent)
     }
 
-    private val playerActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            val data = result.data
-            val shouldRefresh = data?.getBooleanExtra("REFRESH_DATA", false) ?: false
-            val channelName = data?.getStringExtra("CHANNEL_NAME") ?: "Unknown"
-            val isFavorite = data?.getBooleanExtra("IS_FAVORITE", false) ?: false
-            if (shouldRefresh) {
-                refreshCurrentFragment()
+    private val playerActivityResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val data = result.data
+                val shouldRefresh = data?.getBooleanExtra("REFRESH_DATA", false) ?: false
+                val channelName = data?.getStringExtra("CHANNEL_NAME") ?: "Unknown"
+                val isFavorite = data?.getBooleanExtra("IS_FAVORITE", false) ?: false
+                if (shouldRefresh) {
+                    refreshCurrentFragment()
+                }
+            } else {
+                Log.d(
+                    "HomePageActivity",
+                    "Received result from PlayerActivity with resultCode: ${result.resultCode}"
+                )
             }
-        } else {
-            Log.d("HomePageActivity", "Received result from PlayerActivity with resultCode: ${result.resultCode}")
         }
-    }
 
     private fun refreshCurrentFragment() {
         val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
         if (currentFragment is ChannelFragment) {
-                currentFragment.refreshData()
+            currentFragment.refreshData()
         }
     }
 
@@ -116,9 +120,16 @@ class HomePageActivity : BaseActivity() {
             "1" -> {
                 AdsManager.showAdsBanner(this, AdsManager.BANNER_HOME, binding.frHome, binding.line)
             }
+
             "2" -> {
-                AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_COLLAP_HOME, binding.frHome,binding.line)
+                AdsManager.showAdBannerCollapsible(
+                    this,
+                    AdsManager.BANNER_COLLAP_HOME,
+                    binding.frHome,
+                    binding.line
+                )
             }
+
             else -> {
                 binding.frHome.gone()
                 binding.line.gone()
@@ -150,7 +161,6 @@ class HomePageActivity : BaseActivity() {
     }
 
 
-
     private fun updateLanguageIcon(languageCode: String) {
         val iconResId = when (languageCode) {
             "en" -> R.drawable.ic_english
@@ -165,7 +175,7 @@ class HomePageActivity : BaseActivity() {
             "hi" -> R.drawable.ic_hindi
             "it" -> R.drawable.ic_italian
             "de" -> R.drawable.ic_german
-            else -> R.drawable.ic_english // Mặc định
+            else -> R.drawable.ic_english
         }
         binding.languageIcon.setImageResource(iconResId)
     }

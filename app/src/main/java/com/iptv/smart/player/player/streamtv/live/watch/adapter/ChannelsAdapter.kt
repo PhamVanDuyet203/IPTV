@@ -29,7 +29,6 @@ import kotlinx.coroutines.withContext
 class ChannelsAdapter(
     private val context: Activity,
     var channels: MutableList<Channel>,
-
     private val onChannelClicked: (Channel) -> Unit,
     private val onFavoriteClicked: (Channel) -> Unit,
     private val onRenameChannel: (Channel, String) -> Unit,
@@ -59,8 +58,11 @@ class ChannelsAdapter(
             val startIndex = channels.size
             val endIndex = minOf(startIndex + PAGE_SIZE, fullChannelList.size)
             if (startIndex < fullChannelList.size) {
-                channels.addAll(fullChannelList.subList(startIndex, endIndex))
-                notifyItemRangeInserted(startIndex, endIndex - startIndex)
+                val newItems = fullChannelList.subList(startIndex, endIndex)
+                channels.addAll(newItems)
+                context.runOnUiThread {
+                    notifyItemRangeInserted(startIndex, newItems.size)
+                }
                 isLoadingMore = false
                 return true
             }
@@ -75,12 +77,14 @@ class ChannelsAdapter(
 
     var listUrl = mutableListOf<Channel>()
 
+    // start he
+
     fun updateChannels(newChannels: List<Channel>) {
         val uniqueNewChannels = newChannels.distinctBy { it.streamUrl }
         GlobalScope.launch(Dispatchers.Default) {
-            val diffResult = DiffUtil.calculateDiff(ChannelDiffCallback(channels, uniqueNewChannels))
+            val diffResult =
+                DiffUtil.calculateDiff(ChannelDiffCallback(channels, uniqueNewChannels))
             withContext(Dispatchers.Main) {
-                val oldSize = channels.size
                 channels = uniqueNewChannels.toMutableList()
                 diffResult.dispatchUpdatesTo(this@ChannelsAdapter)
                 uniqueNewChannels.forEach {
@@ -124,7 +128,7 @@ class ChannelsAdapter(
             val actualPosition =
                 if ((RemoteConfig.NATIVE_PLAYLIST_CHANNEL_050325 == "1") && AdmobUtils.isNetworkConnected(
                         context
-                    )&& Common.isCheckChannel
+                    ) && Common.isCheckChannel
                 ) {
                     position - getAdsCountBeforePosition(position)
                 } else {
@@ -138,18 +142,18 @@ class ChannelsAdapter(
         }
     }
 
-
     override fun getItemCount(): Int {
-        val adPositions = getAdPositions()
-        val adCount = adPositions.count { it < channels.size + adPositions.size }
-        return channels.size + adCount
+        synchronized(loadLock) {
+            val adPositions = getAdPositions()
+            val adCount = adPositions.count { it < channels.size + adPositions.size }
+            return channels.size + adCount
+        }
     }
 
     private fun getAdPositions(): List<Int> {
         val positions = mutableListOf<Int>()
-
         if ((RemoteConfig.NATIVE_PLAYLIST_CHANNEL_050325 == "1")
-            && AdmobUtils.isNetworkConnected(context)&& Common.isCheckChannel
+            && AdmobUtils.isNetworkConnected(context) && Common.isCheckChannel
             && channels.size >= 3
         ) {
             var position = 2
@@ -169,12 +173,19 @@ class ChannelsAdapter(
         private val logoImageView: ImageView = itemView.findViewById(R.id.logoImageView)
         private val nameTextView: TextView = itemView.findViewById(R.id.nameTextView)
         private val favButton: ImageButton = itemView.findViewById(R.id.fav_channel)
-        private val root: LinearLayout = itemView.findViewById(R.id.layoutItem)
 
         fun bind(channel: Channel) {
             nameTextView.text = channel.name
-            Glide.with(itemView.context).load(channel.logoUrl).placeholder(R.drawable.ic_tv)
-                .into(logoImageView)
+
+            if (!channel.logoUrl.isNullOrEmpty()) {
+                Glide.with(itemView.context)
+                    .load(channel.logoUrl)
+                    .placeholder(R.drawable.ic_tv)
+                    .error(R.drawable.ic_tv)
+                    .into(logoImageView)
+            } else {
+                logoImageView.setImageResource(R.drawable.ic_tv)
+            }
 
             updateFavoriteIcon(channel)
 
@@ -191,26 +202,29 @@ class ChannelsAdapter(
 
         private fun updateFavoriteIcon(channel: Channel) {
             val listFav: ArrayList<Channel> = ArrayList(Common.getChannels(context))
-            val newChannel = filterChannelsByStreamUrl(listFav,channel.streamUrl)
+            val newChannel = filterChannelsByStreamUrl(listFav, channel.streamUrl)
             Log.d("asdasdsd", "updateFavoriteIcon: $newChannel")
             if (listFav.contains(newChannel)) {
                 favButton.setImageResource(R.drawable.fav_on_channel)
             } else {
-
                 favButton.setImageResource(R.drawable.fav_channel)
             }
         }
     }
-    private fun filterChannelsByStreamUrl(channels: List<Channel>, selectedStreamUrl: String): Channel? {
+
+    private fun filterChannelsByStreamUrl(
+        channels: List<Channel>,
+        selectedStreamUrl: String
+    ): Channel? {
         return channels.find { it.streamUrl == selectedStreamUrl }
     }
+
     inner class AdViewHolder(private val binding: ItemadBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind() {
-
             if ((RemoteConfig.NATIVE_PLAYLIST_CHANNEL_050325 == "1") && AdmobUtils.isNetworkConnected(
                     context
-                )&& Common.isCheckChannel
+                ) && Common.isCheckChannel
             ) {
                 when (RemoteConfig.NATIVE_PLAYLIST_CHANNEL_050325) {
                     "1" -> AdsManager.loadAndShowAdsNativeCustom(
@@ -226,12 +240,12 @@ class ChannelsAdapter(
             } else {
                 binding.frbannerHome.gone()
             }
-
         }
     }
 
     private class ChannelDiffCallback(
-        private val oldList: List<Channel>, private val newList: List<Channel>
+        private val oldList: List<Channel>,
+        private val newList: List<Channel>
     ) : DiffUtil.Callback() {
         override fun getOldListSize(): Int = oldList.size
         override fun getNewListSize(): Int = newList.size

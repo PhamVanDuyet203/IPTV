@@ -143,8 +143,14 @@ class PlayerActivity : BaseActivity() {
                 finish()
                 return
             }
-        Log.d("TAG23232323232", "onCreate: " + channel.isFavorite)
-
+        if (Build.VERSION.SDK_INT >= MIN_PIP_API && isInPictureInPictureMode) {
+            if (::player.isInitialized) {
+                player.release()
+            }
+            moveTaskToBack(true)
+            finish() 
+            return
+        }
         channelsProvider = ViewModelProvider(this).get(ChannelsProvider::class.java)
         channelsProvider.init(this)
 
@@ -156,7 +162,7 @@ class PlayerActivity : BaseActivity() {
         setupFavorite()
         setupPip()
         if (intent.getBooleanExtra("FROMCHANNEL", false)) {
-            if (isInPictureInPictureMode){
+            if (isInPictureInPictureMode) {
                 finishAndRemoveTask()
             }
         }
@@ -173,17 +179,15 @@ class PlayerActivity : BaseActivity() {
                 updateFavoriteIcon()
                 tvTitle.text = channel.name
                 tvTitle.isSelected = true
-                Log.d(
-                    TAG,
-                    "Channels observed: Synced Favorite: ${channel.isFavorite}, Name: ${channel.name}"
-                )
             }
         }
 
-//      rf db
         channelsProvider.fetchChannelsFromRoom()
-    }
 
+        setPictureInPictureParams(
+            PictureInPictureParams.Builder().setActions(emptyList()).build()
+        )
+    }
 
     private fun setupNetworkMonitoring() {
         if (isLocalFile) return
@@ -336,13 +340,11 @@ class PlayerActivity : BaseActivity() {
 
         btnMirroring.setOnClickListener {
             AppOpenManager.getInstance().disableAppResumeWithActivity(PlayerActivity::class.java)
-
             if (isLocalFile || isInternetAvailable()) wifiDisplay() else showNoInternetDialog()
         }
 
         binding.btnMirroring1.setOnClickListener {
             AppOpenManager.getInstance().disableAppResumeWithActivity(PlayerActivity::class.java)
-
             if (isLocalFile || isInternetAvailable()) wifiDisplay() else showNoInternetDialog()
         }
 
@@ -372,10 +374,6 @@ class PlayerActivity : BaseActivity() {
             putExtra("CHANNEL_NAME", channel.name)
             putExtra("IS_FAVORITE", channel.isFavorite)
         }
-        Log.d(
-            TAG,
-            "setResultAndFinish: Sending result - Channel: ${channel.name}, isFavorite: ${channel.isFavorite}"
-        )
         setResult(RESULT_OK, resultIntent)
         finish()
     }
@@ -386,6 +384,8 @@ class PlayerActivity : BaseActivity() {
             wasPlayingBeforePause = player.isPlaying
             player.playWhenReady = false
         }
+        AppOpenManager.getInstance().disableAppResumeWithActivity(PlayerActivity::class.java)
+
         try {
             val intent = Intent("android.settings.WIFI_DISPLAY_SETTINGS")
             startActivityForResult(intent, 169)
@@ -459,12 +459,19 @@ class PlayerActivity : BaseActivity() {
     }
 
     private fun showErrorDialog() {
-        if (this.isFinishing && this.isDestroyed()) {
+        if (isFinishing || isDestroyed) {
+            return
+        }
+
+        if (noInternetDialog?.isShowing == true) {
             return
         }
 
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_unavailable, null)
-        val dialog = AlertDialog.Builder(this).setView(dialogView).setCancelable(false).create()
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
 
         dialog.show()
 
@@ -493,45 +500,35 @@ class PlayerActivity : BaseActivity() {
         if (::player.isInitialized) {
             player.release()
         }
-        player = ExoPlayer.Builder(this).setSeekBackIncrementMs(INCREMENT_MILLIS)
-            .setSeekForwardIncrementMs(INCREMENT_MILLIS).build().also { exoPlayer ->
+        player = ExoPlayer.Builder(this)
+            .setSeekBackIncrementMs(INCREMENT_MILLIS)
+            .setSeekForwardIncrementMs(INCREMENT_MILLIS)
+            .build().also { exoPlayer ->
                 playerView.player = exoPlayer
 
                 val uri = Uri.parse(channel.streamUrl)
                 if (uri == null || uri.toString().isEmpty()) {
-
-                    Toast.makeText(this, "Invalid video URL", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.invalid_video_url), Toast.LENGTH_SHORT).show()
+                    showErrorDialog()
                     return
                 }
-                Log.e(TAG, "setupPlayer: Invalid URIiiiiiiiiiiiiii: ${uri}")
+
                 val mediaItem = MediaItem.fromUri(uri)
                 val mediaSource = when {
                     uri.scheme == "content" || uri.scheme == "file" -> {
-                        Log.d(
-                            TAG,
-                            "setupPlayer: Detected local file URI (MP4), using ProgressiveMediaSource"
-                        )
                         isOpenVideo = true
                         binding.btnFav.gone()
                         binding.btnFa.gone()
-                        ProgressiveMediaSource.Factory(
-                            DefaultDataSource.Factory(this)
-                        ).createMediaSource(mediaItem)
+                        ProgressiveMediaSource.Factory(DefaultDataSource.Factory(this))
+                            .createMediaSource(mediaItem)
                     }
-
                     uri.scheme == "http" || uri.scheme == "https" -> {
-                        Log.d(TAG, "setupPlayer: Detected streaming URL, using HlsMediaSource")
                         binding.btnFav.visible()
                         binding.btnFa.visible()
                         HlsMediaSource.Factory(DefaultHttpDataSource.Factory())
                             .createMediaSource(mediaItem)
                     }
-
                     else -> {
-                        Log.w(
-                            TAG,
-                            "setupPlayer: Unsupported URI scheme: ${uri.scheme}, defaulting to HlsMediaSource"
-                        )
                         HlsMediaSource.Factory(DefaultHttpDataSource.Factory())
                             .createMediaSource(mediaItem)
                     }
@@ -557,11 +554,10 @@ class PlayerActivity : BaseActivity() {
                         exoPlayer.release()
                     }
                 }
-                timeoutHandler.postDelayed(timeoutRunnable, 8000L)
+                timeoutHandler.postDelayed(timeoutRunnable, 30000L)
 
                 exoPlayer.addListener(object : Player.Listener {
                     override fun onIsLoadingChanged(isLoading: Boolean) {
-                        Log.d(TAG, "onIsLoadingChanged: isLoading = $isLoading")
                         loadingProgress.visibility =
                             if (isLoading && !exoPlayer.isPlaying) View.VISIBLE else View.GONE
                     }
@@ -570,37 +566,29 @@ class PlayerActivity : BaseActivity() {
                         timeoutHandler.removeCallbacks(timeoutRunnable)
                         loadingProgress.visibility = View.GONE
                         showErrorDialog()
+                        exoPlayer.release()
                     }
 
                     override fun onPlaybackStateChanged(playbackState: Int) {
-                        Log.d(TAG, "onPlaybackStateChanged: State = $playbackState")
                         when (playbackState) {
                             Player.STATE_READY -> {
                                 timeoutHandler.removeCallbacks(timeoutRunnable)
                                 loadingProgress.visibility = View.GONE
                                 isPlayerReady = true
-                                Log.d(TAG, "onPlaybackStateChanged: Player ready")
                             }
-
                             Player.STATE_BUFFERING -> {
-                                Log.d(TAG, "onPlaybackStateChanged: Buffering")
                                 loadingProgress.visibility = View.VISIBLE
                             }
-
                             Player.STATE_ENDED -> {
-                                Log.d(TAG, "onPlaybackStateChanged: Playback ended")
                                 loadingProgress.visibility = View.GONE
                             }
-
                             Player.STATE_IDLE -> {
-                                Log.d(TAG, "onPlaybackStateChanged: Player idle")
                                 loadingProgress.visibility = View.VISIBLE
                             }
                         }
                     }
 
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
-                        Log.d(TAG, "onIsPlayingChanged: isPlaying = $isPlaying")
                         updatePlayPauseIcons(isPlaying)
                         if (isPlaying && !isFullScreen) {
                             loadingProgress.visibility = View.GONE
@@ -812,12 +800,10 @@ class PlayerActivity : BaseActivity() {
                 if (binding.controlButtonsTop1.visibility != View.VISIBLE) {
                     showBottomTool()
                 } else hideBottomTool()
-                Log.d("TAGadsafsdfsafd", "setFullScreen: playerClick")
             }
             mainCustomControl.setOnClickListener {
                 linearLayoutControlUp.gone()
                 linearLayoutControlBottom.gone()
-                // showBottomTool()
                 if (binding.controlButtonsTop1.visibility != View.VISIBLE) {
                     showBottomTool()
                     playerView.showController()
@@ -825,8 +811,6 @@ class PlayerActivity : BaseActivity() {
                     hideBottomTool()
                     playerView.hideController()
                 }
-                Log.d("TAGadsafsdfsafd", "setFullScreen: mainClick")
-
             }
             if (isFullScreen) {
                 showBottomTool()
@@ -1123,7 +1107,7 @@ class PlayerActivity : BaseActivity() {
                     player.playWhenReady = true
                 }
             } else {
-                Toast.makeText(this, "PiP permission denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.pip_permission_denied), Toast.LENGTH_SHORT).show()
                 if (::player.isInitialized && wasPlayingBeforePause) {
                     player.playWhenReady = true
                 }
@@ -1175,8 +1159,6 @@ class PlayerActivity : BaseActivity() {
 
     private fun enterPictureInPictureModeIfAvailable() {
         if (Build.VERSION.SDK_INT < MIN_PIP_API) return
-//        binding.btnBack.gone()
-//        binding.tvTitle.gone()
         binding.controlButtonsTop1.gone()
         binding.frHome.gone()
         playerView.hideController()
@@ -1233,10 +1215,6 @@ class PlayerActivity : BaseActivity() {
 
         if (isInPictureInPictureMode) {
 
-            Log.d(
-                TAG,
-                "PiP mode: PlayerView width=${playerView.width}, height=${playerView.height}"
-            )
             btnBack.visibility = View.GONE
             tvTitle.visibility = View.GONE
             toolPlayer = findViewById(R.id.toolbar_player)
@@ -1250,10 +1228,6 @@ class PlayerActivity : BaseActivity() {
             binding.line.visibility = View.GONE
 
             binding.controlButtonsTop1.visibility = View.GONE
-
-//            if (isFullScreen) {
-//                binding.controlButtonsTop1.gone()
-//            }
 
             val params = playerView.layoutParams as ConstraintLayout.LayoutParams
             params.width = ConstraintLayout.LayoutParams.MATCH_PARENT
@@ -1314,9 +1288,6 @@ class PlayerActivity : BaseActivity() {
             )
             isFullScreen = false
 
-//            if (::player.isInitialized && wasPlayingBeforePause && isPipPermissionGranted() && !isFinishing) {
-//                player.playWhenReady = true
-//            }
 
         }
     }
@@ -1325,7 +1296,6 @@ class PlayerActivity : BaseActivity() {
         super.onUserLeaveHint()
         if (::player.isInitialized && !isInPictureInPictureMode) {
             player.playWhenReady = false
-            Log.d(TAG, "User left app or closed PiP, pausing player")
         }
     }
 
@@ -1347,7 +1317,6 @@ class PlayerActivity : BaseActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        Log.d(TAG, "onConfigurationChanged: Orientation changed to ${newConfig.orientation}")
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE && isFullScreen) {
 
             if (!isControlVisible) {
@@ -1398,10 +1367,6 @@ class PlayerActivity : BaseActivity() {
         super.onResume()
         AppOpenManager.getInstance().enableAppResumeWithActivity(PlayerActivity::class.java)
 
-//        if (isInPictureInPictureMode) {
-//            finishAndRemoveTask()
-//            Log.d("TAG1212121", "onResume: ")
-//        }
         checkInternetConnection()
 
 
@@ -1440,7 +1405,29 @@ class PlayerActivity : BaseActivity() {
             channel = newChannel
             tvTitle.text = channel.name
             tvTitle.isSelected = true
+            isOpenVideo = Uri.parse(channel.streamUrl).scheme in listOf("content", "file")
             updateFavoriteIcon()
+
+            if (isInPictureInPictureMode) {
+                if (::player.isInitialized) {
+                    player.release()
+                }
+                finish() // Kết thúc activity hiện tại mà không xóa task
+                Handler(Looper.getMainLooper()).postDelayed({
+                    val newIntent = Intent(this, PlayerActivity::class.java).apply {
+                        putExtra("channel", newChannel)
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    }
+                    startActivity(newIntent)
+                }, 300) // Trì hoãn nhẹ để hệ thống xử lý xong PiP
+            } else {
+                checkInternetConnection()
+                if (isFullScreen) {
+                    lockScreen(isLock)
+                } else {
+                    Log.d(TAG, "onNewIntent: ")
+                }
+            }
         }
     }
 
@@ -1478,7 +1465,7 @@ class PlayerActivity : BaseActivity() {
         connectivityManager = null
         dismissNoInternetDialog()
         noInternetDialog = null
-        if (::player.isInitialized && !isInPictureInPictureMode) {
+        if (::player.isInitialized) {
             player.release()
         }
         controlHideHandler.removeCallbacks(hideControlRunnable)

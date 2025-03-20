@@ -12,14 +12,14 @@ import com.bumptech.glide.Glide
 import com.iptv.smart.player.player.streamtv.live.watch.R
 
 class LanguageAdapter(
-    private val languages: List<Language>
-    , private val listener: onItemClickListener
+    private val languages: List<Language>, private val listener: onItemClickListener
 ) : RecyclerView.Adapter<LanguageAdapter.LanguageViewHolder>() {
 
     private var selectedPosition = -1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LanguageViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_language, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_language, parent, false)
         return LanguageViewHolder(view)
 
     }
@@ -32,7 +32,6 @@ class LanguageAdapter(
             updateSelection(position)
         }
 
-        // Dùng Glide để load ảnh
         Glide.with(holder.itemView.context)
             .load(language.flagResId)
             .circleCrop()
@@ -66,7 +65,6 @@ class LanguageAdapter(
         val imv_btn: ImageView = itemView.findViewById(R.id.imv_btn)
 
 
-
         fun bind(language: Language, isSelected: Boolean) {
             languageName.text = language.name
             languageIcon.setImageResource(language.flagResId)
@@ -76,7 +74,10 @@ class LanguageAdapter(
 
             imv_btn.setImageResource(if (isSelected) R.drawable.radio_checked else R.drawable.radio_btn)
             languageName.setTextColor(
-                ContextCompat.getColor(itemView.context, if (isSelected) R.color.cool_blue else R.color.black)
+                ContextCompat.getColor(
+                    itemView.context,
+                    if (isSelected) R.color.cool_blue else R.color.black
+                )
             )
             languageName.setTypeface(null, if (isSelected) Typeface.BOLD else Typeface.NORMAL)
         }

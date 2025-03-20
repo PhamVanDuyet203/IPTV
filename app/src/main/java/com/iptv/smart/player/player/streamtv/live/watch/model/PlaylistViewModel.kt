@@ -5,18 +5,22 @@ import androidx.lifecycle.*
 import com.google.android.material.tabs.TabLayout
 import com.iptv.smart.player.player.streamtv.live.watch.db.AppDatabase
 import com.iptv.smart.player.player.streamtv.live.watch.db.PlaylistEntity
+import com.iptv.smart.player.player.streamtv.live.watch.provider.ChannelsProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class PlaylistViewModel(application: Application) : AndroidViewModel(application) {
     private val playlistDao = AppDatabase.getDatabase(application).playlistDao()
+    private val channelsProvider = ChannelsProvider()
 
     private val _filteredPlaylists = MutableLiveData<List<PlaylistEntity>>()
     val filteredPlaylists: LiveData<List<PlaylistEntity>> get() = _filteredPlaylists
 
     init {
         loadAllPlaylists()
+        channelsProvider.init(application)
     }
+
 
     private fun loadAllPlaylists() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -39,8 +43,7 @@ class PlaylistViewModel(application: Application) : AndroidViewModel(application
 
     fun updatePlaylist(playlist: PlaylistEntity) {
         viewModelScope.launch(Dispatchers.IO) {
-            playlistDao.update(playlist) // Cập nhật playlist trong DB
-            // Sau khi cập nhật, làm mới danh sách dựa trên filter hiện tại
+            playlistDao.update(playlist)
             val currentSourceType = when (tabLayout?.selectedTabPosition) {
                 0 -> null
                 1 -> "URL"
@@ -54,8 +57,10 @@ class PlaylistViewModel(application: Application) : AndroidViewModel(application
 
     fun deletePlaylist(playlist: PlaylistEntity) {
         viewModelScope.launch(Dispatchers.IO) {
-            playlistDao.delete(playlist) // Xóa playlist khỏi DB
-            // Sau khi xóa, làm mới danh sách dựa trên filter hiện tại
+            playlistDao.delete(playlist)
+
+            channelsProvider.removeFavoritesFromDeletedPlaylist(getApplication(), playlist.sourcePath)
+
             val currentSourceType = when (tabLayout?.selectedTabPosition) {
                 0 -> null
                 1 -> "URL"
@@ -67,7 +72,6 @@ class PlaylistViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    // Để lấy được selectedTabPosition, cần thêm một cách để truy cập từ HomePageFragment
     private var tabLayout: TabLayout? = null
     fun setTabLayout(tabLayout: TabLayout) {
         this.tabLayout = tabLayout

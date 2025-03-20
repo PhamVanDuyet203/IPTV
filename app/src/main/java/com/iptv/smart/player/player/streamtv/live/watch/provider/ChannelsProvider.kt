@@ -10,11 +10,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iptv.smart.player.player.streamtv.live.watch.db.AppDatabase
 import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -25,12 +22,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.net.HttpURLConnection
 import java.net.URL
 import androidx.core.content.edit
-import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
-
 
 @Serializable
 data class RecentChannel(
@@ -56,8 +50,6 @@ class ChannelsProvider : ViewModel() {
     private lateinit var appContext: Context
 
     private var cachedChannels: List<Channel> = emptyList()
-
-
 
     fun init(context: Context) {
         Log.d("ChannelsProvider", "Initializing ChannelsProvider")
@@ -100,7 +92,6 @@ class ChannelsProvider : ViewModel() {
         }
     }
 
-
     private suspend fun loadChannels() {
         Log.d("ChannelsProvider", "Loading channels")
         try {
@@ -138,12 +129,11 @@ class ChannelsProvider : ViewModel() {
         }
     }
 
-
     fun addChannelsFromM3U(channels: List<Channel>) {
         viewModelScope.launch(Dispatchers.Main) {
             val currentList = _channels.value?.toMutableList() ?: mutableListOf()
             val newChannels = channels.map { channel ->
-                Log.d("sdfsdf", "addChannelsFromM3U: "+channel.groupTitle)
+                Log.d("sdfsdf", "addChannelsFromM3U: " + channel.groupTitle)
                 channel.copy(
                     isFavorite = isFavorite(channel.streamUrl),
                     groupTitle = channel.groupTitle
@@ -162,7 +152,7 @@ class ChannelsProvider : ViewModel() {
         return withContext(Dispatchers.IO) {
             try {
                 val client = OkHttpClient.Builder()
-                    .cache(Cache(appContext.cacheDir, 10 * 1024 * 1024)) // 10MB cache
+                    .cache(Cache(appContext.cacheDir, 10 * 1024 * 1024))
                     .build()
                 val request = Request.Builder().url(url).build()
                 val response = client.newCall(request).execute()
@@ -177,7 +167,6 @@ class ChannelsProvider : ViewModel() {
 
     private suspend fun fetchChannelsFromUri(uri: Uri): List<Channel> {
         return withContext(Dispatchers.IO) {
-            //val channelList = mutableListOf<Channel>()
             try {
                 val inputStream = appContext.contentResolver.openInputStream(uri)
                 val reader = BufferedReader(InputStreamReader(inputStream))
@@ -188,46 +177,52 @@ class ChannelsProvider : ViewModel() {
                 Log.e("ChannelsProvider", "Error fetching from URI $uri: ${e.message}")
                 emptyList()
             }
-            //channelList
         }
     }
-
 
     private fun parseM3UFile(fileText: String): List<Channel> {
         val lines = fileText.split("\n")
         val tempChannels = mutableListOf<Channel>()
         var name: String? = null
-        var logoUrl: String = getDefaultLogoUrl()
+        var logoUrl: String? = null
         var streamUrl: String? = null
+        var groupTitle: String? = null
 
         for (line in lines) {
             when {
                 line.startsWith("#EXTINF:") -> {
-                    name = extractChannelName(line)
-                    logoUrl = extractLogoUrl(line) ?: getDefaultLogoUrl()
+                    val nameMatch = Regex("tvg-name=\"([^\"]+)\"").find(line)?.groupValues?.get(1)
+                    val groupMatch = Regex("group-title=\"([^\"]+)\"").find(line)?.groupValues?.get(1)
+                    val logoMatch = Regex("tvg-logo=\"([^\"]+)\"").find(line)?.groupValues?.get(1)
+
+                    name = nameMatch ?: line.substringAfter(",").trim()
+                    groupTitle = groupMatch ?: "Unknown"
+                    logoUrl = logoMatch
+                    Log.d("ChannelsProvider", "Parsed logoUrl: $logoUrl")
                 }
                 line.isNotEmpty() -> {
                     streamUrl = line
                     if (!name.isNullOrEmpty() && streamUrl != null) {
+                        val finalLogoUrl = logoUrl ?: ""
                         tempChannels.add(
                             Channel(
                                 name = name,
-                                logoUrl = logoUrl,
+                                logoUrl = finalLogoUrl,
                                 streamUrl = streamUrl,
+                                groupTitle = groupTitle,
                                 isFavorite = false
                             )
                         )
                     }
                     name = null
-                    logoUrl = getDefaultLogoUrl()
+                    logoUrl = null
                     streamUrl = null
+                    groupTitle = null
                 }
             }
         }
         return tempChannels
     }
-
-    private fun getDefaultLogoUrl(): String = "assets/images/ic_tv.png"
 
     private fun extractChannelName(line: String): String? = line.split(",").lastOrNull()?.trim()
 
@@ -242,11 +237,11 @@ class ChannelsProvider : ViewModel() {
 
     private fun isValidUrl(url: String): Boolean = url.startsWith("https") || url.startsWith("http")
 
-    fun filterChannels(context: Context,type: String) {
+    fun filterChannels(context: Context, type: String) {
         _channels.value?.let { channelList ->
             val filtered = when (type) {
                 "favorite" -> {
-                    Log.d("rthtrhrhrhth", "filterChannels: "+ Common.getChannels(context))
+                    Log.d("rthtrhrhrhth", "filterChannels: " + Common.getChannels(context))
                     Common.getChannels(context)
                 }
                 "recent" -> {
@@ -255,7 +250,6 @@ class ChannelsProvider : ViewModel() {
                         .mapNotNull { recent -> channelList.find { it.streamUrl == recent.streamUrl } }
                     sortedRecent
                 }
-
                 else -> channelList
             }
             _filteredChannels.value = filtered
@@ -275,26 +269,49 @@ class ChannelsProvider : ViewModel() {
         }
     }
 
-    fun toggleFavorite(context: Context,channel: Channel) {
-        val listFav :ArrayList<Channel> = ArrayList()
+    fun toggleFavorite(context: Context, channel: Channel) {
+        val listFav: ArrayList<Channel> = ArrayList()
         listFav.addAll(Common.getChannels(context))
-        val newChannel = filterChannelsByStreamUrl(listFav,channel.streamUrl)
-        if (listFav.contains(newChannel)){
+        val newChannel = filterChannelsByStreamUrl(listFav, channel.streamUrl)
+        if (listFav.contains(newChannel)) {
             listFav.remove(newChannel)
-        }else{
+        } else {
             listFav.add(channel)
         }
         Log.d("asdasdsd", "toggleFavorite: $newChannel")
-
-        Common.saveChannels(context,listFav)
+        Common.saveChannels(context, listFav)
     }
+
+    fun removeFavoritesFromDeletedPlaylist(context: Context, playlistSourcePath: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val channelsToRemove = when {
+                playlistSourcePath.startsWith("http") -> fetchChannelsFromUrl(playlistSourcePath)
+                else -> fetchChannelsFromUri(Uri.parse(playlistSourcePath))
+            }
+            val listFav: ArrayList<Channel> = ArrayList(Common.getChannels(context))
+            val streamUrlsToRemove = channelsToRemove.map { it.streamUrl }.toSet()
+            val updatedFavList = listFav.filter { it.streamUrl !in streamUrlsToRemove }
+            Common.saveChannels(context, updatedFavList.toList())
+            _channels.value?.let { currentList ->
+                val updatedChannels = currentList.map { channel ->
+                    if (channel.streamUrl in streamUrlsToRemove) {
+                        channel.copy(isFavorite = false)
+                    } else {
+                        channel
+                    }
+                }
+                withContext(Dispatchers.Main) {
+                    _channels.value = updatedChannels
+                    cachedChannels = updatedChannels
+                    Log.d("ChannelsProvider", "Removed favorites from deleted playlist: ${streamUrlsToRemove.size}")
+                }
+            }
+        }
+    }
+
     private fun filterChannelsByStreamUrl(channels: List<Channel>, selectedStreamUrl: String): Channel? {
         return channels.find { it.streamUrl == selectedStreamUrl }
     }
-
-
-
-
 
     fun updateChannel(updatedChannel: Channel) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -332,18 +349,14 @@ class ChannelsProvider : ViewModel() {
         }
     }
 
-    // refresh data
-
     private val _shouldRefresh = MutableLiveData<Boolean>()
     val shouldRefresh: LiveData<Boolean> = _shouldRefresh
 
-    // Đặt lại flag khi cần làm mới
     fun requestRefresh() {
         _shouldRefresh.postValue(true)
         Log.d("ChannelsProvider", "Requested refresh")
     }
 
-    // Reset flag sau khi đã làm mới
     fun resetRefresh() {
         _shouldRefresh.postValue(false)
     }
@@ -355,7 +368,7 @@ class ChannelsProvider : ViewModel() {
         }
     }
 
-    fun addToRecent(context: Context,channel: Channel) {
+    fun addToRecent(context: Context, channel: Channel) {
         viewModelScope.launch(Dispatchers.IO) {
             val recentChannels = getRecentChannels().toMutableList()
             recentChannels.removeAll { it.streamUrl == channel.streamUrl }
@@ -369,7 +382,7 @@ class ChannelsProvider : ViewModel() {
 
             withContext(Dispatchers.Main) {
                 if (tabLayoutSelectedPosition() == 2) {
-                    filterChannels(context,"recent")
+                    filterChannels(context, "recent")
                 }
             }
         }

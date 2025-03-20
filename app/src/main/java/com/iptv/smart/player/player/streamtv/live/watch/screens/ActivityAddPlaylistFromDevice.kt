@@ -84,14 +84,12 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
         }
 
 
-
     }
 
     private fun showNativeAd() {
         if (RemoteConfig.NATIVE_ADD_050325 == "1") {
             AdsManager.loadAndShowAdsNative(this, binding.frNative, AdsManager.NATIVE_ADD)
-        }
-        else binding.frNative.gone()
+        } else binding.frNative.gone()
     }
 
     private val videoPicker =
@@ -105,9 +103,9 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
                     binding.errorTextFile.visibility = View.GONE
                     val fileName = getFileName(uri)
                     val fileSize = getFileSizeFromFileUri(uri) ?: return@let
-                    val maxSize = 30 * 1024 * 1024 // 30MB
+                    val maxSize = 30 * 1024 * 1024
                     if (fileName != null && fileSize <= maxSize) {
-                        videoList.add(Channel(fileName,"",uri.toString(), ))
+                        videoList.add(Channel(fileName, "", uri.toString()))
                         videoAdapter.notifyDataSetChanged()
                     } else {
                         Toast.makeText(
@@ -119,6 +117,7 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
                 }
             }
         }
+
     fun getFileSizeFromFileUri(uri: Uri): Long? {
         return try {
             contentResolver.query(uri, null, null, null, null)?.use { cursor ->
@@ -134,17 +133,21 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
             null
         }
     }
+
     override fun onResume() {
         super.onResume()
-        AppOpenManager.getInstance().enableAppResumeWithActivity(ActivityAddPlaylistFromDevice::class.java)
+        AppOpenManager.getInstance()
+            .enableAppResumeWithActivity(ActivityAddPlaylistFromDevice::class.java)
     }
+
     private fun openFilePicker() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             type = "video/*"
             addCategory(Intent.CATEGORY_OPENABLE)
         }
         videoPicker.launch(intent)
-        AppOpenManager.getInstance().disableAppResumeWithActivity(ActivityAddPlaylistFromDevice::class.java)
+        AppOpenManager.getInstance()
+            .disableAppResumeWithActivity(ActivityAddPlaylistFromDevice::class.java)
     }
 
     private fun removeVideo(videoItem: Channel) {
@@ -205,8 +208,10 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
                     }
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(this@ActivityAddPlaylistFromDevice,
-                            getString(R.string.error_saving_playlist_video), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@ActivityAddPlaylistFromDevice,
+                            getString(R.string.error_saving_playlist_video), Toast.LENGTH_SHORT
+                        ).show()
                     }
                 } finally {
                     isSaving = false
@@ -225,9 +230,13 @@ class ActivityAddPlaylistFromDevice : BaseActivity() {
                 setResult(RESULT_OK)
                 finish()
             }
+
             else -> {
-                Log.d("TAG121212212", "startAds: "+Common.countInterAdd)
-                Log.d("TAG121212212", "startAdsINTER_SAVE_ADD_050325: "+RemoteConfig.INTER_SAVE_ADD_050325)
+                Log.d("TAG121212212", "startAds: " + Common.countInterAdd)
+                Log.d(
+                    "TAG121212212",
+                    "startAdsINTER_SAVE_ADD_050325: " + RemoteConfig.INTER_SAVE_ADD_050325
+                )
                 Common.countInterAdd++
                 if (Common.countInterAdd % RemoteConfig.INTER_SAVE_ADD_050325.toInt() == 0) {
                     AdsManager.loadAndShowInter(this, INTER_SAVE_ADD) {

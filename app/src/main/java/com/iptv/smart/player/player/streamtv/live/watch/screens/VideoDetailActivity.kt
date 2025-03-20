@@ -117,8 +117,6 @@ class VideoDetailActivity : BaseActivity() {
 
         groupName = intent.getStringExtra("GROUP_NAME") ?: "Unknown"
         val sourcePath = intent.getStringExtra("SOURCE_PATH") ?: ""
-        Log.d("VideoDetailActivity", "onCreate: GROUP_NAME=$groupName, SOURCE_PATH=$sourcePath")
-
         tvTitle.text = groupName
         tvTitle.isSelected = true
         btnBack.setOnClickListener {

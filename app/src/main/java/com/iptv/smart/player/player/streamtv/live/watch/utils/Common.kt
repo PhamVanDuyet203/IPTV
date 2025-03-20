@@ -19,6 +19,7 @@ object Common {
     var countInterItemPlaylist = 0
     var countInterAddOption = 0
     var isCheckChannel = false
+    var titlte = ""
 
     private const val PREFS_NAME = "ChannelPrefs"
     private const val KEY_CHANNELS = "channels"

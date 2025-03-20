@@ -63,8 +63,6 @@ class VideoDetailAdapter(
     override fun getItemCount() = videoList.size
 
 
-
-
     private fun getVideoThumbnail(uri: Uri): Bitmap? {
         return try {
             val retriever = MediaMetadataRetriever()

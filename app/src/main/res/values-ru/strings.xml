@@ -105,7 +105,6 @@
     <string name="add_button">кнопка Добавить</string>
     <string name="screen_lock_long_press_to_unlock">Блокировка экрана. Длительное нажатие, чтобы разблокировать</string>
     <string name="facebook_id">" "</string>
-
     <string name="please_select_at_least_one_video">Пожалуйста, выберите хотя бы одно видео</string>
     <string name="please_enter_a_name">Пожалуйста, введите имя</string>
     <string name="please_select_a_file">Пожалуйста, выберите файл</string>
@@ -139,4 +138,13 @@
     <string name="pip_not_supported_on_this_device">PiP не поддерживается на этом устройстве</string>
     <string name="player_not_ready_for_pip">Игрок не готов к PiP</string>
     <string name="failed_to_entxer_pip_mode">Не удалось включить режим PiP.</string>
+    <string name="pip_btn1">PiP</string>
+    <string name="lock_text">Замок</string>
+    <string name="lock_btn1">Замок</string>
+    <string name="favorite_btn1">Любимый</string>
+    <string name="mirroring_btn1">Зеркальное отображение</string>
+    <string name="invalid_video_url">Неверный URL-адрес видео</string>
+    <string name="pip_permission_denied">Разрешение PiP отклонено</string>
+    <string name="name_cannot_be_empty">Имя не может быть пустым</string>
+    <string name="not_results">Нет результатов</string>
 </resources>

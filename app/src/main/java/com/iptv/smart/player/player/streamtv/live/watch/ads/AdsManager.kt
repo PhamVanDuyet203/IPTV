@@ -141,7 +141,11 @@ object AdsManager {
             })
     }
 
-    fun loadAndShowAdsNativeCustom(activity: Activity, viewGroup: ViewGroup, holder: NativeHolderAdmob) {
+    fun loadAndShowAdsNativeCustom(
+        activity: Activity,
+        viewGroup: ViewGroup,
+        holder: NativeHolderAdmob
+    ) {
         if (!AdmobUtils.isNetworkConnected(activity)) {
             viewGroup.visibility = View.GONE
             return

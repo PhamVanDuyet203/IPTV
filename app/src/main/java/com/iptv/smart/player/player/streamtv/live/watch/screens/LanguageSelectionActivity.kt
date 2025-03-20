@@ -44,12 +44,12 @@ class LanguageSelectionActivity : BaseActivity() {
 
         if (fromSplash) {
             if (!Common.checkBoolAndroid13(this)) {
-               Common.checkAndroid13(this)
+                Common.checkAndroid13(this)
             }
             binding.icBack.gone()
-            if (RemoteConfig.NATIVE_LANGUAGE_050325=="1"){
+            if (RemoteConfig.NATIVE_LANGUAGE_050325 == "1") {
                 AdsManager.showNativeBottom(this, binding.frNative, AdsManager.NATIVE_LANGUAGE)
-            }else{
+            } else {
                 binding.frNative.gone()
             }
             loadNativeAd()
@@ -65,7 +65,6 @@ class LanguageSelectionActivity : BaseActivity() {
             startActivity(intent)
             finish()
         }
-
 
 
         val languageList = findViewById<RecyclerView>(R.id.language_list)
@@ -96,9 +95,11 @@ class LanguageSelectionActivity : BaseActivity() {
         checkIcon.setOnClickListener {
             if (fromSplash) {
                 val selectedLanguage = adapter.getSelectedLanguage()
-                if (selectedLanguage == null){
-                    Toast.makeText(this@LanguageSelectionActivity,
-                        getString(R.string.please_select_a_language_first), Toast.LENGTH_SHORT).show()
+                if (selectedLanguage == null) {
+                    Toast.makeText(
+                        this@LanguageSelectionActivity,
+                        getString(R.string.please_select_a_language_first), Toast.LENGTH_SHORT
+                    ).show()
                     return@setOnClickListener
                 }
                 if (RemoteConfig.INTER_LANGUAGE_050325 == "1") {
@@ -136,13 +137,21 @@ class LanguageSelectionActivity : BaseActivity() {
 
 
     private fun loadNativeAd() {
-        if (RemoteConfig.NATIVE_INTRO_050325.contains("1") || RemoteConfig.NATIVE_INTRO_050325.contains("2")
-            || RemoteConfig.NATIVE_INTRO_050325.contains("3") || RemoteConfig.NATIVE_INTRO_050325.contains("4")) {
+        if (RemoteConfig.NATIVE_INTRO_050325.contains("1") || RemoteConfig.NATIVE_INTRO_050325.contains(
+                "2"
+            )
+            || RemoteConfig.NATIVE_INTRO_050325.contains("3") || RemoteConfig.NATIVE_INTRO_050325.contains(
+                "4"
+            )
+        ) {
             AdsManager.loadAdsNative(this, AdsManager.NATIVE_INTRO)
         }
 
-        if (RemoteConfig.NATIVE_FULL_SCREEN_INTRO_050325.contains("1") || RemoteConfig.NATIVE_FULL_SCREEN_INTRO_050325.contains("2")
-            || RemoteConfig.NATIVE_FULL_SCREEN_INTRO_050325.contains("3") ) {
+        if (RemoteConfig.NATIVE_FULL_SCREEN_INTRO_050325.contains("1") || RemoteConfig.NATIVE_FULL_SCREEN_INTRO_050325.contains(
+                "2"
+            )
+            || RemoteConfig.NATIVE_FULL_SCREEN_INTRO_050325.contains("3")
+        ) {
             AdsManager.loadNativeFullScreen(this, AdsManager.NATIVE_FULL_SCREEN_INTRO)
         }
 

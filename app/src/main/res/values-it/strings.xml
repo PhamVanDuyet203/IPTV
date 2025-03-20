@@ -139,4 +139,15 @@
     <string name="pip_not_supported_on_this_device">PiP non supportato su questo dispositivo</string>
     <string name="player_not_ready_for_pip">Il lettore non è pronto per PiP</string>
     <string name="failed_to_entxer_pip_mode">Impossibile accedere alla modalità PiP</string>
+    <string name="pip_btn1">PiP</string>
+    <string name="lock_text">Serratura</string>
+    <string name="lock_btn1">Serratura</string>
+    <string name="favorite_btn1">Preferito</string>
+
+    <string name="mirroring_btn1">Mirroring</string>
+    <string name="invalid_video_url">URL del video non valido</string>
+    <string name="pip_permission_denied">Autorizzazione PiP negata</string>
+    <string name="name_cannot_be_empty">Il nome non può essere vuoto</string>
+
+    <string name="not_results">Nessun risultato</string>
 </resources>

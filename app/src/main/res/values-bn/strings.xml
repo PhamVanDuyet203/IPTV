@@ -139,5 +139,14 @@
     <string name="pip_not_supported_on_this_device">এই ডিভাইসে PiP সমর্থিত নয়</string>
     <string name="player_not_ready_for_pip">প্লেয়ার PiP এর জন্য প্রস্তুত নয়</string>
     <string name="failed_to_entxer_pip_mode">PiP মোড entxer করতে ব্যর্থ হয়েছে৷</string>
+    <string name="lock_text">তালা</string>
+    <string name="lock_btn1">তালা</string>
+    <string name="favorite_btn1">প্রিয়</string>
+    <string name="pip_btn1">PiP</string>
+    <string name="mirroring_btn1">মিররিং</string>
+    <string name="invalid_video_url">অবৈধ ভিডিও URL</string>
+    <string name="pip_permission_denied">PiP অনুমতি অস্বীকার করা হয়েছে৷</string>
+    <string name="name_cannot_be_empty">নাম খালি রাখা যাবে না</string>
 
+    <string name="not_results">কোন ফলাফল নেই</string>
 </resources>

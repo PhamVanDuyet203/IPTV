@@ -18,8 +18,8 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:layout_marginBottom="14dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
             android:background="@color/white">
 
             <ImageView

@@ -139,5 +139,15 @@
     <string name="pip_not_supported_on_this_device">PiP no es compatible con este dispositivo</string>
     <string name="player_not_ready_for_pip">El jugador no está listo para PiP</string>
     <string name="failed_to_entxer_pip_mode">No se pudo acceder al modo PiP</string>
+    <string name="lock_text">Cerrar</string>
+    <string name="lock_btn1">Cerrar</string>
+    <string name="favorite_btn1">Favorito</string>
 
+    <string name="mirroring_btn1">Duplicación</string>
+    <string name="pip_btn1">PiP</string>
+    <string name="invalid_video_url">URL del vídeo no válida</string>
+    <string name="pip_permission_denied">Permiso PiP denegado</string>
+    <string name="name_cannot_be_empty">El nombre no puede estar vacío</string>
+
+    <string name="not_results">Sin resultados</string>
 </resources>

@@ -50,7 +50,8 @@ class ActivityImportPlaylistUrl : BaseActivity() {
 
         btnBack.setOnClickListener { finish() }
         btnAddPlaylist.setOnClickListener {
-            savePlaylist() }
+            savePlaylist()
+        }
 
         binding.etPlaylistName.addTextChangedListener() {
             binding.errorTextName.visibility = View.GONE
@@ -79,19 +80,17 @@ class ActivityImportPlaylistUrl : BaseActivity() {
         val name = etPlaylistName.text.toString().trim()
         val url = etPlaylistUrl.text.toString().trim()
 
-        if (url.isEmpty() && name.isEmpty() ) {
+        if (url.isEmpty() && name.isEmpty()) {
             binding.errorTextName.visibility = View.VISIBLE
             binding.errorTextURL.visibility = View.VISIBLE
             return
-        }else if (url.isEmpty()){
+        } else if (url.isEmpty()) {
             binding.errorTextURL.visibility = View.VISIBLE
             return
-        }
-        else if (name.isEmpty()){
+        } else if (name.isEmpty()) {
             binding.errorTextName.visibility = View.VISIBLE
             return
-        }
-        else {
+        } else {
             val currentTime = System.currentTimeMillis()
             if (isSaving || currentTime - lastSaveTime < debounceDuration) return
 
@@ -166,6 +165,7 @@ class ActivityImportPlaylistUrl : BaseActivity() {
                 finish()
                 binding.progressBar.gone()
             }
+
             else -> {
                 Common.countInterAdd++
                 if (Common.countInterAdd % RemoteConfig.INTER_SAVE_ADD_050325.toInt() == 0) {
@@ -195,7 +195,6 @@ class ActivityImportPlaylistUrl : BaseActivity() {
                 val fileText = connection.inputStream.bufferedReader().use { it.readText() }
                 connection.disconnect()
 
-                // Sử dụng logic parse từ ChannelsProvider
                 val lines = fileText.split("\n")
                 var name: String? = null
                 var streamUrl: String? = null
@@ -205,6 +204,7 @@ class ActivityImportPlaylistUrl : BaseActivity() {
                         line.startsWith("#EXTINF:") -> {
                             name = extractChannelName(line)
                         }
+
                         line.isNotEmpty() && !line.startsWith("#") -> {
                             streamUrl = line
                             if (!name.isNullOrEmpty() && streamUrl != null) {

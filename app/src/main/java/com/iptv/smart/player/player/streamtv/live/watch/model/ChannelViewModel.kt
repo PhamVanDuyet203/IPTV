@@ -51,9 +51,9 @@ class ChannelViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch(Dispatchers.IO) {
             val allChannels = _channels.value ?: emptyList()
             val filtered = when (currentTabPosition) {
-                0 -> allChannels // Tab "All"
-                1 -> allChannels.filter { it.isFavorite } // Tab "Favorite"
-                2 -> allChannels // Tab "Recent" (chưa có logic, cần thêm nếu có trường thời gian)
+                0 -> allChannels
+                1 -> allChannels.filter { it.isFavorite }
+                2 -> allChannels
                 else -> allChannels
             }
             _filteredChannels.postValue(filtered)

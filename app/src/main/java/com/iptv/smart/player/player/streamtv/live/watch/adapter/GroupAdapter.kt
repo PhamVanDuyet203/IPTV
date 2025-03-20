@@ -15,6 +15,7 @@ import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.ItemadBinding
 import com.iptv.smart.player.player.streamtv.live.watch.db.PlaylistEntity
 import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
+import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
 
 class GroupAdapter(
     private val context: Activity, private var groups: List<PlaylistEntity> = emptyList()
@@ -107,6 +108,7 @@ class GroupAdapter(
 
             itemView.setOnClickListener {
                 val intent = Intent(itemView.context, ChannelDetailActivity::class.java)
+                Common.isCheckChannel = true
                 intent.putExtra("GROUP_NAME", group.name)
                 intent.putExtra("SOURCE_PATH", group.sourcePath)
                 itemView.context.startActivity(intent)

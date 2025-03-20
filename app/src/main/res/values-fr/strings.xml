@@ -139,4 +139,15 @@
     <string name="pip_not_supported_on_this_device">PiP n\'est pas pris en charge sur cet appareil</string>
     <string name="player_not_ready_for_pip">Le joueur n\'est pas prêt pour PiP</string>
     <string name="failed_to_entxer_pip_mode">Échec de l\'entrée en mode PiP</string>
+    <string name="pip_btn1">PiP</string>
+    <string name="lock_text">Verrouillage</string>
+    <string name="lock_btn1">Verrouillage</string>
+    <string name="favorite_btn1">Préféré</string>
+
+    <string name="mirroring_btn1">Mise en miroir</string>
+    <string name="invalid_video_url">URL de la vidéo invalide</string>
+    <string name="pip_permission_denied">Autorisation PiP refusée</string>
+    <string name="name_cannot_be_empty">Le nom ne peut pas être vide</string>
+
+    <string name="not_results">Aucun résultat</string>
 </resources>

@@ -77,11 +77,13 @@ class PlaylistAdapter(
                     .inflate(R.layout.item_playlist, parent, false)
                 PlaylistViewHolder(view, activity, onRenamePlaylist, onDeletePlaylist)
             }
+
             ViewType.NATIVE_AD -> {
                 val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.ad_template_item, parent, false)
                 NativeAdViewHolder(view)
             }
+
             else -> throw IllegalArgumentException("Invalid view type")
         }
     }
@@ -226,7 +228,14 @@ class PlaylistAdapter(
             }
 
             nameEditText.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: Editable?) {
                     btnDelText.visibility = if (s.isNullOrEmpty()) View.GONE else View.VISIBLE
@@ -247,10 +256,16 @@ class PlaylistAdapter(
                         }
                         dialog.dismiss()
                     } else {
-                        Toast.makeText(dialogView.context, "Name cannot be empty", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            dialogView.context,
+                            context.getString(R.string.name_cannot_be_empty),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 } else {
-                    Toast.makeText(dialogView.context, "Name cannot be empty", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(dialogView.context,
+                        context.getString(R.string.name_cannot_be_empty), Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         }
@@ -292,7 +307,8 @@ class PlaylistAdapter(
 
     class NativeAdViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind() {
-            val adLoader = AdLoader.Builder(itemView.context,
+            val adLoader = AdLoader.Builder(
+                itemView.context,
                 AdsManager.NATIVE_PLAYLIST_CHANNEL.toString()
             )
                 .forNativeAd { nativeAd ->

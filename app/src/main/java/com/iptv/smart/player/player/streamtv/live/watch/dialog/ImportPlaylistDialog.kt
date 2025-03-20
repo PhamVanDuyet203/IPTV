@@ -31,7 +31,6 @@ class ImportPlaylistDialog : DialogFragment() {
     ): View {
 
 
-
         return inflater.inflate(R.layout.item_import_option, container, false)
     }
 
@@ -53,7 +52,7 @@ class ImportPlaylistDialog : DialogFragment() {
             place = 3
             startAds()
         }
-        view.findViewById<TextView>(R.id.btn_howtouse).setOnClickListener{
+        view.findViewById<TextView>(R.id.btn_howtouse).setOnClickListener {
             openActivity(HowToUseActivity::class.java)
         }
     }
@@ -61,17 +60,14 @@ class ImportPlaylistDialog : DialogFragment() {
     private fun checkCLick() {
         when (place) {
             1 -> {
-                Log.d("1111111111111", "checkCLick1: ")
                 openActivity(ActivityImportPlaylistUrl::class.java)
             }
 
             2 -> {
-                Log.d("1111111111111", "checkCLick2: ")
                 openActivity(ActivityImportPlaylistM3U::class.java)
             }
 
             3 -> {
-                Log.d("1111111111111", "checkCLick3: ")
                 openActivity(ActivityAddPlaylistFromDevice::class.java)
             }
         }
@@ -82,6 +78,7 @@ class ImportPlaylistDialog : DialogFragment() {
             "0" -> {
                 checkCLick()
             }
+
             else -> {
                 Common.countInterAddOption++
                 if (Common.countInterAddOption % RemoteConfig.INTER_ADD_050325.toInt() == 0) {

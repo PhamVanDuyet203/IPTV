@@ -7,239 +7,245 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="14dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="14dp">
 
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="14dp"
             android:layout_marginTop="2dp"
-            android:layout_marginBottom="4dp">
+            android:layout_marginBottom="4dp"
+            android:padding="14dp">
 
-        <TextView
-            android:id="@+id/txt_htu"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/how_to_add_a_playlist"
-            android:textSize="20sp"
-            android:gravity="center"
-            android:fontFamily="@font/inter_bold"
-            android:layout_centerInParent="true"
-            android:layout_centerVertical="true"
-            android:ellipsize="marquee"
-            android:marqueeRepeatLimit="marquee_forever"
-            android:singleLine="true"
-            android:scrollHorizontally="true"
-            android:focusable="true"
-            android:focusableInTouchMode="true" />
-        <ImageButton
-            android:id="@+id/close_htu"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:src="@drawable/remove"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:background="#E9EFF0"/>
+            <TextView
+                android:id="@+id/txt_htu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_centerVertical="true"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:fontFamily="@font/inter_bold"
+                android:gravity="center"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:text="@string/how_to_add_a_playlist"
+                android:textSize="20sp" />
+
+            <ImageButton
+                android:id="@+id/close_htu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="#E9EFF0"
+                android:padding="8dp"
+                android:src="@drawable/remove" />
 
         </RelativeLayout>
 
-        <!-- Step 1 -->
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/item_step"
-        android:backgroundTint="@color/white"
-        android:padding="12dp"
-        android:orientation="vertical">
-
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:background="@color/white">
-            <ImageView
-                android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@drawable/item_step"
+            android:backgroundTint="@color/white"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:src="@drawable/menu_icon"/>
+                android:layout_marginBottom="4dp"
+                android:background="@color/white">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:src="@drawable/menu_icon" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:fontFamily="@font/inter_semibold"
+                    android:text="@string/step_1"
+                    android:textColor="@color/cool_blue"
+                    android:textSize="12sp" />
+            </RelativeLayout>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/step_1"
-                android:layout_marginLeft="16dp"
-                android:fontFamily="@font/inter_semibold"
-                android:textSize="12sp"
-                android:textColor="@color/cool_blue" />
-        </RelativeLayout>
+                android:fontFamily="@font/inter_medium"
+                android:text="@string/use_any_search_engine_to_find_free_iptv_playlist_public"
+                android:textSize="16sp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:fontFamily="@font/inter_medium"
-            android:text="@string/use_any_search_engine_to_find_free_iptv_playlist_public" />
-
-        <TextView
-            android:gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/free_iptv_playlist_public"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:backgroundTint="@color/cool_blue"
-            android:background="@drawable/ic_btn_step_1"
-            android:textColor="@color/white"
-            android:textSize="12sp"
-            android:layout_gravity="center"
-            android:layout_marginTop="8dp" />
-
-    </LinearLayout>
-        <!-- Step 2 -->
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="12dp"
-        android:padding="12dp"
-        android:background="@drawable/item_step"
-        android:backgroundTint="@color/white"
-        android:orientation="vertical">
-
-    <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:background="@color/white">
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:src="@drawable/menu_icon"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/step_2"
-                android:layout_marginLeft="16dp"
-                android:fontFamily="@font/inter_semibold"
-                android:textSize="12sp"
-                android:textColor="@color/cool_blue" />
-        </RelativeLayout>
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/ic_btn_step_1"
+                android:backgroundTint="@color/cool_blue"
+                android:gravity="center"
+                android:paddingStart="16dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="8dp"
+                android:text="@string/free_iptv_playlist_public"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:fontFamily="@font/inter_medium"
-            android:text="@string/copy_the_m3u_playlist_or_download_the_file" />
+        </LinearLayout>
 
-
-        <ImageView
-            android:scaleType="centerCrop"
-            android:layout_width="220dp"
-            android:layout_height="66dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/img_step_2" />
-
-    </LinearLayout>
-
-
-        <!-- Step 3 -->
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/item_step"
-        android:backgroundTint="@color/white"
-        android:padding="12dp"
-        android:orientation="vertical">
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:background="@color/white">
-            <ImageView
-                android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/item_step"
+            android:backgroundTint="@color/white"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:src="@drawable/menu_icon"/>
+                android:layout_marginBottom="4dp"
+                android:background="@color/white">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:src="@drawable/menu_icon" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:fontFamily="@font/inter_semibold"
+                    android:text="@string/step_2"
+                    android:textColor="@color/cool_blue"
+                    android:textSize="12sp" />
+            </RelativeLayout>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/step_3"
-                android:layout_marginLeft="16dp"
-                android:fontFamily="@font/inter_semibold"
-                android:textSize="12sp"
-                android:textColor="@color/cool_blue" />
-        </RelativeLayout>
+                android:fontFamily="@font/inter_medium"
+                android:text="@string/copy_the_m3u_playlist_or_download_the_file"
+                android:textSize="16sp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:fontFamily="@font/inter_medium"
-            android:text="@string/return_to_the_app_tap_the_add_playlist_button_select_import_playlist_url_and_paste_the_link" />
 
-        <ImageView
-            android:layout_width="226dp"
-            android:layout_height="160dp"
-            android:src="@drawable/img_step_3"
-            android:scaleType="fitCenter"
-            android:layout_gravity="center"
-            android:layout_marginTop="8dp" />
-    </LinearLayout>
-
-        <!-- Step 4 -->
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/item_step"
-        android:backgroundTint="@color/white"
-        android:layout_marginTop="12dp"
-        android:padding="12dp"
-        android:orientation="vertical">
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:background="@color/white">
             <ImageView
-                android:layout_width="wrap_content"
+                android:layout_width="220dp"
+                android:layout_height="66dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/img_step_2" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/item_step"
+            android:backgroundTint="@color/white"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:src="@drawable/menu_icon"/>
+                android:layout_marginBottom="4dp"
+                android:background="@color/white">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:src="@drawable/menu_icon" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:fontFamily="@font/inter_semibold"
+                    android:text="@string/step_3"
+                    android:textColor="@color/cool_blue"
+                    android:textSize="12sp" />
+            </RelativeLayout>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/step_4"
-                android:layout_marginLeft="16dp"
-                android:fontFamily="@font/inter_semibold"
-                android:textSize="12sp"
-                android:textColor="@color/cool_blue" />
-        </RelativeLayout>
+                android:fontFamily="@font/inter_medium"
+                android:text="@string/return_to_the_app_tap_the_add_playlist_button_select_import_playlist_url_and_paste_the_link"
+                android:textSize="16sp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:fontFamily="@font/inter_medium"
-            android:text="@string/start_streaming_and_enjoy_your_iptv_shows" />
+            <ImageView
+                android:layout_width="226dp"
+                android:layout_height="160dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/img_step_3" />
+        </LinearLayout>
 
-        <ImageView
-            android:layout_width="226dp"
-            android:layout_height="200dp"
-            android:src="@drawable/img_step_4"
-            android:scaleType="fitCenter"
-            android:layout_gravity="center"
-            android:layout_marginTop="8dp" />
-    </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/item_step"
+            android:backgroundTint="@color/white"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:background="@color/white">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:src="@drawable/menu_icon" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:fontFamily="@font/inter_semibold"
+                    android:text="@string/step_4"
+                    android:textColor="@color/cool_blue"
+                    android:textSize="12sp" />
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/inter_medium"
+                android:text="@string/start_streaming_and_enjoy_your_iptv_shows"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:layout_width="226dp"
+                android:layout_height="200dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/img_step_4" />
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

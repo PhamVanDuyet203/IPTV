@@ -104,9 +104,7 @@
     <string name="error_saving_playlist">Erro ao salvar a lista de reprodução: %1$s</string>
     <string name="add_button">botão Adicionar</string>
     <string name="screen_lock_long_press_to_unlock">Bloqueio de tela. Pressione e segure para desbloquear</string>
-
     <string name="facebook_id">" "</string>
-
     <string name="please_select_at_least_one_video">Selecione pelo menos um vídeo</string>
     <string name="please_enter_a_name">Por favor insira um nome</string>
     <string name="please_select_a_file">Selecione um arquivo</string>
@@ -140,4 +138,13 @@
     <string name="pip_not_supported_on_this_device">PiP não é compatível com este dispositivo</string>
     <string name="player_not_ready_for_pip">Jogador não está pronto para PiP</string>
     <string name="failed_to_entxer_pip_mode">Falha ao entrar no modo PiP</string>
+    <string name="pip_btn1">PiP</string>
+    <string name="lock_text">Trancar</string>
+    <string name="lock_btn1">Trancar</string>
+    <string name="favorite_btn1">Favorito</string>
+    <string name="mirroring_btn1">Espelhamento</string>
+    <string name="invalid_video_url">URL de vídeo inválido</string>
+    <string name="pip_permission_denied">Permissão PiP negada</string>
+    <string name="name_cannot_be_empty">O nome não pode ficar vazio</string>
+    <string name="not_results">Sem resultados</string>
 </resources>

@@ -77,7 +77,6 @@ class ActivityImportPlaylistM3U : BaseActivity() {
     }
 
 
-
     private fun showNativeAd() {
         if (RemoteConfig.NATIVE_ADD_050325 == "1") {
             AdsManager.loadAndShowAdsNative(this, binding.frNative, AdsManager.NATIVE_ADD)
@@ -127,12 +126,14 @@ class ActivityImportPlaylistM3U : BaseActivity() {
             addCategory(Intent.CATEGORY_OPENABLE)
         }
         filePicker.launch(intent)
-        AppOpenManager.getInstance().disableAppResumeWithActivity(ActivityImportPlaylistM3U::class.java)
+        AppOpenManager.getInstance()
+            .disableAppResumeWithActivity(ActivityImportPlaylistM3U::class.java)
     }
 
     override fun onResume() {
         super.onResume()
-        AppOpenManager.getInstance().enableAppResumeWithActivity(ActivityImportPlaylistM3U::class.java)
+        AppOpenManager.getInstance()
+            .enableAppResumeWithActivity(ActivityImportPlaylistM3U::class.java)
     }
 
     private fun removeSelectedFile() {

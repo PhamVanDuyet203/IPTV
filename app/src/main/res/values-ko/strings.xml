@@ -104,9 +104,7 @@
     <string name="error_saving_playlist">재생목록 저장 오류: %1$s</string>
     <string name="add_button">추가 버튼</string>
     <string name="screen_lock_long_press_to_unlock">화면 잠금. 잠금을 해제하려면 길게 누르세요.</string>
-
     <string name="facebook_id">" "</string>
-
     <string name="please_select_at_least_one_video">동영상을 하나 이상 선택하세요.</string>
     <string name="please_enter_a_name">이름을 입력하세요</string>
     <string name="please_select_a_file">파일을 선택하세요</string>
@@ -140,4 +138,13 @@
     <string name="pip_not_supported_on_this_device">이 장치에서는 PiP가 지원되지 않습니다</string>
     <string name="player_not_ready_for_pip">플레이어가 PiP를 사용할 준비가 되지 않았습니다.</string>
     <string name="failed_to_entxer_pip_mode">PiP 모드를 실행하지 못했습니다.</string>
+    <string name="pip_btn1">PiP</string>
+    <string name="lock_text">잠그다</string>
+    <string name="lock_btn1">잠그다</string>
+    <string name="favorite_btn1">가장 좋아하는</string>
+    <string name="mirroring_btn1">미러링</string>
+    <string name="invalid_video_url">잘못된 동영상 URL</string>
+    <string name="pip_permission_denied">PiP 권한이 거부되었습니다.</string>
+    <string name="name_cannot_be_empty">이름은 비워둘 수 없습니다.</string>
+    <string name="not_results">결과 없음</string>
 </resources>

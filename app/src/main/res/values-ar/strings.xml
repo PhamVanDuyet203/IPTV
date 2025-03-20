@@ -139,4 +139,15 @@
     <string name="pip_not_supported_on_this_device">PiP غير مدعوم على هذا الجهاز</string>
     <string name="player_not_ready_for_pip">اللاعب غير جاهز لـ PiP</string>
     <string name="failed_to_entxer_pip_mode">فشل في إدخال وضع PiP</string>
+
+    <string name="pip_btn1">PiP</string>
+    <string name="lock_text">قفل</string>
+    <string name="lock_btn1">قفل</string>
+    <string name="favorite_btn1">مفضل</string>
+    <string name="mirroring_btn1">النسخ المتطابق</string>
+    <string name="invalid_video_url">عنوان URL للفيديو غير صالح</string>
+    <string name="pip_permission_denied">تم رفض إذن PiP</string>
+    <string name="name_cannot_be_empty">لا يمكن أن يكون الاسم فارغًا</string>
+
+    <string name="not_results">لا توجد نتائج</string>
 </resources>

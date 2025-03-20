@@ -12,7 +12,7 @@ interface PlaylistDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlaylist(playlist: PlaylistEntity)
 
-    @Query("SELECT * FROM playlists") // Đồng bộ với tableName
+    @Query("SELECT * FROM playlists")
     suspend fun getAllPlaylists(): List<PlaylistEntity>
 
     @Query("SELECT * FROM playlists WHERE sourceType = :sourceType")
@@ -36,7 +36,6 @@ interface PlaylistDao {
 
     @Query("SELECT COUNT(*) FROM playlists")
     suspend fun getPlaylistCount(): Int
-
 
 
 }

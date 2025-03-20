@@ -138,4 +138,15 @@
     <string name="pip_not_supported_on_this_device">PiP wird auf diesem Gerät nicht unterstützt</string>
     <string name="player_not_ready_for_pip">Player nicht bereit für PiP</string>
     <string name="failed_to_entxer_pip_mode">Der PiP-Modus konnte nicht aktiviert werden</string>
+    <string name="pip_btn1">PiP</string>
+    <string name="lock_text">Sperren</string>
+    <string name="lock_btn1">Sperren</string>
+    <string name="favorite_btn1">Favorit</string>
+
+    <string name="mirroring_btn1">Spiegelung</string>
+    <string name="invalid_video_url">Ungültige Video-URL</string>
+    <string name="pip_permission_denied">PiP-Berechtigung verweigert</string>
+    <string name="name_cannot_be_empty">Der Name darf nicht leer sein</string>
+
+    <string name="not_results">Keine Ergebnisse</string>
 </resources>

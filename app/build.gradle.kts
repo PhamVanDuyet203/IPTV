@@ -45,6 +45,11 @@ android {
     base{
         archivesName = "iptv${version}"
     }
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
 }
 
 dependencies {
@@ -118,12 +123,12 @@ dependencies {
 
     // AdMob Mediation
     implementation("com.google.ads.mediation:pangle:6.5.0.4.0")
-    implementation("com.google.ads.mediation:applovin:13.1.0.0")
+    implementation("com.google.ads.mediation:applovin:13.1.0.1")
     implementation("com.google.ads.mediation:facebook:6.18.0.0")
     implementation("com.google.ads.mediation:vungle:7.4.3.0")
     implementation("com.google.ads.mediation:mintegral:16.8.61.0")
 
-    implementation("com.github.thienlp201097:DktechLib:1.4.1")
+    implementation("com.github.thienlp201097:DktechLib:2.0.0")
 
 //Adjust
     implementation ("com.adjust.sdk:adjust-android:5.0.0")

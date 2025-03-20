@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">IPTV Smart Player: Stream TV</string>
+    <string name="facebook_id" translatable="false">"2635470686650587"</string>
+    <string name="id_ads" translatable="false">ca-app-pub-3940256099942544~3347511713</string>
+
     <string name="title_language">Language</string>
     <string name="title_onboard_1">Stream Your Favorite Shows</string>
     <string name="content_onboard_1">Enjoy unlimited entertainment with thousands of movies, TV shows, and more.</string>
@@ -107,7 +110,6 @@
     <string name="please_select_at_least_one_video">Please select at least one video</string>
     <string name="please_enter_a_name">Please enter a name</string>
     <string name="please_select_a_file">Please select a file</string>
-    <string name="facebook_id">" "</string>
     <string name="this_action_can_contain_ads">This action can contain ads…</string>
     <string name="not_found">Not result for %1$s</string>
     <string name="no_wi_fi_detected">No Wi-Fi Detected</string>
@@ -138,10 +140,15 @@
     <string name="pip_not_supported_on_this_device">PiP not supported on this device</string>
     <string name="player_not_ready_for_pip">Player not ready for PiP</string>
     <string name="failed_to_entxer_pip_mode">Failed to entxer PiP mode</string>
+    <string name="pip_btn1">PiP</string>
     <string name="lock_text">Lock</string>
     <string name="lock_btn1">Lock</string>
     <string name="favorite_btn1">Favorite</string>
-    <string name="pip_btn1">PiP</string>
     <string name="mirroring_btn1">Mirroring</string>
+    <string name="invalid_video_url">Invalid video URL</string>
+    <string name="pip_permission_denied">PiP permission denied</string>
+    <string name="name_cannot_be_empty">Name cannot be empty</string>
+    <string name="not_results">No Results</string>
+    <string name="adjust_token_key">xq4xnd8o5uyo</string>
 </resources>
 

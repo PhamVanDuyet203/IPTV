@@ -140,4 +140,15 @@
     <string name="pip_not_supported_on_this_device">इस डिवाइस पर PiP समर्थित नहीं है</string>
     <string name="player_not_ready_for_pip">खिलाड़ी PiP के लिए तैयार नहीं है</string>
     <string name="failed_to_entxer_pip_mode">PiP मोड में प्रवेश करने में विफल</string>
+    <string name="pip_btn1">PiP</string>
+    <string name="lock_text">ताला</string>
+    <string name="lock_btn1">ताला</string>
+    <string name="favorite_btn1">पसंदीदा</string>
+
+    <string name="mirroring_btn1">मिरर</string>
+    <string name="invalid_video_url">अमान्य वीडियो यूआरएल</string>
+    <string name="pip_permission_denied">PiP अनुमति अस्वीकृत</string>
+    <string name="name_cannot_be_empty">नाम खाली नहीं हो सकता</string>
+
+    <string name="not_results">कोई परिणाम नहीं</string>
 </resources>

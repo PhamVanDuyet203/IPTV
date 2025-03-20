@@ -94,7 +94,6 @@ class HomePageFragment : Fragment() {
     }
 
 
-
     private fun setupAddButton(view: View) {
         val textView2 = view.findViewById<TextView>(R.id.textView2)
         val fullText = getString(R.string.press_the_add_button_to_create_one_channel)
@@ -193,7 +192,6 @@ class HomePageFragment : Fragment() {
         selectedTabIndex = index
         playlistViewModel.filterPlaylists(sourceTypes[index])
     }
-
 
 
     override fun onDestroyView() {

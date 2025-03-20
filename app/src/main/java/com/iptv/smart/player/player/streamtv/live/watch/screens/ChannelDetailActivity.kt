@@ -161,9 +161,14 @@ class ChannelDetailActivity : BaseActivity() {
     }
 
     override fun onBackPressed() {
-        val intent = Intent(this, ChannelListActivity::class.java)
+//        super.onBackPressed()
+        val intent = Intent(this, ChannelListActivity::class.java).apply {
+            putExtra("GROUP_NAME", groupName)
+            putExtra("SOURCE_PATH", intent.getStringExtra("SOURCE_PATH"))
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
         startActivity(intent)
-        super.onBackPressed()
+        finish()
     }
 
     override fun onStop() {
@@ -171,9 +176,10 @@ class ChannelDetailActivity : BaseActivity() {
         unregisterReceiver(networkChangeReceiver)
 
     }
+
     private fun nextActivity(channel: Channel) {
         PlayerActivity.start(this, channel)
-        channelsProvider.addToRecent(this,channel)
+        channelsProvider.addToRecent(this, channel)
     }
 
     override fun onResume() {
@@ -181,20 +187,25 @@ class ChannelDetailActivity : BaseActivity() {
         Common.isCheckChannel = true
 
         if (RemoteConfig.BANNER_DETAIL_PLAYLIST_CHANNEL_050325 == "1") {
-            AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_DETAIL_PLAYLIST_CHANNEL, frNative , vLine)
-        }
-        else {
+            AdsManager.showAdBannerCollapsible(
+                this,
+                AdsManager.BANNER_DETAIL_PLAYLIST_CHANNEL,
+                frNative,
+                vLine
+            )
+        } else {
             frNative.gone()
             vLine.gone()
         }
+
         adapter.notifyDataSetChanged()
     }
-
     private fun startAds(channel: Channel) {
         when (RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325) {
             "0" -> {
                 nextActivity(channel)
             }
+
             else -> {
                 Common.countInterSelect++
                 if (Common.countInterSelect % RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325.toInt() == 0) {
@@ -214,7 +225,11 @@ class ChannelDetailActivity : BaseActivity() {
             try {
                 progressBar.visibility = View.VISIBLE
                 sortIcon.isEnabled = false
-                sortIcon.alpha = 0.5f
+                sortIcon.alpha = 0.2f
+                imgNotFound.visibility = View.GONE
+                txtNotFound.visibility = View.GONE
+                recyclerView.visibility = View.GONE
+
                 val channels = withContext(Dispatchers.IO) {
                     if (sourcePath.startsWith("http://") || sourcePath.startsWith("https://")) {
                         parseM3U(sourcePath)
@@ -227,7 +242,8 @@ class ChannelDetailActivity : BaseActivity() {
                             throw Exception(getString(R.string.no_file_access_permission_please_select_again))
                         }
                         val inputStream = contentResolver.openInputStream(uri)
-                        inputStream?.use { parseM3UFromFile(it) } ?: throw Exception(getString(R.string.cannot_open_the_file))
+                        inputStream?.use { parseM3UFromFile(it) }
+                            ?: throw Exception(getString(R.string.cannot_open_the_file))
                     }
                 }
 
@@ -244,16 +260,32 @@ class ChannelDetailActivity : BaseActivity() {
 
                 initialChannels = filteredChannels
                 channelsProvider.addChannelsFromM3U(filteredChannels)
+
                 if (filteredChannels.isEmpty()) {
-                    txtNotFound.setText("Not found")
-                    txtNotFound.visible()
-                    imgNotFound.visible()
-                    Toast.makeText(this@ChannelDetailActivity,
-                        getString(R.string.there_are_no_channels_in_the_group, groupName), Toast.LENGTH_SHORT).show()
+                    imgNotFound.visibility = View.VISIBLE
+                    txtNotFound.visibility = View.VISIBLE
+                    recyclerView.visibility = View.GONE
+                    txtNotFound.text = getString(R.string.not_results)
+                    Toast.makeText(
+                        this@ChannelDetailActivity,
+                        getString(R.string.there_are_no_channels_in_the_group, groupName),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    imgNotFound.visibility = View.GONE
+                    txtNotFound.visibility = View.GONE
+                    recyclerView.visibility = View.VISIBLE
+                    adapter.updateChannels(filteredChannels)
                 }
             } catch (e: Exception) {
-                Toast.makeText(this@ChannelDetailActivity,
-                    getString(R.string.error_loading_data, e.message), Toast.LENGTH_LONG).show()
+                imgNotFound.visibility = View.VISIBLE
+                txtNotFound.visibility = View.VISIBLE
+                recyclerView.visibility = View.GONE
+                txtNotFound.text = getString(R.string.not_results)
+                Toast.makeText(
+                    this@ChannelDetailActivity,
+                    getString(R.string.error_loading_data, e.message), Toast.LENGTH_LONG
+                ).show()
             } finally {
                 progressBar.visibility = View.GONE
                 sortIcon.isEnabled = true
@@ -285,7 +317,7 @@ class ChannelDetailActivity : BaseActivity() {
 
 
     private fun filterChannels(query: String) {
-        CoroutineScope(Dispatchers.IO).launch{
+        CoroutineScope(Dispatchers.IO).launch {
             val filteredList = initialChannels
                 .let { list ->
                     if (query.isEmpty()) list
@@ -298,15 +330,14 @@ class ChannelDetailActivity : BaseActivity() {
                 else -> filteredList
             }
 
-
-            withContext(Dispatchers.Main){
+            withContext(Dispatchers.Main) {
                 adapter.updateChannels(sortedList)
 
                 if (sortedList.isEmpty()) {
                     imgNotFound.visibility = View.VISIBLE
                     txtNotFound.visibility = View.VISIBLE
                     recyclerView.visibility = View.GONE
-                    txtNotFound.text = getString(R.string.not_found, query)
+                    txtNotFound.text = if (query.isEmpty()) getString(R.string.not_results) else getString(R.string.not_found, query)
                 } else {
                     imgNotFound.visibility = View.GONE
                     txtNotFound.visibility = View.GONE
@@ -315,8 +346,6 @@ class ChannelDetailActivity : BaseActivity() {
                 }
             }
         }
-
-
     }
 
 
@@ -361,9 +390,13 @@ class ChannelDetailActivity : BaseActivity() {
 
 
     private fun toggleFavorite(channel: Channel) {
-        channelsProvider.toggleFavorite(this,channel )
+        channelsProvider.toggleFavorite(this, channel)
         initialChannels = initialChannels.map {
-            if (it.streamUrl == channel.streamUrl) it.copy(isFavorite = channelsProvider.isFavorite(it.streamUrl)) else it
+            if (it.streamUrl == channel.streamUrl) it.copy(
+                isFavorite = channelsProvider.isFavorite(
+                    it.streamUrl
+                )
+            ) else it
         }
     }
 

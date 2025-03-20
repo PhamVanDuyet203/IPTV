@@ -5,10 +5,14 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [PlaylistEntity::class, ChannelEntity::class], version = 5, exportSchema = true)
+@Database(
+    entities = [PlaylistEntity::class, ChannelEntity::class],
+    version = 5,
+    exportSchema = true
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun playlistDao(): PlaylistDao
-    abstract fun channelDao(): ChannelDao // Thêm ChannelDao
+    abstract fun channelDao(): ChannelDao
 
     companion object {
         @Volatile
@@ -21,7 +25,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "iptv_database"
                 )
-                    .fallbackToDestructiveMigration() // Reset database nếu có thay đổi schema
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

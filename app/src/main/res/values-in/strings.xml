@@ -139,4 +139,15 @@
     <string name="pip_not_supported_on_this_device">PiP tidak didukung di perangkat ini</string>
     <string name="player_not_ready_for_pip">Pemain belum siap untuk PiP</string>
     <string name="failed_to_entxer_pip_mode">Gagal masuk ke mode PiP</string>
+    <string name="pip_btn1">PiP</string>
+    <string name="lock_text">Kunci</string>
+    <string name="lock_btn1">Kunci</string>
+    <string name="favorite_btn1">Favorit</string>
+
+    <string name="mirroring_btn1">Pencerminan</string>
+    <string name="invalid_video_url">URL video tidak valid</string>
+    <string name="pip_permission_denied">Izin PiP ditolak</string>
+    <string name="name_cannot_be_empty">Nama tidak boleh kosong</string>
+
+    <string name="not_results">Tidak Ada Hasil</string>
 </resources>

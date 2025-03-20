@@ -102,8 +102,9 @@ class ChannelListActivity : BaseActivity() {
 
         val playlistName = intent.getStringExtra("GROUP_NAME") ?: "Unknown Playlist"
         sourcePath = intent.getStringExtra("SOURCE_PATH") ?: ""
+        Common.titlte = playlistName
 
-        tvTitle.text = playlistName
+        tvTitle.text = Common.titlte
         tvTitle.isSelected = true
 
 
@@ -218,12 +219,19 @@ class ChannelListActivity : BaseActivity() {
     private fun checkInternetConnection() {
         if (!isInternetAvailable()) {
             showNoInternetDialog()
+            progressBar.visibility = View.GONE
         } else {
             dismissNoInternetDialog()
             if (fullGroupList.isEmpty()) {
+                progressBar.visibility = View.VISIBLE
+                imgNotFound.visibility = View.GONE
+                txtNotFound.visibility = View.GONE
+                recyclerView.visibility = View.GONE
                 loadGroupedChannels(sourcePath)
             } else {
                 progressBar.visibility = View.GONE
+                adapter.updateData(fullGroupList)
+                filterGroups(searchEditText.text.toString())
             }
         }
     }
@@ -288,6 +296,7 @@ class ChannelListActivity : BaseActivity() {
     private fun loadGroupedChannels(sourcePath: String) {
         if (!isInternetAvailable() && sourcePath.startsWith("http")) {
             showNoInternetDialog()
+            progressBar.visibility = View.GONE
             return
         }
 
@@ -300,30 +309,29 @@ class ChannelListActivity : BaseActivity() {
         CoroutineScope(Dispatchers.Main).launch {
             try {
                 sortIcon.isEnabled = false
-                sortIcon.alpha = 0.5f
-                progressBar.visibility = View.VISIBLE
+                sortIcon.alpha = 0.2f
+                progressBar.visibility = View.VISIBLE // Đảm bảo loading hiển thị
+                imgNotFound.visibility = View.GONE
+                txtNotFound.visibility = View.GONE
+                recyclerView.visibility = View.GONE
+
                 val channels =
                     if (sourcePath.startsWith("http://") || sourcePath.startsWith("https://")) {
                         parseM3U(sourcePath)
                     } else {
                         val uri = android.net.Uri.parse(sourcePath)
-
                         val hasPermission = contentResolver.persistedUriPermissions.any {
                             it.uri == uri && it.isReadPermission
                         }
 
-
                         if (!hasPermission) {
-//                        Toast.makeText(this@ChannelListActivity, "Quyền truy cập tệp đã bị thu hồi. Vui lòng chọn lại tệp.", Toast.LENGTH_LONG).show()
                             finish()
                             return@launch
                         }
 
                         val inputStream = try {
                             contentResolver.openInputStream(uri) ?: throw Exception(
-                                getString(
-                                    R.string.failed_to_open_input_stream_for_uri, uri
-                                )
+                                getString(R.string.failed_to_open_input_stream_for_uri, uri)
                             )
                         } catch (e: SecurityException) {
                             throw Exception("Permission denied for URI: $uri. Please select the file again.")
@@ -347,11 +355,25 @@ class ChannelListActivity : BaseActivity() {
                 sortIcon.isEnabled = true
                 sortIcon.alpha = 1f
 
+                if (playlistEntities.isEmpty()) {
+                    imgNotFound.visibility = View.VISIBLE
+                    txtNotFound.visibility = View.VISIBLE
+                    recyclerView.visibility = View.GONE
+                    txtNotFound.text = getString(R.string.not_results)
+                } else {
+                    imgNotFound.visibility = View.GONE
+                    txtNotFound.visibility = View.GONE
+                    recyclerView.visibility = View.VISIBLE
+                }
+
             } catch (e: Exception) {
-//                Toast.makeText(this@ChannelListActivity, "Lỗi khi tải dữ liệu: ${e.message}", Toast.LENGTH_LONG).show()
                 progressBar.visibility = View.GONE
                 sortIcon.isEnabled = true
                 sortIcon.alpha = 1f
+                imgNotFound.visibility = View.VISIBLE
+                txtNotFound.visibility = View.VISIBLE
+                recyclerView.visibility = View.GONE
+                txtNotFound.text = getString(R.string.not_results)
             }
         }
     }
@@ -375,7 +397,7 @@ class ChannelListActivity : BaseActivity() {
             imgNotFound.visibility = View.VISIBLE
             txtNotFound.visibility = View.VISIBLE
             recyclerView.visibility = View.GONE
-            txtNotFound.text = getString(R.string.not_found, query)
+            txtNotFound.text = if (query.isEmpty())  getString(R.string.not_results) else getString(R.string.not_found, query)
         } else {
             imgNotFound.visibility = View.GONE
             txtNotFound.visibility = View.GONE
@@ -386,9 +408,7 @@ class ChannelListActivity : BaseActivity() {
 
 
     private fun toggleSearchBar() {
-//        // Implement toggle logic if needed
-//        isSearchVisible = !isSearchVisible
-//        searchEditText.visibility = if (isSearchVisible) View.VISIBLE else View.GONE
+
     }
 
     private fun startAds() {
@@ -468,9 +488,16 @@ class ChannelListActivity : BaseActivity() {
         }
 
         checkInternetConnection()
-        if (fullGroupList.isNotEmpty()) {
-            adapter.updateData(fullGroupList)
-            progressBar.visibility = View.GONE
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val playlistName = intent.getStringExtra("GROUP_NAME") ?: "Unknown Playlist"
+        val sourcePath = intent.getStringExtra("SOURCE_PATH") ?: ""
+//        tvTitle.text = playlistName
+        if (fullGroupList.isEmpty()) {
+            loadGroupedChannels(sourcePath)
         }
     }
 

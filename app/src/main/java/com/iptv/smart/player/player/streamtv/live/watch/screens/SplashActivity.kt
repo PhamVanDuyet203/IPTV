@@ -1,19 +1,11 @@
 package com.iptv.smart.player.player.streamtv.live.watch.screens
 
-import android.content.Context
 import android.content.Intent
-import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkCapabilities
-import android.net.NetworkRequest
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.widget.ImageView
-import androidx.annotation.RequiresApi
-import androidx.core.os.postDelayed
 import com.admob.max.dktlibrary.AOAManager
 import com.admob.max.dktlibrary.AdmobUtils
 import com.admob.max.dktlibrary.AppOpenManager
@@ -61,6 +53,10 @@ class SplashActivity : BaseActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        System.exit(0)
+    }
 
     private fun nextActivity() {
         val intent = Intent(this, LanguageSelectionActivity::class.java)
@@ -105,10 +101,6 @@ class SplashActivity : BaseActivity() {
                     RemoteConfig.getValueAbTest("ADS_PLAY_CONTROL_050325")
                 RemoteConfig.ONRESUME_050325 = RemoteConfig.getValueAbTest("ONRESUME_050325")
                 setupCMP()
-                Log.d(
-                    "TAG121212121",
-                    "onComplete: " + RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325
-                )
             }
         })
     }
@@ -137,7 +129,7 @@ class SplashActivity : BaseActivity() {
     private fun initAdmod() {
         AdmobUtils.initAdmob(this, 12000, AdsManager.isDebug, isEnableAds = true)
         if (Build.VERSION.SDK_INT != Build.VERSION_CODES.P && RemoteConfig.ONRESUME_050325 == "1") {
-            AppOpenManager.getInstance().init(application, AdsManager.ONRESUME, false)
+            AppOpenManager.getInstance().init(application, AdsManager.ONRESUME)
             AppOpenManager.getInstance().disableAppResumeWithActivity(SplashActivity::class.java)
         }
         if (RemoteConfig.BANNER_SPLASH_050325 == "1") {

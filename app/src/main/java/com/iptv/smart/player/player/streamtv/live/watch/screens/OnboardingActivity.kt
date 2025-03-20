@@ -18,15 +18,12 @@ class OnboardingActivity : BaseActivity() {
         binding = ActivityOnboardingBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Thiết lập Adapter cho ViewPager2
         binding.viewPager.adapter = OnboardingAdapter(this)
 
-        // Lắng nghe sự kiện thay đổi trang
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels)
 
-                // Đổi hình nền dựa vào trang hiện tại
                 val backgroundRes = when (position) {
                     0 -> R.drawable.onboard_img_1
                     1 -> R.drawable.onboard_img_2

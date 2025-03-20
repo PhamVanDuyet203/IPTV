@@ -44,14 +44,12 @@ class OnboardingFragment : Fragment() {
         view.findViewById<TextView>(R.id.text_title).text = title
         view.findViewById<TextView>(R.id.text_content).text = content
 
-        // Gắn WormDotsIndicator với ViewPager2 từ Activity
         val dotsIndicator = view.findViewById<WormDotsIndicator>(R.id.worm_dots_indicator)
         val viewPager = requireActivity().findViewById<ViewPager2>(R.id.view_pager)
-        val nextButton = view.findViewById<TextView>(R.id.next_text) // Text "Next" hoặc "Start"
+        val nextButton = view.findViewById<TextView>(R.id.next_text)
 
         dotsIndicator.attachTo(viewPager)
 
-        // Lắng nghe sự kiện thay đổi trang
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
@@ -62,13 +60,12 @@ class OnboardingFragment : Fragment() {
         })
 
 
-        // Xử lý khi bấm "Next" hoặc "Start"
         nextButton.setOnClickListener {
             if (nextButton.text == getString(R.string.start)) {
                 startActivity(Intent(requireActivity(), HomePageActivity::class.java))
-                requireActivity().finish() // Đóng màn hình Onboarding
+                requireActivity().finish()
             } else {
-                viewPager.currentItem += 1 // Chuyển sang trang tiếp theo
+                viewPager.currentItem += 1
             }
         }
     }
