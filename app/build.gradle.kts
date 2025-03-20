@@ -95,14 +95,14 @@ dependencies {
 //    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.1") // For ViewModel
     // Add other dependencies here
 
-    implementation("androidx.viewpager2:viewpager2:1.0.0")
+//    implementation("androidx.viewpager2:viewpager2:1.0.0")
 
 
     // viewpage2
-    implementation("com.tbuonomo:dotsindicator:5.1.0")
+//    implementation("com.tbuonomo:dotsindicator:5.1.0")
 
     //
-    implementation("com.google.android.material:material:1.9.0")
+//    implementation("com.google.android.material:material:1.9.0")
 
     implementation("androidx.room:room-runtime:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
@@ -128,7 +128,7 @@ dependencies {
     implementation("com.google.ads.mediation:vungle:7.4.3.0")
     implementation("com.google.ads.mediation:mintegral:16.8.61.0")
 
-    implementation("com.github.thienlp201097:DktechLib:2.0.0")
+    implementation("com.github.thienlp201097:DktechLib:1.4.1")
 
 //Adjust
     implementation ("com.adjust.sdk:adjust-android:5.0.0")

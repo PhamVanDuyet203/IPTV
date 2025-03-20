@@ -129,7 +129,7 @@ class SplashActivity : BaseActivity() {
     private fun initAdmod() {
         AdmobUtils.initAdmob(this, 12000, AdsManager.isDebug, isEnableAds = true)
         if (Build.VERSION.SDK_INT != Build.VERSION_CODES.P && RemoteConfig.ONRESUME_050325 == "1") {
-            AppOpenManager.getInstance().init(application, AdsManager.ONRESUME)
+            AppOpenManager.getInstance().init(application, AdsManager.ONRESUME, false)
             AppOpenManager.getInstance().disableAppResumeWithActivity(SplashActivity::class.java)
         }
         if (RemoteConfig.BANNER_SPLASH_050325 == "1") {
