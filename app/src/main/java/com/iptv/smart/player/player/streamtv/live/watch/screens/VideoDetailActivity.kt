@@ -12,6 +12,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -22,8 +23,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.adapter.VideoDetailAdapter
+import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
+import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.INTER_SELECT_CATEG_OR_CHANNEL
+import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
 import com.iptv.smart.player.player.streamtv.live.watch.model.Channel
+import com.iptv.smart.player.player.streamtv.live.watch.provider.ChannelsProvider
+import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
 import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -45,6 +51,9 @@ class VideoDetailActivity : BaseActivity() {
     private lateinit var imgNotFound: ImageView
     private lateinit var txtNotFound: TextView
 
+    private lateinit var frNative: FrameLayout
+    private lateinit var vLine: View
+    private lateinit var channelsProvider: ChannelsProvider
 
     // new
     private val playerResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -79,6 +88,10 @@ class VideoDetailActivity : BaseActivity() {
         imgNotFound.visibility = View.GONE
         txtNotFound.visibility = View.GONE
 
+
+        frNative = findViewById(R.id.fr_home)
+        vLine = findViewById(R.id.line)
+
         adapter = VideoDetailAdapter(
             context = this,
             videoList = mutableListOf(),
@@ -90,12 +103,7 @@ class VideoDetailActivity : BaseActivity() {
                     isFavorite = videoItem.isFavorite,
                     groupTitle = videoItem.groupTitle ?: groupName
                 )
-
-                // new
-                val intent = Intent(this, PlayerActivity::class.java).apply {
-                    putExtra("channel", channel)
-                }
-                playerResultLauncher.launch(intent)
+                startAds(channel)
             },
             onFavoriteClicked = { videoItem ->
                 toggleFavorite(this,videoItem)
@@ -113,7 +121,9 @@ class VideoDetailActivity : BaseActivity() {
 
         tvTitle.text = groupName
         tvTitle.isSelected = true
-        btnBack.setOnClickListener { finish() }
+        btnBack.setOnClickListener {
+            onBackPressed()
+        }
 
         CoroutineScope(Dispatchers.Main).launch {
             loadVideoData(sourcePath, groupName)
@@ -162,6 +172,47 @@ class VideoDetailActivity : BaseActivity() {
         Common.saveChannels(context, listFav)
         adapter.notifyDataSetChanged()
     }
+
+    override fun onBackPressed() {
+        val intent = Intent(this, HomePageActivity::class.java)
+        startActivity(intent)
+        super.onBackPressed()
+    }
+
+    private fun startAds(channel: Channel) {
+        when (RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325) {
+            "0" -> {
+                nextActivity(channel)
+            }
+            else -> {
+                Common.countInterSelect++
+                if (Common.countInterSelect % RemoteConfig.INTER_SELECT_CATEG_OR_CHANNEL_050325.toInt() == 0) {
+                    AdsManager.loadAndShowInter(this, INTER_SELECT_CATEG_OR_CHANNEL) {
+                        nextActivity(channel)
+                    }
+                } else {
+                    nextActivity(channel)
+                }
+            }
+        }
+
+    }
+
+    private fun nextActivity(channel: Channel) {
+        PlayerActivity.start(this, channel)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (RemoteConfig.BANNER_DETAIL_PLAYLIST_CHANNEL_050325 == "1") {
+            AdsManager.showAdBannerCollapsible(this, AdsManager.BANNER_DETAIL_PLAYLIST_CHANNEL, frNative , vLine)
+        }
+        else {
+            frNative.gone()
+            vLine.gone()
+        }
+    }
+
     private suspend fun loadVideoData(sourcePath: String, groupName: String) {
 
         val favoriteChannels = Common.getChannels(this)

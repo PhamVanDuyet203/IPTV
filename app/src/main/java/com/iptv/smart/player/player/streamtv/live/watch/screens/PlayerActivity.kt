@@ -116,6 +116,7 @@ class PlayerActivity : BaseActivity() {
     private var connectivityManager: ConnectivityManager? = null
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var isLocalFile = false
+    private var isOpenVideo = false
 
     private var defaultLockLayoutParams: LinearLayout.LayoutParams? = null
 
@@ -351,7 +352,12 @@ class PlayerActivity : BaseActivity() {
             }
             if (isFullScreen && resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 imageViewFullScreen.performClick()
-                binding.btnFav.visible()
+                if (isOpenVideo) {
+                    binding.btnFav.gone()
+                    binding.btnFa.gone()
+                } else {
+                    binding.btnFav.visible()
+                }
             } else if (Build.VERSION.SDK_INT >= MIN_PIP_API && isInPictureInPictureMode) {
                 moveTaskToBack(true)
             } else {
@@ -505,6 +511,7 @@ class PlayerActivity : BaseActivity() {
                             TAG,
                             "setupPlayer: Detected local file URI (MP4), using ProgressiveMediaSource"
                         )
+                        isOpenVideo = true
                         binding.btnFav.gone()
                         binding.btnFa.gone()
                         ProgressiveMediaSource.Factory(
@@ -679,13 +686,11 @@ class PlayerActivity : BaseActivity() {
 
             for (i in 0 until controlButtons.childCount) {
                 val child = controlButtons.getChildAt(i)
-                child.visibility = View.VISIBLE
-                originalLayoutParams[child]?.let {
-                    child.layoutParams = it
-                } ?: run {
-                    val params = child.layoutParams as LinearLayout.LayoutParams
-                    params.setMargins(margin4dp, params.topMargin, margin4dp, params.bottomMargin)
-                    child.layoutParams = params
+                if (isOpenVideo && (child == binding.btnFav || child == binding.btnFa)) {
+                    child.visibility = View.GONE
+                } else {
+                    child.visibility = View.VISIBLE
+                    originalLayoutParams[child]?.let { child.layoutParams = it }
                 }
             }
 
@@ -699,6 +704,13 @@ class PlayerActivity : BaseActivity() {
             } else {
                 lockLayout.setBackgroundResource(R.drawable.bg_menu_playcontrol1)
                 lockText.setTextColor(Color.WHITE)
+                if (isOpenVideo) {
+                    binding.btnFav.gone()
+                    binding.btnFa.gone()
+                } else {
+                    binding.btnFav.visible()
+                    binding.btnFa.visible()
+                }
             }
 
 
@@ -1411,8 +1423,7 @@ class PlayerActivity : BaseActivity() {
         } else {
             playerView.useController = true
             playerView.showController()
-//            binding.btnFa.visibility = View.VISIBLE
-//            binding.btnFav.visibility = View.VISIBLE
+
         }
 
         if (::player.isInitialized && !isInPictureInPictureMode && wasPlayingBeforePause && isPipPermissionGranted()) {

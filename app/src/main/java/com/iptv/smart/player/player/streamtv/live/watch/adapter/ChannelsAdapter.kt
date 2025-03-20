@@ -44,6 +44,7 @@ class ChannelsAdapter(
 
     private var fullChannelList: List<Channel> = emptyList()
     private var isLoadingMore = false
+    private val loadLock = Any()
 
     fun setFullChannelList(channels: List<Channel>) {
         fullChannelList = channels
@@ -52,20 +53,20 @@ class ChannelsAdapter(
     }
 
     fun loadMoreChannels(): Boolean {
-        if (isLoadingMore || channels.size >= fullChannelList.size) return false
-
-        isLoadingMore = true
-        val startIndex = channels.size
-        val endIndex = minOf(startIndex + PAGE_SIZE, fullChannelList.size)
-
-        if (startIndex < fullChannelList.size) {
-            channels.addAll(fullChannelList.subList(startIndex, endIndex))
-            notifyItemRangeInserted(startIndex, endIndex - startIndex)
+        synchronized(loadLock) {
+            if (isLoadingMore || channels.size >= fullChannelList.size) return false
+            isLoadingMore = true
+            val startIndex = channels.size
+            val endIndex = minOf(startIndex + PAGE_SIZE, fullChannelList.size)
+            if (startIndex < fullChannelList.size) {
+                channels.addAll(fullChannelList.subList(startIndex, endIndex))
+                notifyItemRangeInserted(startIndex, endIndex - startIndex)
+                isLoadingMore = false
+                return true
+            }
             isLoadingMore = false
-            return true
+            return false
         }
-        isLoadingMore = false
-        return false
     }
 
     fun hasMoreData(): Boolean {
@@ -78,17 +79,15 @@ class ChannelsAdapter(
         val uniqueNewChannels = newChannels.distinctBy { it.streamUrl }
         GlobalScope.launch(Dispatchers.Default) {
             val diffResult = DiffUtil.calculateDiff(ChannelDiffCallback(channels, uniqueNewChannels))
-
             withContext(Dispatchers.Main) {
+                val oldSize = channels.size
+                channels = uniqueNewChannels.toMutableList()
+                diffResult.dispatchUpdatesTo(this@ChannelsAdapter)
                 uniqueNewChannels.forEach {
                     if (listUrl.none { existing -> existing.streamUrl == it.streamUrl }) {
                         listUrl.add(it)
                     }
                 }
-                channels.clear()
-                channels.addAll(uniqueNewChannels)
-                diffResult.dispatchUpdatesTo(this@ChannelsAdapter)
-
             }
         }
     }
@@ -132,19 +131,18 @@ class ChannelsAdapter(
                     position
                 }
 
-            if (actualPosition in channels.indices) {
+            if (actualPosition in 0 until channels.size) {
                 val channel = channels[actualPosition]
                 (holder as ChannelViewHolder).bind(channel)
             }
-            Log.d("TAGCHannelllllllll", "onBindViewHolder: "+channels.size)
         }
     }
 
 
     override fun getItemCount(): Int {
-        val itemCount = channels.size
-        val adCount = getAdPositions().count { it < itemCount }
-        return itemCount + adCount
+        val adPositions = getAdPositions()
+        val adCount = adPositions.count { it < channels.size + adPositions.size }
+        return channels.size + adCount
     }
 
     private fun getAdPositions(): List<Int> {
