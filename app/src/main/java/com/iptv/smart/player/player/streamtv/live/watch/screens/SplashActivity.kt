@@ -5,7 +5,10 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.TextView
 import com.admob.max.dktlibrary.AOAManager
 import com.admob.max.dktlibrary.AdmobUtils
 import com.admob.max.dktlibrary.AppOpenManager
@@ -15,34 +18,48 @@ import com.google.android.gms.ads.AdValue
 import com.iptv.smart.player.player.streamtv.live.watch.R
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
-import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.isShowRate
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.visible
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
 import com.iptv.smart.player.player.streamtv.live.watch.databinding.ActivitySplashBinding
 import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
 import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
-import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.system.exitProcess
 
 class SplashActivity : BaseActivity() {
     private val binding by lazy { ActivitySplashBinding.inflate(layoutInflater) }
+    private var loadGif:ImageView?=null
+    private var frBanner:FrameLayout?=null
+    private var viewLine:View?=null
+    private var textView:TextView?=null
+
     private var isMobileAdsInitializeCalled = AtomicBoolean(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if ((!isTaskRoot && intent.hasCategory(Intent.CATEGORY_LAUNCHER)) && intent.action != null && intent.action == Intent.ACTION_MAIN) {
+            finish()
+            return
+        }
         setContentView(binding.root)
 
-        val loaderGif = findViewById<ImageView>(R.id.loader_gif)
         Common.isCheckChannel = false
-        Glide.with(this).asGif().load(R.drawable.loader).into(loaderGif)
+        loadGif = findViewById(R.id.loader_gif)
+        frBanner = findViewById(R.id.fr_home)
+        viewLine = findViewById(R.id.line)
+        textView = findViewById(R.id.text_view)
 
         Common.countInterAdd = 0
         Common.countInterSelect = 0
         Common.countInterBackPLay = 0
         Common.countInterItemPlaylist = 0
         Common.countInterAddOption = 0
-        isShowRate = false
+        AdsManager.isShowRate = false
         RemoteConfig.setReload(this, false)
+        loadGif?.let {
+            Glide.with(this).asGif().load(R.drawable.loader).into(it)
+        }
 
         if (AdmobUtils.isNetworkConnected(this)) {
             getKeyRemoteConfig()
@@ -55,7 +72,7 @@ class SplashActivity : BaseActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
-        System.exit(0)
+        exitProcess(0)
     }
 
     private fun nextActivity() {
@@ -133,21 +150,22 @@ class SplashActivity : BaseActivity() {
             AppOpenManager.getInstance().disableAppResumeWithActivity(SplashActivity::class.java)
         }
         if (RemoteConfig.BANNER_SPLASH_050325 == "1") {
-            binding.frBanner.visible()
-            binding.view.visible()
-            binding.textView.visible()
-
-            AdsManager.showAdsBannerSplash(this,
-                AdsManager.BANNER_SPLASH,
-                binding.frBanner,
-                binding.view,
-                object : AdsManager.onDelay {
-                    override fun onDelay() {
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            checkRemoteConFigSPlash()
-                        }, 1000)
-                    }
-                })
+            textView?.visible()
+            frBanner?.let {
+                viewLine?.let { it1 ->
+                    AdsManager.showAdsBannerSplash(this,
+                        AdsManager.BANNER_SPLASH,
+                        it,
+                        it1,
+                        object : AdsManager.onDelay {
+                            override fun onDelay() {
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    checkRemoteConFigSPlash()
+                                }, 1000)
+                            }
+                        })
+                }
+            }
         } else {
             checkRemoteConFigSPlash()
         }
@@ -156,7 +174,7 @@ class SplashActivity : BaseActivity() {
             AdsManager.loadAdsNative(this, AdsManager.NATIVE_LANGUAGE_ID2)
         }
 
-        binding.loaderGif.visible()
+        loadGif?.visible()
     }
 
     private fun checkRemoteConFigSPlash() {
@@ -165,7 +183,7 @@ class SplashActivity : BaseActivity() {
 
         when (RemoteConfig.ADS_SPLASH_050325) {
             "1" -> {
-                binding.textView.visible()
+                textView?.visible()
 
                 val aoaManager = AOAManager(
                     this,
@@ -199,7 +217,7 @@ class SplashActivity : BaseActivity() {
             }
 
             "2" -> {
-                binding.textView.visible()
+                textView?.visible()
 
                 AdsManager.loadAndShowInterSplash(
                     this,
@@ -219,22 +237,11 @@ class SplashActivity : BaseActivity() {
             }
 
             else -> {
-                binding.textView.gone()
+                textView?.gone()
+
                 nextActivity()
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
-    private fun applyLocale(languageCode: String) {
-        val locale = Locale(languageCode)
-        Locale.setDefault(locale)
-        val config = resources.configuration
-        config.setLocale(locale)
-        resources.updateConfiguration(config, resources.displayMetrics)
     }
 
 }
