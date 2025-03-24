@@ -5,10 +5,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.View
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.TextView
 import com.admob.max.dktlibrary.AOAManager
 import com.admob.max.dktlibrary.AdmobUtils
 import com.admob.max.dktlibrary.AppOpenManager
@@ -20,18 +16,14 @@ import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.gone
 import com.iptv.smart.player.player.streamtv.live.watch.ads.AdsManager.visible
 import com.iptv.smart.player.player.streamtv.live.watch.base.BaseActivity
-import com.iptv.smart.player.player.streamtv.live.watch.databinding.ActivitySplashBinding
+import com.iptv.smart.player.player.streamtv.live.watch.databinding.ScreenSplashBinding
 import com.iptv.smart.player.player.streamtv.live.watch.remoteconfig.RemoteConfig
 import com.iptv.smart.player.player.streamtv.live.watch.utils.Common
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.system.exitProcess
 
 class SplashActivity : BaseActivity() {
-    private val binding by lazy { ActivitySplashBinding.inflate(layoutInflater) }
-    private var loadGif:ImageView?=null
-    private var frBanner:FrameLayout?=null
-    private var viewLine:View?=null
-    private var textView:TextView?=null
+    private val binding by lazy { ScreenSplashBinding.inflate(layoutInflater) }
 
     private var isMobileAdsInitializeCalled = AtomicBoolean(false)
 
@@ -45,10 +37,7 @@ class SplashActivity : BaseActivity() {
         setContentView(binding.root)
 
         Common.isCheckChannel = false
-        loadGif = findViewById(R.id.loader_gif)
-        frBanner = findViewById(R.id.fr_home)
-        viewLine = findViewById(R.id.line)
-        textView = findViewById(R.id.text_view)
+
 
         Common.countInterAdd = 0
         Common.countInterSelect = 0
@@ -57,9 +46,7 @@ class SplashActivity : BaseActivity() {
         Common.countInterAddOption = 0
         AdsManager.isShowRate = false
         RemoteConfig.setReload(this, false)
-        loadGif?.let {
-            Glide.with(this).asGif().load(R.drawable.loader).into(it)
-        }
+            Glide.with(this).asGif().load(R.drawable.loader).into(binding.loaderGif)
 
         if (AdmobUtils.isNetworkConnected(this)) {
             getKeyRemoteConfig()
@@ -150,13 +137,11 @@ class SplashActivity : BaseActivity() {
             AppOpenManager.getInstance().disableAppResumeWithActivity(SplashActivity::class.java)
         }
         if (RemoteConfig.BANNER_SPLASH_050325 == "1") {
-            textView?.visible()
-            frBanner?.let {
-                viewLine?.let { it1 ->
+            binding.textView.visible()
                     AdsManager.showAdsBannerSplash(this,
                         AdsManager.BANNER_SPLASH,
-                        it,
-                        it1,
+                        binding.frHome,
+                        binding.line,
                         object : AdsManager.onDelay {
                             override fun onDelay() {
                                 Handler(Looper.getMainLooper()).postDelayed({
@@ -164,8 +149,6 @@ class SplashActivity : BaseActivity() {
                                 }, 1000)
                             }
                         })
-                }
-            }
         } else {
             checkRemoteConFigSPlash()
         }
@@ -174,7 +157,7 @@ class SplashActivity : BaseActivity() {
             AdsManager.loadAdsNative(this, AdsManager.NATIVE_LANGUAGE_ID2)
         }
 
-        loadGif?.visible()
+        binding.loaderGif.visible()
     }
 
     private fun checkRemoteConFigSPlash() {
@@ -183,7 +166,7 @@ class SplashActivity : BaseActivity() {
 
         when (RemoteConfig.ADS_SPLASH_050325) {
             "1" -> {
-                textView?.visible()
+                binding.textView.visible()
 
                 val aoaManager = AOAManager(
                     this,
@@ -217,7 +200,7 @@ class SplashActivity : BaseActivity() {
             }
 
             "2" -> {
-                textView?.visible()
+                binding.textView.visible()
 
                 AdsManager.loadAndShowInterSplash(
                     this,
@@ -237,7 +220,7 @@ class SplashActivity : BaseActivity() {
             }
 
             else -> {
-                textView?.gone()
+                binding.textView.gone()
 
                 nextActivity()
             }
